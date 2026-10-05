@@ -11,8 +11,13 @@ export const MIN_BIRTH_DATE = "1900-01-01";
 export function birthDateError(value) {
   if (!value) return "";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "Enter a valid date with a 4-digit year.";
+  // Compare the calendar fields in LOCAL time: toISOString() is UTC, so for anyone east of UTC local midnight is still the
+  // previous day there and every valid date would have been rejected.
   const parsed = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) return "That isn't a real calendar date.";
+  const [y, m, d] = value.split("-").map(Number);
+  if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() !== y || parsed.getMonth() + 1 !== m || parsed.getDate() !== d) {
+    return "That isn't a real calendar date.";
+  }
   if (value < MIN_BIRTH_DATE) return "Date of birth can't be before 1900.";
   if (value > todayISO()) return "Date of birth can't be in the future.";
   return "";

@@ -28,6 +28,28 @@ export const defaultHandlers = [
   http.get(`${API}/api/clients`, () => HttpResponse.json([])),
   http.get(`${API}/api/state`, () => HttpResponse.json({ doneTasks: {}, groups: [] })),
   // What the layout and the providers ask for on every page.
+  http.get(`${API}/api/billing/ai-usage`, () =>
+    HttpResponse.json({
+      plan: "Professional",
+      aiIncluded: true,
+      unlimited: true,
+      period: {},
+      credits: null,
+      percentUsed: null,
+      warning: null,
+      byFeature: [],
+      wallet: { balanceCents: 1000 },
+      recentUsage: [],
+    })
+  ),
+  http.get(`${API}/api/followups/rules/:ref`, ({ params }) =>
+    HttpResponse.json({ clientRef: params.ref, enabled: false, frequency: "monthly", tone: "friendly" })
+  ),
+  http.put(`${API}/api/state`, () => HttpResponse.json({})),
+  http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans: [], stripeConfigured: false, purchasesOpen: true })),
+  http.get(`${API}/api/sales-packages/companies`, () => HttpResponse.json([])),
+  http.get(`${API}/api/sales-packages/companies/:id/products`, () => HttpResponse.json([])),
+  http.get(`${API}/api/tickets`, () => HttpResponse.json([])),
   http.get(`${API}/api/reminders`, () => HttpResponse.json([])),
   http.get(`${API}/api/booking/requests`, () => HttpResponse.json([])),
   http.get(`${API}/api/calendar-connect/status`, () => HttpResponse.json({ configured: true, connected: false, status: "disconnected", googleEmail: null })),
