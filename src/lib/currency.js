@@ -18,16 +18,23 @@ export function formatCurrencyInput(value) {
 }
 
 /**
- * An amount in minor units (cents) as money for a person to read: 9900, "usd" -> "$99.00". A currency the browser does not know is
- * shown as its code after the number rather than failing.
+ * An amount in minor units (cents) as money for a person to read: 9900, "usd" -> "$99.00"; 4999, "cad" -> "$49.99 CAD". Built from the integer
+ * alone (whole units, then the two cents digits): an amount is never turned into a fractional number and back, so a price can never be shown a cent out.
+ * Anything that is not a whole number of cents (a fraction, text, NaN) shows as a dash rather than a wrong figure.
  * @param {number | null | undefined} cents
  * @param {string} [currency]
  */
 export function formatCents(cents, currency = "usd") {
-  const amount = (Number(cents) || 0) / 100;
-  try {
-    return amount.toLocaleString("en-US", { style: "currency", currency: currency.toUpperCase() });
-  } catch {
-    return `${amount.toFixed(2)} ${String(currency).toUpperCase()}`;
-  }
+  const amount = cents ?? 0; // nothing at all reads as zero, as it always has (a wallet with no balance yet)
+  if (!Number.isSafeInteger(amount)) return "–";
+  const sign = amount < 0 ? "-" : "";
+  const magnitude = Math.abs(amount);
+  const centsPart = magnitude % 100;
+  const whole = (magnitude - centsPart) / 100; // exact: the numerator is a multiple of 100
+  const grouped = whole.toLocaleString("en-US");
+  const digits = String(centsPart).padStart(2, "0");
+  const code = String(currency || "usd").toUpperCase();
+  if (code === "USD") return `${sign}$${grouped}.${digits}`;
+  if (code === "CAD") return `${sign}$${grouped}.${digits} CAD`;
+  return `${sign}${grouped}.${digits} ${code}`;
 }

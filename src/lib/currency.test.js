@@ -24,9 +24,36 @@ describe("formatCents", () => {
     expect(formatCents(100000, "usd")).toBe("$1,000.00");
   });
 
-  it("does not fail on a currency the browser does not know, or on nothing", () => {
-    expect(formatCents(1234, "zzzz")).toBe("12.34 ZZZZ");
+  it("is exact for every cent, built from the integer and never from a fraction", () => {
+    expect(formatCents(1, "usd")).toBe("$0.01");
+    expect(formatCents(5, "usd")).toBe("$0.05");
+    expect(formatCents(99, "usd")).toBe("$0.99");
+    expect(formatCents(4999, "usd")).toBe("$49.99");
+    expect(formatCents(10001, "usd")).toBe("$100.01");
+    expect(formatCents(99_999_999, "usd")).toBe("$999,999.99"); // the largest single charge
+    // the classic float traps: x.xx5 and amounts that are not exact in binary
+    for (const cents of [1005, 1015, 2675, 3, 29, 57, 1099, 4_294_967_295]) {
+      const text = formatCents(cents, "usd").replace(/[$,]/g, "");
+      expect(text.replace(".", "")).toBe(String(cents).padStart(3, "0")); // the digits are the cents, in order
+    }
+  });
+
+  it("names a currency that is not US dollars, so two dollars are never confused", () => {
+    expect(formatCents(4999, "cad")).toBe("$49.99 CAD");
+    expect(formatCents(4999, "CAD")).toBe("$49.99 CAD");
+    expect(formatCents(1234, "eur")).toBe("12.34 EUR");
+  });
+
+  it("shows a negative balance with its sign, and nothing at all as zero", () => {
+    expect(formatCents(-20, "usd")).toBe("-$0.20");
+    expect(formatCents(-1250, "usd")).toBe("-$12.50");
     expect(formatCents(null, "usd")).toBe("$0.00");
     expect(formatCents(undefined)).toBe("$0.00");
+  });
+
+  it("refuses to guess at an amount that is not a whole number of cents", () => {
+    for (const bad of [49.99, 0.5, NaN, Infinity, "4900", {}, [], Number.MAX_SAFE_INTEGER + 2]) {
+      expect(formatCents(bad, "usd")).toBe("–");
+    }
   });
 });
