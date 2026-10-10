@@ -58,13 +58,13 @@ export const TICKET_TYPE = {
 };
 export const ticketTypeMeta = (type) => TICKET_TYPE[type] ?? TICKET_TYPE.bug;
 
-/** An invoice (as the payment provider reports it). Anything it adds later shows its own word, in a neutral colour. */
-export const INVOICE_STATUS = {
-  paid: meta("Paid", "green"),
-  open: meta("Payment due", "amber"),
-  draft: meta("Draft", "slate"),
-  uncollectible: meta("Uncollectible", "red"),
-  void: meta("Void", "slate"),
+/** A payment as our own ledger records it. Anything new shows its own word, in a neutral colour. */
+export const PAYMENT_STATUS = {
+  succeeded: meta("Paid", "green"),
+  pending: meta("Waiting for payment", "amber"),
+  failed: meta("Failed", "red"),
+  expired: meta("Not completed", "slate"),
+  refunded: meta("Refunded", "slate"),
 };
-export const invoiceStatusMeta = (status) =>
-  INVOICE_STATUS[status] ?? meta(status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown", "slate");
+export const paymentStatusMeta = (status) =>
+  PAYMENT_STATUS[status] ?? meta(status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown", "slate");

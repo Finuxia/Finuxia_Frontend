@@ -549,7 +549,6 @@ export const api = {
 
   // Billing / subscription plans — modules, plans, purchase (real Stripe
   // Checkout once configured, an instant "mock" purchase until then).
-  /** @returns {Promise<import("./types").PlansResponse>} */
   /** @returns {Promise<import("./types").BillingPlans>} */
   getBillingPlans: () => request("/api/billing/plans"),
   /** @returns {Promise<import("./types").BillingStatus>} */
@@ -559,41 +558,13 @@ export const api = {
   /** @returns {Promise<import("./types").AiUsage>} */
   getAiUsage: () => request("/api/billing/ai-usage"),
   topUpWallet: (amountCents) => request("/api/billing/wallet/topup", { method: "POST", body: { amountCents } }),
-  // The provider sends the customer back to these pages, which confirm the payment with the server (see PaymentReturn).
-  /** @returns {Promise<import("./types").PurchaseResponse>} */
-  purchasePlan: (planId) =>
-    request("/api/billing/purchase", {
-      method: "POST",
-      body: { planId, successUrl: `${window.location.origin}/billing/success`, cancelUrl: `${window.location.origin}/billing/cancel` },
-    }),
-  // Stripe hosts the card form and the invoice pages (it, not us, holds payment details). The server decides where the portal returns
-  // to; `flow: "payment_method_update"` opens it on the card form. 409 (code no_billing_account): this customer has never paid.
-  /** @param {"payment_method_update"} [flow] @returns {Promise<{ url: string }>} */
-  openBillingPortal: (flow) => request("/api/billing/portal", { method: "POST", body: flow ? { flow } : {} }),
-  /** The customer's invoices as Stripe reports them. `available: false` means payments are not connected yet. @returns {Promise<import("./types").InvoiceList>} */
-  getInvoices: () => request("/api/billing/invoices"),
-
-  // Changing plan. The preview is Stripe's own prorated figure for an upgrade (applied now, the billing date unchanged) or what a downgrade
-  // loses and when (it waits for the end of the paid period). Confirming an upgrade sends back the total and the instant the preview was worked
-  // out at; the server answers 409 (code price_changed, with the new `preview` in the body) if the figure has moved.
-  /** @param {number} planId @returns {Promise<import("./types").PlanChangePreview>} */
-  previewPlanChange: (planId) => request("/api/billing/plan-change/preview", { method: "POST", body: { planId } }),
-  /** @param {{ planId: number, expectedTotalCents?: number, prorationDate?: number }} change @returns {Promise<import("./types").BillingStatus & { outcome: "upgraded" | "scheduled" }>} */
-  changePlan: ({ planId, expectedTotalCents, prorationDate }) =>
-    request("/api/billing/plan-change", { method: "POST", body: { planId, expectedTotalCents, prorationDate } }),
-  // Takes back a downgrade that has not taken effect yet.
-  /** @returns {Promise<import("./types").BillingStatus>} */
-  cancelScheduledPlanChange: () => request("/api/billing/plan-change", { method: "DELETE" }),
-
-  // Ending a subscription: by default access continues to the end of the paid period. Ending it right now forfeits the rest of
-  // the period, so the server wants `confirmImmediate` as well. Nothing is ever refunded by either call.
-  /** @param {{ reason?: string, immediately?: boolean, confirmImmediate?: boolean }} [options] @returns {Promise<import("./types").BillingStatus>} */
-  cancelSubscription: ({ reason = "", immediately = false, confirmImmediate = false } = {}) =>
-    request("/api/billing/cancel", { method: "POST", body: { reason, immediately, confirmImmediate } }),
-  // Takes back a cancellation inside the paid period: same price, same billing date, nothing to pay. After the period the server
-  // answers 409 (code purchase_required): coming back is a new purchase.
-  /** @returns {Promise<import("./types").BillingStatus>} */
-  reactivateSubscription: () => request("/api/billing/reactivate", { method: "POST" }),
+  // The provider sends the customer back to pages of ours, which the server chooses (built from its own configuration): nothing about
+  // where to return, and nothing about the amount, is sent from here. The amount charged is always the plan's price on the server.
+  /** @param {number} planId @returns {Promise<import("./types").PurchaseResponse>} */
+  purchasePlan: (planId) => request("/api/billing/purchase", { method: "POST", body: { planId } }),
+  // The receipt (a PDF made by the server) of one of the customer's own payments that succeeded; saved through the browser's download.
+  /** @param {number} paymentId @param {string} [fallbackName] */
+  downloadReceipt: (paymentId, fallbackName) => downloadFile(`/api/billing/payments/${paymentId}/receipt`, fallbackName || "receipt.pdf"),
 
   // Booking (Calendly-style) — an advisor's shared availability, their
   // (possibly several) named booking links, and the request queue are all

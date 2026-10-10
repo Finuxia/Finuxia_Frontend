@@ -16,7 +16,9 @@ export const testBilling = {
   plan: { key: "professional", name: "Professional" },
   status: "active",
   moduleKeys: ["sales_package_prep", "documents"],
+  accessEndsAt: null,
   currentPeriodEnd: null,
+  access: { status: "unlimited", warning: "none", endsAt: null, daysLeft: null, valid: true, warnDays: 14 },
 };
 
 // Defaults every test starts from: a signed-in advisor with no clients. A test overrides what it cares
@@ -42,7 +44,7 @@ export const defaultHandlers = [
       recentUsage: [],
     })
   ),
-  http.get(`${API}/api/billing/invoices`, () => HttpResponse.json({ available: false, invoices: [] })),
+  http.get(`${API}/api/billing/payments`, () => HttpResponse.json({ results: [], nextCursor: null })),
   http.get(`${API}/api/followups/rules/:ref`, ({ params }) =>
     HttpResponse.json({ clientRef: params.ref, enabled: false, frequency: "monthly", tone: "friendly" })
   ),

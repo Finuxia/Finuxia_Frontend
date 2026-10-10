@@ -2,15 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { forgetPlanBeforeCheckout, planBeforeCheckout, purchaseConfirmed } from "../lib/checkout";
+import { api } from "../lib/api";
+import { purchaseConfirmed } from "../lib/checkout";
 
 /**
  * Where the payment provider sends the customer back to: /billing/success and /billing/cancel.
  *
  * Nothing here believes the URL. Anyone can open /billing/success, and the provider's redirect proves nothing (the
- * payment can still be processing, or fail). So the success page asks the server for the account's real billing
- * status, again every few seconds, and only says "confirmed" once the server shows an active paid plan that is not the
- * one the account had before checkout. If that does not happen in time it says so honestly and offers to check again.
+ * payment can still be processing, or fail). So the success page asks the server, again every few seconds, and only says
+ * "confirmed" once the server's own ledger shows the newest payment as paid (see lib/checkout.js). If that does not happen
+ * in time it says so honestly and offers to check again.
  * The cancel page likewise only reports the plan the server says the account is on (loaded when the app started).
  */
 export default function PaymentReturn({ outcome, intervalMs = 2000, maxAttempts = 15 }) {
@@ -24,17 +25,22 @@ export default function PaymentReturn({ outcome, intervalMs = 2000, maxAttempts 
     if (outcome !== "success") return undefined;
     let cancelled = false;
     let timer;
-    const before = planBeforeCheckout();
     setPhase("checking");
 
     const attempt = async (n) => {
-      const status = await refreshRef.current(); // asks the server; null if it could not
+      // Two questions to the server: what its ledger says about the newest payment, and (so the rest of the app catches up) our billing status.
+      const [status, newest] = await Promise.all([
+        refreshRef.current(), // null if it could not
+        api.getPage("/api/billing/payments", { limit: 1 }).then(
+          (page) => page.results[0] ?? null,
+          () => undefined
+        ), // undefined: could not ask
+      ]);
       if (cancelled) return;
-      if (purchaseConfirmed(status, before)) {
-        forgetPlanBeforeCheckout();
+      if (purchaseConfirmed(newest)) {
         setPhase("confirmed");
       } else if (n >= maxAttempts) {
-        setPhase(status ? "pending" : "error");
+        setPhase(status && newest !== undefined ? "pending" : "error");
       } else {
         timer = setTimeout(() => attempt(n + 1), intervalMs);
       }

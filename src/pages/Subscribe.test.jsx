@@ -1,7 +1,6 @@
 import { delay, http, HttpResponse } from "msw";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { planBeforeCheckout } from "../lib/checkout";
 import { API, testBilling, testUser } from "../test/handlers";
 import { server } from "../test/server";
 import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
@@ -40,6 +39,19 @@ const plans = [
     modules: [{ key: "strategy_prep", name: "Strategy Prep" }],
   },
 ];
+const accessEnding = (days) => ({
+  status: "valid",
+  warning: "none",
+  endsAt: inDays(days),
+  daysLeft: days,
+  valid: true,
+  warnDays: 14,
+});
+const starterBilling = (access) => ({
+  ...testBilling,
+  plan: { key: "starter", name: "Starter", priceCents: 0 },
+  ...(access ? { access } : {}),
+});
 const catalogue = (over = {}) => ({ plans, stripeConfigured: true, purchasesOpen: true, supportEmail: "", ...over });
 const realLocation = window.location;
 let me;
@@ -104,7 +116,7 @@ afterEach(() => Object.defineProperty(window, "location", { configurable: true, 
 
 describe("a trial that is running", () => {
   it("shows the end date, the days left, and the way back into the app", async () => {
-    serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(12) } });
+    serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(12) }, billing: starterBilling(accessEnding(12)) });
     show();
     expect(await screen.findByRole("heading", { name: "You're on the free trial" })).toBeInTheDocument();
     expect(screen.getByText(/\(12 days left\)/)).toBeInTheDocument();
@@ -113,7 +125,7 @@ describe("a trial that is running", () => {
   });
 
   it("says '1 day' in the singular", async () => {
-    serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(1) } });
+    serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(1) }, billing: starterBilling(accessEnding(1)) });
     show();
     expect(await screen.findByText(/\(1 day left\)/)).toBeInTheDocument();
   });
@@ -121,14 +133,14 @@ describe("a trial that is running", () => {
   it("does not make up an end date when there is none", async () => {
     serve({ user: { subscriptionActive: true, subscriptionUntil: null } });
     show();
-    expect(await screen.findByText(/has no end date yet/)).toBeInTheDocument();
+    expect(await screen.findByText(/Your access has no end date/)).toBeInTheDocument();
     expect(screen.queryByText(/days left/)).not.toBeInTheDocument();
   });
 
   it("offers the plans too, so a customer can subscribe before it ends", async () => {
-    serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(5) } });
+    serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(5) }, billing: starterBilling(accessEnding(5)) });
     show();
-    expect(await screen.findAllByRole("button", { name: "Subscribe" })).toHaveLength(2);
+    expect(await screen.findAllByRole("button", { name: "Buy" })).toHaveLength(2);
   });
 });
 
@@ -149,6 +161,65 @@ describe("a trial that has ended", () => {
     expect(screen.queryByRole("button", { name: "Back to the app" })).not.toBeInTheDocument();
   });
 
+  it("an account that has paid before is told its access ended, not that a trial did", async () => {
+    serve({
+      user: ended,
+      billing: {
+        ...testBilling,
+        plan: { key: "professional", name: "Professional", priceCents: 4900 },
+        status: "active",
+        access: { status: "lapsed", warning: "ended", endsAt: ended.subscriptionUntil, daysLeft: 0, valid: false, warnDays: 14 },
+      },
+    });
+    show();
+    expect(await screen.findByRole("heading", { name: "Your access has ended" })).toBeInTheDocument();
+    expect(screen.getByText(/It ended on January 5, 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/don't renew by themselves/)).toBeInTheDocument();
+  });
+
+  it("shows what the account paid, with a receipt for each payment that went through, even though access has ended", async () => {
+    serve({ user: ended });
+    server.use(
+      http.get(`${API}/api/billing/payments`, () =>
+        HttpResponse.json({
+          results: [
+            {
+              id: 11,
+              date: new Date(2026, 0, 1, 12).toISOString(),
+              planName: "Professional",
+              amountCents: 4900,
+              currency: "usd",
+              amountDisplay: "49.00 USD",
+              status: "succeeded",
+              isMock: false,
+              accessWindow: { start: new Date(2026, 0, 1, 12).toISOString(), end: new Date(2026, 0, 5, 12).toISOString() },
+              receiptNumber: "R-00000011",
+              receiptAvailable: true,
+            },
+            {
+              id: 12,
+              date: new Date(2026, 0, 3, 12).toISOString(),
+              planName: "Elite",
+              amountCents: 9900,
+              currency: "usd",
+              amountDisplay: "99.00 USD",
+              status: "pending",
+              isMock: false,
+              accessWindow: null,
+              receiptNumber: null,
+              receiptAvailable: false,
+            },
+          ],
+          nextCursor: null,
+        })
+      )
+    );
+    show();
+    expect(await screen.findByRole("region", { name: "Your payments and receipts" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Download receipt R-00000011" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Download receipt/ })).toHaveLength(1); // the unpaid one has none
+  });
+
   it("there is no mailto link to anyone: the way back is the plans", async () => {
     serve({ user: ended });
     show();
@@ -167,26 +238,23 @@ describe("the plans and the real checkout", () => {
     expect(screen.getByText("Strategy Prep")).toBeInTheDocument();
   });
 
-  it("subscribing starts Stripe checkout and remembers the plan the account had, so the return page can tell", async () => {
+  it("buying starts checkout with only the plan: no amount and no return address come from the browser", async () => {
     serve({ user: { subscriptionActive: false } });
     show();
-    const subscribe = await screen.findAllByRole("button", { name: "Subscribe" });
+    const subscribe = await screen.findAllByRole("button", { name: "Buy" });
     await userEvent.click(subscribe[1]);
     await waitFor(() => expect(window.location.href).toBe("https://checkout.stripe.com/c/pay/abc"));
-    expect(purchases).toEqual([
-      { planId: 2, successUrl: `${window.location.origin}/billing/success`, cancelUrl: `${window.location.origin}/billing/cancel` },
-    ]);
-    expect(planBeforeCheckout()).toBe("starter");
+    expect(purchases).toEqual([{ planId: 2 }]);
   });
 
   it("the buttons stay busy while the browser leaves, so it cannot be clicked twice", async () => {
     serve({ user: { subscriptionActive: false } });
     show();
-    const subscribe = await screen.findAllByRole("button", { name: "Subscribe" });
+    const subscribe = await screen.findAllByRole("button", { name: "Buy" });
     await userEvent.click(subscribe[0]);
     await waitFor(() => expect(window.location.href).toBe("https://checkout.stripe.com/c/pay/abc"));
     expect(screen.getByRole("button", { name: "Processing..." })).toBeDisabled();
-    screen.getAllByRole("button", { name: "Subscribe" }).forEach((b) => expect(b).toBeDisabled());
+    screen.getAllByRole("button", { name: "Buy" }).forEach((b) => expect(b).toBeDisabled());
   });
 
   it("a failure is a message and the plans can be tried again", async () => {
@@ -195,10 +263,10 @@ describe("the plans and the real checkout", () => {
       http.post(`${API}/api/billing/purchase`, () => HttpResponse.json({ error: "Plan purchases aren't open yet." }, { status: 503 }))
     );
     show();
-    await userEvent.click((await screen.findAllByRole("button", { name: "Subscribe" }))[0]);
+    await userEvent.click((await screen.findAllByRole("button", { name: "Buy" }))[0]);
     await waitFor(() => expect(document.querySelector("[role=status][aria-live]")?.textContent).toMatch(/aren't open yet/));
     expect(window.location.href).toBe("http://localhost/subscribe");
-    expect(screen.getAllByRole("button", { name: "Subscribe" })[0]).toBeEnabled();
+    expect(screen.getAllByRole("button", { name: "Buy" })[0]).toBeEnabled();
   });
 
   it("in demo mode (payments not connected) a purchase takes effect and goes back to the app", async () => {

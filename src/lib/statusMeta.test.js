@@ -4,8 +4,8 @@ import {
   BOOKING_STATUS,
   DOCUMENT_STATUS,
   DOTS,
-  INVOICE_STATUS,
-  invoiceStatusMeta,
+  PAYMENT_STATUS,
+  paymentStatusMeta,
   TICKET_STATUS,
   TICKET_TYPE,
   TONES,
@@ -61,17 +61,17 @@ describe("status styling lives in one module", () => {
   });
 });
 
-describe("invoice statuses", () => {
+describe("payment statuses", () => {
   it("each known status has a label and a tone", () => {
-    expect(Object.keys(INVOICE_STATUS).sort()).toEqual(["draft", "open", "paid", "uncollectible", "void"]);
-    expect(invoiceStatusMeta("paid")).toMatchObject({ label: "Paid", tone: "green" });
-    expect(invoiceStatusMeta("open")).toMatchObject({ label: "Payment due", tone: "amber" });
-    expect(invoiceStatusMeta("uncollectible")).toMatchObject({ label: "Uncollectible", tone: "red" });
+    expect(Object.keys(PAYMENT_STATUS).sort()).toEqual(["expired", "failed", "pending", "refunded", "succeeded"]);
+    expect(paymentStatusMeta("succeeded")).toMatchObject({ label: "Paid", tone: "green" });
+    expect(paymentStatusMeta("pending")).toMatchObject({ label: "Waiting for payment", tone: "amber" });
+    expect(paymentStatusMeta("failed")).toMatchObject({ label: "Failed", tone: "red" });
   });
 
   it("a status added later shows its own word, neutral", () => {
-    expect(invoiceStatusMeta("scheduled")).toMatchObject({ label: "Scheduled", tone: "slate" });
-    expect(invoiceStatusMeta("")).toMatchObject({ label: "Unknown", tone: "slate" });
-    expect(invoiceStatusMeta(undefined)).toMatchObject({ label: "Unknown", tone: "slate" });
+    expect(paymentStatusMeta("scheduled")).toMatchObject({ label: "Scheduled", tone: "slate" });
+    expect(paymentStatusMeta("")).toMatchObject({ label: "Unknown", tone: "slate" });
+    expect(paymentStatusMeta(undefined)).toMatchObject({ label: "Unknown", tone: "slate" });
   });
 });

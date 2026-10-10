@@ -1,23 +1,24 @@
 import { useEffect, useState } from "react";
 import { Sparkles, ShieldCheck } from "lucide-react";
-import { rememberPlanBeforeCheckout } from "../lib/checkout";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
-import ChangePlanModal from "../components/billing/ChangePlanModal";
-import InvoiceHistory from "../components/billing/InvoiceHistory";
+import AccessCard from "../components/billing/AccessCard";
+import PaymentHistory from "../components/billing/PaymentHistory";
 import PlanCards from "../components/billing/PlanCards";
-import SubscriptionCard from "../components/billing/SubscriptionCard";
 
+/**
+ * Plans & Billing. Every plan is a single payment that buys a stretch of access (nothing renews), so this page is about three things: when
+ * your access ends, which plan to buy next, and what you have paid. All of it is read from our own records, not from the payment provider.
+ */
 export default function Billing() {
   const { billing, refreshBilling } = useAuth();
   const { addToast } = useToast();
   const [plans, setPlans] = useState(null);
   const [stripeConfigured, setStripeConfigured] = useState(false);
-  // False in production until payments are connected: paid plans can't be selected yet.
+  // False in production until payments are connected: paid plans can't be bought yet.
   const [purchasesOpen, setPurchasesOpen] = useState(true);
   const [purchasingId, setPurchasingId] = useState(null);
-  const [changingTo, setChangingTo] = useState(null);
 
   useEffect(() => {
     api
@@ -33,80 +34,52 @@ export default function Billing() {
   const currentPlanKey = billing?.plan?.key;
   const isLegacy = currentPlanKey === "legacy";
 
-  // A paying customer moves between plans with the change flow (previewed, prorated by Stripe, a downgrade waits for the period's end);
-  // buying is for someone with no paid subscription.
-  const paying = billing?.plan?.priceCents > 0 && !isLegacy && billing?.status !== "canceled";
-  const changeBlocker = !paying
-    ? ""
-    : billing.cancelAtPeriodEnd
-      ? "Keep your subscription first"
-      : billing.status === "past_due"
-        ? "Fix your payment first"
-        : "";
-  const changeLabel = (plan) => (plan.priceCents > billing.plan.priceCents ? "Upgrade" : "Downgrade");
-
-  const planChanged = async (result) => {
-    await refreshBilling();
-    addToast(
-      result.outcome === "upgraded"
-        ? "Your plan has been upgraded."
-        : "Your plan change is scheduled. Nothing changes until your current period ends."
-    );
-  };
-
-  const actionFor = (plan) => {
-    const isCurrent = plan.key === currentPlanKey;
-    return {
-      onClick: () => (paying ? setChangingTo(plan) : handlePurchase(plan)),
-      disabled:
-        isCurrent ||
-        purchasingId === plan.id ||
-        isLegacy ||
-        Boolean(paying && changeBlocker) ||
-        (!paying && !purchasesOpen && plan.priceCents > 0),
-      label: isCurrent
-        ? "Active"
-        : paying
-          ? changeBlocker || changeLabel(plan)
-          : purchasingId === plan.id
-            ? "Processing..."
-            : !purchasesOpen && plan.priceCents > 0
-              ? "Not available yet"
-              : stripeConfigured
-                ? "Subscribe"
-                : "Get this plan (test)",
-    };
-  };
-
   const handlePurchase = async (plan) => {
     setPurchasingId(plan.id);
     try {
       const result = await api.purchasePlan(plan.id);
       if (result.mock) {
         await refreshBilling();
-        addToast(`You're now on the ${plan.name} plan (test purchase — no real charge, Stripe isn't connected yet).`);
+        addToast(`You're now on the ${plan.name} plan (test purchase — no real charge, payments aren't connected yet).`);
       } else if (result.checkoutUrl) {
-        rememberPlanBeforeCheckout(currentPlanKey); // so the return page can tell that the purchase really went through
-        window.location.href = result.checkoutUrl;
+        window.location.href = result.checkoutUrl; // the page stays "busy" while the browser leaves
+        return;
       }
     } catch (err) {
       addToast(err.message || "Could not start checkout");
-    } finally {
-      setPurchasingId(null);
     }
+    setPurchasingId(null);
+  };
+
+  const actionFor = (plan) => {
+    const paid = plan.priceCents > 0;
+    const closed = paid && !purchasesOpen;
+    return {
+      onClick: () => handlePurchase(plan),
+      disabled: purchasingId !== null || isLegacy || closed,
+      label:
+        purchasingId === plan.id
+          ? "Processing..."
+          : closed
+            ? "Not available yet"
+            : !paid
+              ? "Choose"
+              : plan.key === currentPlanKey
+                ? "Buy again"
+                : stripeConfigured
+                  ? "Buy"
+                  : "Get this plan (test)",
+    };
   };
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">Plans &amp; Billing</h1>
-        <p className="text-sm text-slate-500">
-          Pick a plan to unlock its modules. Each plan below only affects what your own account can use.
-        </p>
+        <p className="text-sm text-slate-500">When your access ends, the plans you can buy, and what you have paid.</p>
       </div>
 
-      <SubscriptionCard />
-      {billing?.plan?.priceCents > 0 && !isLegacy && <InvoiceHistory />}
+      <AccessCard />
 
       {isLegacy && (
         <div className="flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold-dark">
@@ -118,20 +91,22 @@ export default function Billing() {
       {!purchasesOpen && (
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
           <Sparkles size={14} className="shrink-0 text-gold-dark" />
-          Plan purchases aren't open yet. Your current plan stays as it is — we'll announce when paid plans are available.
+          Plan purchases aren't open yet. Your access stays as it is — we'll announce when paid plans are available.
         </div>
       )}
 
       {purchasesOpen && !stripeConfigured && (
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
           <Sparkles size={14} className="shrink-0 text-gold-dark" />
-          Payments aren't connected yet — "purchasing" a plan below activates it instantly for testing, with no real charge.
+          Payments aren't connected yet — "buying" a plan below activates it instantly for testing, with no real charge.
         </div>
       )}
 
-      <PlanCards plans={plans} currentPlanKey={currentPlanKey} actionFor={actionFor} />
+      <section id="plans" aria-label="Plans" className="scroll-mt-20">
+        <PlanCards plans={plans} currentPlanKey={currentPlanKey} actionFor={actionFor} />
+      </section>
 
-      {changingTo && <ChangePlanModal plan={changingTo} onClose={() => setChangingTo(null)} onChanged={planChanged} />}
+      <PaymentHistory />
     </div>
   );
 }
