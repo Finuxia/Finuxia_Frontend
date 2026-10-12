@@ -102,3 +102,12 @@ Every page is loaded on demand (`React.lazy`), so a visitor downloads the shell 
 | Excel libraries (only on import / export) | on demand | on demand (unchanged, 464 kB) |
 
 `npm run check:bundle` (run after `npm run build`, and in CI) fails if the first load statically imports the signed-in shell, a page of it or an Excel library, if a public page does, or if the first-load gzip size passes the budget in `scripts/check-bundle.mjs`. Raise the budget only on purpose, with the change that adds the weight. Chunks are same-origin files, so the Content Security Policy (`script-src 'self'`) is unaffected.
+
+## Sales Package Prep
+
+The wizard is split by what each part is for, so a part can be changed and tested on its own. `src/pages/SalesPackagePrep.jsx` only decides what to show (loading, the picker, or the wizard) and which step is open.
+
+- **One component per step** in `src/components/sales-package/`: `ClientStep`, `NeedsStep`, `ProductsStep`, `DetailsStep`, `LetterStep`, `ComplianceStep`, `DocumentsStep` and `ReviewStep`, plus `Stepper`, `PackagePicker`, shared form pieces (`shared.jsx`) and the reusable `DocumentUpload` file chooser, which the Documents and Review steps both use.
+- **The rules are plain functions** in `src/lib/salesPackage/`: `wizard.js` (the steps, what is complete, what blocks moving forward, the empty shapes of a draft) and `uploads.js` (which files are accepted). They have no React in them and are tested directly.
+- **State and server calls are hooks**: `useSalesPackageDraft` (the form data, status and documents, saving, and the optimistic-locking `version` with the reload on a 409), `useSalesPackageCatalog` (companies, products, funds), `useProductRows`, `useDocumentUploads`, and `useSalesPackageActions` (draft and save the letter, generate the forms, download, generate the package).
+- Keep every file under about 400 lines. `SalesPackagePrep.test.jsx` pins what the whole wizard does; it was first run against the single-file version and passes on both. This feature produces compliance documents, so a change to a rule in `wizard.js` or `uploads.js` should come with a test of that rule.

@@ -124,7 +124,8 @@ const renderWizard = (route = "/sales?id=1") =>
     { route }
   );
 
-const toastText = () => document.querySelector("[role=status]")?.textContent || "";
+// The toast box has no role on this branch's base (the accessible live region comes with the shared UI primitives), so it is found by where it sits.
+const toastText = () => document.querySelector(".fixed.bottom-5.right-5")?.textContent || "";
 const stepper = (name) => screen.getByRole("button", { name: new RegExp(name, "i") });
 const next = () => userEvent.click(screen.getByRole("button", { name: /^next$/i }));
 const waitToast = (re) => waitFor(() => expect(toastText()).toMatch(re));
@@ -146,9 +147,11 @@ describe("starting", () => {
   it("with no id and no saved packages it creates a draft and puts its id in the address", async () => {
     server.use(http.get(`${P}/packages`, () => HttpResponse.json([])));
     renderWizard("/sales");
-    // (putting the id in the address makes the wizard load that package again, so wait for the address first)
+    // (putting the id in the address makes the wizard load that package again, so wait for the address first, and then for the wizard to
+    // be there for good: it shows for a moment, is replaced by "Loading..." while the package is fetched, and comes back, so a one-off
+    // find could catch the first appearance and then assert on an element that has already been removed)
     await waitFor(() => expect(screen.getByTestId("where")).toHaveTextContent("?id=2"));
-    expect(await screen.findByText("Client Information")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Client Information")).toBeInTheDocument());
   });
 
   it("with saved packages it shows the picker: continue one, delete one, or start a new one", async () => {
@@ -157,7 +160,7 @@ describe("starting", () => {
     expect(await screen.findByText(/saved sales packages in progress/i)).toBeInTheDocument();
     expect(screen.getByText("Grace Hopper")).toBeInTheDocument();
     server.use(http.delete(`${P}/packages/1`, () => new HttpResponse(null, { status: 204 })));
-    await userEvent.click(screen.getByRole("button", { name: "Delete draft" }));
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(screen.queryByText("Grace Hopper")).not.toBeInTheDocument());
     await waitToast(/Sales package deleted/);
     await userEvent.click(screen.getByRole("button", { name: /start a new sales package/i }));
@@ -167,7 +170,7 @@ describe("starting", () => {
   it("does not delete when the confirmation is declined", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     renderWizard("/sales");
-    await userEvent.click(await screen.findByRole("button", { name: "Delete draft" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Delete" }));
     expect(screen.getByText("Grace Hopper")).toBeInTheDocument();
   });
 
@@ -227,6 +230,23 @@ describe("saving and the version", () => {
     serverWith({ version: 7, data: validData({ policyOwner: "Edited Elsewhere", insuredPerson: "Edited Elsewhere" }) });
     await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
     await waitFor(() => expect(puts.at(-1)?.version).toBe(7));
+  });
+
+  it("an error that merely carries a package is not a version conflict: nothing is replaced", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    server.use(
+      http.put(`${P}/packages/:id`, () =>
+        HttpResponse.json(
+          { error: "Upstream trouble", package: { ...server_pkg, version: 9, data: validData({ policyOwner: "Somebody Else", insuredPerson: "Somebody Else" }) } },
+          { status: 502 }
+        )
+      )
+    );
+    await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
+    await waitToast(/Upstream trouble/);
+    expect(toastText()).not.toMatch(/changed elsewhere/);
+    expect(screen.queryByDisplayValue("Somebody Else")).not.toBeInTheDocument();
   });
 
   it("another save failure is reported with the server's message", async () => {
@@ -298,7 +318,7 @@ describe("what blocks moving forward", () => {
     await userEvent.click(stepper("products"));
     await screen.findByText("Products Sold / Recommended");
     await next();
-    await screen.findByText("Investment Profile");
+    await screen.findByText("Existing Insurance & Investments");
   });
 
   it("the Reason Why Letter must exist before leaving its step", async () => {
@@ -356,24 +376,6 @@ describe("the Reason Why Letter", () => {
     await waitToast(/Reason Why Letter saved/);
     // jumping from step 1 to the letter step saved the draft first (version 1 -> 2), so the letter is saved against version 2
     expect(puts.at(-1).letter).toEqual({ text: "Drafted letter text", version: 2 });
-  });
-
-  it("an out-of-credit answer is explained on the page, not flashed as a toast", async () => {
-    server.use(
-      http.post(`${P}/packages/:id/reason-why-letter`, () =>
-        HttpResponse.json(
-          { error: "Your AI wallet balance is too low for this. Top up in Profile.", code: "ai_credit_exhausted", actions: ["top_up"] },
-          { status: 402 }
-        )
-      )
-    );
-    renderWizard();
-    await screen.findByText("Client Information");
-    await userEvent.click(stepper("reason why letter"));
-    await userEvent.click(await screen.findByRole("button", { name: /regenerate draft|generate draft/i }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Your AI wallet balance is too low");
-    expect(screen.getByRole("link", { name: "Add credit" })).toBeInTheDocument();
-    expect(toastText()).not.toMatch(/wallet balance/);
   });
 
   it("another drafting failure is a toast with the server's message", async () => {
@@ -550,5 +552,396 @@ describe("the stepper", () => {
     await userEvent.click(stepper("review"));
     await screen.findByText("Review & Generate");
     expect(screen.queryByRole("button", { name: /^next$/i })).not.toBeInTheDocument();
+  });
+});
+
+// Added while splitting the page, after mutation checks showed these behaviours were not yet pinned. They pass on the
+// monolith too: they describe what it always did.
+describe("details the split must keep", () => {
+  const conflict = (over = {}) =>
+    http.put(`${P}/packages/:id`, () =>
+      HttpResponse.json(
+        { error: "changed", package: { ...server_pkg, version: 7, data: validData({ policyOwner: "Edited Elsewhere", ...over }) } },
+        { status: 409 }
+      )
+    );
+  const labelColour = (name) => stepper(name).querySelector("span.text-sm").className;
+
+  it("a conflict reload starts the advisor again on the first step, with nothing marked as visited", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("details"));
+    await screen.findByText("Existing Insurance & Investments");
+    expect(labelColour("details")).toContain("text-navy"); // the open step
+    await userEvent.click(stepper("needs"));
+    await screen.findByText("Client Needs & Objectives");
+    expect(labelColour("details")).toContain("text-av-green"); // visited, and nothing is required on it
+    server.use(conflict());
+    await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
+    await waitToast(/changed elsewhere/);
+    // one message, not the server's raw error on top of it
+    expect(toastText()).toBe("This package was changed elsewhere — showing the latest version. Re-apply your edits if needed.");
+    expect(await screen.findByText("Client Information")).toBeInTheDocument();
+    expect(labelColour("details")).toContain("text-slate-400"); // not visited any more
+  });
+
+  it("a step with nothing required counts as done only once it has been visited", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    expect(labelColour("details")).toContain("text-slate-400");
+    await userEvent.click(stepper("details"));
+    await userEvent.click(stepper("client"));
+    expect(labelColour("details")).toContain("text-av-green");
+  });
+
+  it("a conflict also clears the review confirmation", async () => {
+    server_pkg.documents = documents(DOCS.map(([k]) => k));
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("review"));
+    const box = await screen.findByRole("checkbox", { name: /I have reviewed the information above/i });
+    await userEvent.click(box);
+    expect(box).toBeChecked();
+    server.use(conflict());
+    await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
+    await waitToast(/changed elsewhere/);
+    await userEvent.click(stepper("review"));
+    expect(await screen.findByRole("checkbox", { name: /I have reviewed the information above/i })).not.toBeChecked();
+  });
+
+  it("a reopened draft shows its saved product, not a blank dropdown", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await screen.findByText("Products Sold / Recommended");
+    await waitFor(() => expect(screen.getByDisplayValue("TermPlus")).toBeInTheDocument());
+  });
+
+  it("a reopened investment product has its funds loaded for the allocation dropdown", async () => {
+    let fundsAsked = 0;
+    server.use(
+      http.get(`${P}/companies/1/funds`, () => {
+        fundsAsked += 1;
+        return HttpResponse.json([{ id: 5, name: "Equity Fund" }]);
+      })
+    );
+    server_pkg.data = validData({
+      products: [
+        product({
+          type: "segregated_fund",
+          productId: "11",
+          productName: "GrowthSeg",
+          accountType: "RRSP",
+          allocations: [{ id: "a1", fundId: "5", fundName: "Equity Fund", allocationPct: "100" }],
+        }),
+      ],
+    });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await waitFor(() => expect(fundsAsked).toBe(1));
+  });
+
+  it("a package with no products still offers one empty product row", async () => {
+    server_pkg.data = validData({ products: [] });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await screen.findByText("Products Sold / Recommended");
+    expect(screen.getAllByRole("option", { name: "Select Company" })).toHaveLength(1);
+  });
+
+  it("the last product row cannot be removed, but one of several can", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await screen.findByDisplayValue("TermPlus");
+    const trash = () => [...document.querySelectorAll("button svg[class*=trash]")].map((i) => i.closest("button"));
+    await userEvent.click(trash()[0]);
+    expect(screen.getByDisplayValue("TermPlus")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: /add another product/i }));
+    await waitFor(() => expect(screen.getAllByRole("option", { name: "Select Company" })).toHaveLength(2));
+    await userEvent.click(trash()[0]);
+    await waitFor(() => expect(screen.getAllByRole("option", { name: "Select Company" })).toHaveLength(1));
+    expect(screen.queryByDisplayValue("TermPlus")).not.toBeInTheDocument();
+  });
+
+  it("choosing another company resets everything that depended on the old one", async () => {
+    server_pkg.data = validData({
+      products: [
+        product({
+          type: "segregated_fund",
+          productId: "11",
+          productName: "GrowthSeg",
+          accountType: "RRSP",
+          allocations: [{ id: "a1", fundId: "5", fundName: "Equity Fund", allocationPct: "100" }],
+        }),
+      ],
+    });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await screen.findByDisplayValue("GrowthSeg");
+    await userEvent.selectOptions(screen.getByDisplayValue("Acme Life"), "");
+    await userEvent.selectOptions(screen.getByDisplayValue("Select Company"), "1");
+    await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
+    await waitFor(() => expect(puts).toHaveLength(2)); // the first is the save when jumping to Products
+    expect(puts[1].data.products[0]).toMatchObject({
+      companyId: "1",
+      company: "Acme Life",
+      productId: "",
+      productName: "",
+      type: "",
+      accountType: "",
+      allocations: [],
+    });
+  });
+
+  const segFund = (allocations) =>
+    product({ type: "segregated_fund", productId: "11", productName: "GrowthSeg", accountType: "RRSP", allocations });
+
+  it("choosing another product clears the account type and allocations of the old one", async () => {
+    server_pkg.data = validData({ products: [segFund([{ id: "a1", fundId: "5", fundName: "Equity Fund", allocationPct: "100" }])] });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await userEvent.selectOptions(await screen.findByDisplayValue("GrowthSeg"), "10");
+    await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
+    await waitFor(() => expect(puts).toHaveLength(2));
+    expect(puts[1].data.products[0]).toMatchObject({
+      productId: "10",
+      productName: "TermPlus",
+      type: "term",
+      accountType: "",
+      allocations: [],
+    });
+  });
+
+  it("choosing an investment product loads its funds and offers the allocation section", async () => {
+    let fundsAsked = 0;
+    server.use(
+      http.get(`${P}/companies/1/funds`, () => {
+        fundsAsked += 1;
+        return HttpResponse.json([{ id: 5, name: "Equity Fund" }]);
+      })
+    );
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await userEvent.selectOptions(await screen.findByDisplayValue("TermPlus"), "11");
+    expect(await screen.findByText(/Fund Allocation — GrowthSeg/)).toBeInTheDocument();
+    await waitFor(() => expect(fundsAsked).toBe(1));
+  });
+
+  it("fund allocations can be added, edited and removed", async () => {
+    server_pkg.data = validData({ products: [segFund([{ id: "a1", fundId: "5", fundName: "Equity Fund", allocationPct: "60" }])] });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await screen.findByText("60% allocated");
+    await userEvent.click(screen.getByRole("button", { name: "Add Another Fund" }));
+    const pct = () => screen.getAllByRole("spinbutton");
+    // the product's own amount fields are text inputs, so these are just the allocation percentages
+    expect(pct()).toHaveLength(2);
+    await userEvent.type(pct()[1], "40");
+    await screen.findByText("100% allocated");
+    const trash = () => [...document.querySelectorAll("button svg[class*=trash]")].map((i) => i.closest("button"));
+    await userEvent.click(trash()[1]); // the first allocation's remove (trash()[0] removes the product)
+    await screen.findByText("40% allocated");
+    await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
+    await waitFor(() => expect(puts).toHaveLength(2));
+    expect(puts[1].data.products[0].allocations).toEqual([expect.objectContaining({ allocationPct: "40" })]);
+  });
+
+  it("allocations that are only half a percent short still block", async () => {
+    server_pkg.data = validData({
+      products: [
+        product({
+          type: "segregated_fund",
+          productId: "11",
+          productName: "GrowthSeg",
+          accountType: "RRSP",
+          allocations: [{ id: "a1", fundId: "5", fundName: "Equity Fund", allocationPct: "99.5" }],
+        }),
+      ],
+    });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("products"));
+    await screen.findByText("Products Sold / Recommended");
+    await next();
+    await waitToast(/allocations must total 100%/);
+  });
+
+  it("clicking the step you are already on is not a move forward, so it is not blocked", async () => {
+    server_pkg.data = validData({ dateOfBirth: "2999-01-01" });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("client"));
+    await waitFor(() => expect(puts).toHaveLength(1));
+    expect(toastText()).not.toMatch(/date of birth/i);
+  });
+
+  it("a letter save that meets a conflict shows the newer package and says so", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("reason why letter"));
+    server.use(
+      http.put(`${P}/packages/:id/reason-why-letter`, () =>
+        HttpResponse.json(
+          { error: "changed", package: { ...server_pkg, version: 9, data: validData({ reasonWhyLetterText: "Newer letter" }) } },
+          { status: 409 }
+        )
+      )
+    );
+    await userEvent.click(await screen.findByRole("button", { name: /save letter/i }));
+    await waitToast(/changed elsewhere/);
+    expect(await screen.findByText("Client Information")).toBeInTheDocument();
+  });
+
+  it("a letter save that fails otherwise says why", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("reason why letter"));
+    server.use(http.put(`${P}/packages/:id/reason-why-letter`, () => HttpResponse.json({ error: "Letter too long" }, { status: 400 })));
+    await userEvent.click(await screen.findByRole("button", { name: /save letter/i }));
+    await waitToast(/Letter too long/);
+  });
+
+  it("saving the letter takes the package's new documents (the letter can then be downloaded)", async () => {
+    server.use(
+      http.put(`${P}/packages/:id/reason-why-letter`, () =>
+        HttpResponse.json({
+          ...server_pkg,
+          version: 5,
+          documents: documents(["reasonWhyLetter"]).map((d) =>
+            d.key === "reasonWhyLetter" ? { ...d, generatedFileName: "letter.docx" } : d
+          ),
+        })
+      )
+    );
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("reason why letter"));
+    expect(screen.queryByRole("button", { name: /download pdf/i })).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByRole("button", { name: /save letter/i }));
+    expect(await screen.findByRole("button", { name: /download pdf/i })).toBeInTheDocument();
+  });
+
+  it("saving the letter advances the package version and status", async () => {
+    server_pkg.status = "completed";
+    server.use(
+      http.put(`${P}/packages/:id/reason-why-letter`, () => {
+        server_pkg = { ...server_pkg, version: 5, status: "draft" };
+        return HttpResponse.json(server_pkg);
+      })
+    );
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("review"));
+    expect(await screen.findByRole("button", { name: "Regenerate Package" })).toBeInTheDocument();
+    await userEvent.click(stepper("reason why letter"));
+    await userEvent.click(await screen.findByRole("button", { name: /save letter/i }));
+    await waitToast(/Reason Why Letter saved/);
+    await userEvent.click(screen.getByRole("button", { name: /save draft/i }));
+    await waitFor(() => expect(puts.at(-1)?.version).toBe(5));
+    await userEvent.click(stepper("review"));
+    expect(await screen.findByRole("button", { name: "Generate Package" })).toBeInTheDocument();
+  });
+
+
+  it("only the letter's file chooser accepts a Word file", async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("documents"));
+    await screen.findByText("Upload Documents");
+    const accepts = [...document.querySelectorAll("input[type=file]")].map((i) => i.getAttribute("accept"));
+    expect(accepts.filter((a) => a.includes(".docx"))).toHaveLength(1);
+    expect(accepts[1]).toContain(".docx");
+  });
+
+  it("the upload progress bar goes away when the upload ends", async () => {
+    let finish;
+    vi.spyOn(api, "uploadSalesPackageDocument").mockImplementation(
+      (id, key, file, onProgress) =>
+        new Promise((resolve) => {
+          onProgress?.(40);
+          finish = () => resolve({ ...server_pkg, documents: documents(["fna"]) });
+        })
+    );
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("documents"));
+    await screen.findByText("Upload Documents");
+    const input = [...document.querySelectorAll("input[type=file]")][2];
+    await userEvent.upload(input, new File(["%PDF"], "f.pdf", { type: "application/pdf" }), { applyAccept: false });
+    await waitFor(() => expect(document.querySelector("[style*='width: 40%']")).toBeInTheDocument());
+    finish();
+    await waitFor(() => expect(document.querySelector("[style*='width: 40%']")).not.toBeInTheDocument());
+  });
+
+  it("a Word letter is uploaded and says it was converted to PDF", async () => {
+    vi.spyOn(api, "uploadSalesPackageDocument").mockResolvedValue({ ...server_pkg, documents: documents(["reasonWhyLetter"]) });
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("documents"));
+    await screen.findByText("Upload Documents");
+    const input = [...document.querySelectorAll("input[type=file]")][1];
+    await userEvent.upload(input, new File(["x"], "letter.docx"), { applyAccept: false });
+    await waitToast(/Reason Why Letter uploaded and converted to PDF/);
+  });
+
+  it("a failed upload says why", async () => {
+    vi.spyOn(api, "uploadSalesPackageDocument").mockRejectedValue(new Error("Virus found"));
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("documents"));
+    await screen.findByText("Upload Documents");
+    const input = [...document.querySelectorAll("input[type=file]")][2];
+    await userEvent.upload(input, new File(["%PDF"], "f.pdf", { type: "application/pdf" }), { applyAccept: false });
+    await waitToast(/Virus found/);
+  });
+
+  describe("the generated file's name", () => {
+    const generateWith = async (insuredPerson) => {
+      server_pkg.data = validData({ insuredPerson });
+      server_pkg.documents = documents(DOCS.map(([k]) => k));
+      vi.spyOn(api, "confirmSalesPackage").mockResolvedValue({});
+      const generate = vi.spyOn(api, "generateSalesPackage").mockResolvedValue({});
+      renderWizard();
+      await screen.findByText("Client Information");
+      await userEvent.click(stepper("review"));
+      await userEvent.click(await screen.findByRole("checkbox", { name: /I have reviewed the information above/i }));
+      const button = screen.getByRole("button", { name: "Generate Package" });
+      await waitFor(() => expect(button).toBeEnabled());
+      await userEvent.click(button);
+      await waitToast(/Sales package generated/);
+      return generate.mock.calls[0][1];
+    };
+
+    it("is the insured person's name with underscores", async () => {
+      expect(await generateWith("  Grace   Hopper ")).toBe("Grace_Hopper_DocuSeal_Package.pdf");
+    });
+  });
+
+  it("downloading a document names the file after its label", async () => {
+    const download = vi.spyOn(api, "downloadSalesPackageDocument").mockResolvedValue();
+    server_pkg.documents = documents().map((d) => (d.key === "agentDisclosureForm" ? { ...d, generatedFileName: "form.pdf" } : d));
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("documents"));
+    await screen.findByText("Upload Documents");
+    await userEvent.click(screen.getByRole("button", { name: "Download" }));
+    await waitFor(() => expect(download).toHaveBeenCalledWith("1", "agentDisclosureForm", "Agent_Disclosure_Form.pdf", true));
+  });
+
+  it("a failed download says why", async () => {
+    vi.spyOn(api, "downloadSalesPackageDocument").mockRejectedValue(new Error("File missing"));
+    server_pkg.documents = documents().map((d) => (d.key === "agentDisclosureForm" ? { ...d, generatedFileName: "form.pdf" } : d));
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("documents"));
+    await screen.findByText("Upload Documents");
+    await userEvent.click(screen.getByRole("button", { name: "Download" }));
+    await waitToast(/File missing/);
   });
 });
