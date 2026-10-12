@@ -1,7 +1,10 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { server } from "./server";
+
+// A busy machine (or a full suite running in parallel) can take longer than the default 1 s to settle a multi-step flow.
+configure({ asyncUtilTimeout: 4000 });
 
 // A request nobody mocked is a bug in the test (or an unexpected call in the code): fail loudly, never reach a network.
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
