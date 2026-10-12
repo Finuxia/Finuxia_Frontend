@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
+import LoadMore from "../components/LoadMore";
 import { useClients } from "../context/ClientsContext";
+import usePagedList from "../hooks/usePagedList";
 import { getStage, PIPELINE_STAGES } from "../lib/pipeline";
 import { formatCanadianPhone } from "../lib/phone";
 
@@ -22,24 +24,42 @@ const AVATAR_BG = {
   "av-teal": "bg-av-teal",
 };
 
+const SEARCH_DELAY_MS = 300;
+
+/** `value`, but only once it has stopped changing for `delay` ms: typing in the search box must not send a request per keystroke. */
+function useDebounced(value, delay) {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setSettled(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return settled;
+}
+
 export default function Clients() {
-  const { clients, loading } = useClients();
+  // The complete list is held by the clients context (it is what edits are synced against); it gives the total here. WHAT IS SHOWN is asked of the server,
+  // which filters and pages it, so the filters work across every page and not only across what happens to be loaded.
+  const { clients } = useClients();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState(searchParams.get("stage") || "all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return clients.filter((c) => {
-      if (stageFilter !== "all" && c.currentStage !== stageFilter) return false;
-      if (priorityFilter !== "all" && c.priority !== priorityFilter) return false;
-      if (!q) return true;
-      const haystack = `${c.first} ${c.last} ${c.phone} ${c.email} ${c.telegram}`.toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [clients, query, stageFilter, priorityFilter]);
+  const search = useDebounced(query.trim(), SEARCH_DELAY_MS);
+  const {
+    items: shown,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+    error,
+    reload,
+  } = usePagedList("/api/clients", {
+    q: search,
+    stage: stageFilter === "all" ? "" : stageFilter,
+    priority: priorityFilter === "all" ? "" : priorityFilter,
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,18 +104,29 @@ export default function Clients() {
         </select>
       </div>
 
-      {loading && clients.length === 0 ? (
+      {loading && shown.length === 0 ? (
         <div className="flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-12 text-sm text-slate-400">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-gold" />
           Loading clients…
         </div>
-      ) : filtered.length === 0 ? (
+      ) : error && shown.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-av-red/30 bg-white px-6 py-10 text-center text-sm text-av-red">
+          {error.message}
+          <button
+            type="button"
+            onClick={reload}
+            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-navy transition hover:bg-slate-50"
+          >
+            Try again
+          </button>
+        </div>
+      ) : shown.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-400">
           No clients match your filters.
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {filtered.map((c) => {
+          {shown.map((c) => {
             const stage = getStage(c.currentStage);
             return (
               <button
@@ -131,6 +162,7 @@ export default function Clients() {
               </button>
             );
           })}
+          <LoadMore hasMore={hasMore} loadingMore={loadingMore} error={shown.length > 0 ? error : null} onLoadMore={loadMore} />
         </div>
       )}
     </div>

@@ -8,7 +8,9 @@ import { api } from "../lib/api";
  *   const { items, loading, loadingMore, hasMore, loadMore, error, reload, setItems } = usePagedList("/api/tickets");
  *   {hasMore && <button onClick={loadMore} disabled={loadingMore}>Load more</button>}
  *
- * - `params` (filters, sort) are part of the request; when they change the list starts again from the first page.
+ * - `params` (filters, sort) are part of the request; when they change the list starts again from the first page, and the rows of the old
+ *   params are dropped at once (they are not the answer to the new ones, even if the new request fails). A `reload()` with the same params keeps
+ *   the rows on screen until the fresh page arrives.
  * - An answer that arrives after the component left, or after the params changed, is ignored.
  * - A failed `loadMore` keeps what is already shown and reports the error; calling it again retries that page.
  * - `setItems` changes the shown items locally (after an edit) without another request.
@@ -22,11 +24,17 @@ export default function usePagedList(path, params = {}) {
   const paramsKey = JSON.stringify(params);
   const paramsRef = useRef(params);
   paramsRef.current = params;
+  const shownFor = useRef(paramsKey); // the params the rows in `state` were fetched with
 
   const loadFirst = useCallback(async () => {
     const id = ++run.current;
     fetching.current = false;
-    setState((s) => ({ ...s, loading: true, loadingMore: false, error: null }));
+    const key = JSON.stringify(paramsRef.current);
+    const changed = key !== shownFor.current;
+    shownFor.current = key;
+    setState((s) =>
+      changed ? { items: [], cursor: null, hasMore: false, loading: true, loadingMore: false, error: null } : { ...s, loading: true, loadingMore: false, error: null }
+    );
     try {
       const { results, nextCursor } = await api.getPage(path, paramsRef.current);
       if (id === run.current)
