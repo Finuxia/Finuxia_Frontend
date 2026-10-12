@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Sparkles, ShieldCheck } from "lucide-react";
+import { Sparkles, ShieldCheck } from "lucide-react";
 import { rememberPlanBeforeCheckout } from "../lib/checkout";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import { createAttemptKeys, isRetryable } from "../lib/idempotency";
-
-function formatPrice(cents, currency, interval) {
-  if (cents === 0) return "Free";
-  const amount = (cents / 100).toLocaleString("en-US", { minimumFractionDigits: 0 });
-  return `$${amount} ${currency.toUpperCase()}/${interval === "month" ? "mo" : interval === "year" ? "yr" : "one-time"}`;
-}
+import PlanCards from "../components/PlanCards";
 
 export default function Billing() {
   const { billing, refreshBilling } = useAuth();
@@ -65,6 +60,23 @@ export default function Billing() {
     }
   };
 
+  const actionFor = (plan) => {
+    const isCurrent = plan.key === currentPlanKey;
+    return {
+      onClick: () => handlePurchase(plan),
+      disabled: isCurrent || purchasingId === plan.id || isLegacy || (!purchasesOpen && plan.priceCents > 0),
+      label: isCurrent
+        ? "Active"
+        : purchasingId === plan.id
+          ? "Processing..."
+          : !purchasesOpen && plan.priceCents > 0
+            ? "Not available yet"
+            : stripeConfigured
+              ? "Subscribe"
+              : "Get this plan (test)",
+    };
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -93,54 +105,7 @@ export default function Billing() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {(plans || []).map((plan) => {
-          const isCurrent = plan.key === currentPlanKey;
-          return (
-            <div
-              key={plan.id}
-              className={`flex flex-col gap-4 rounded-2xl border bg-white p-6 shadow-sm ${
-                isCurrent ? "border-gold ring-2 ring-gold/30" : "border-slate-200"
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-navy">{plan.name}</h2>
-                  {isCurrent && <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-[11px] font-semibold text-gold-dark">Current plan</span>}
-                </div>
-                <p className="mt-1 text-2xl font-bold text-navy">{formatPrice(plan.priceCents, plan.currency, plan.interval)}</p>
-                <p className="mt-1 text-xs text-slate-500">{plan.description}</p>
-              </div>
-
-              <ul className="flex flex-1 flex-col gap-1.5">
-                {plan.modules.map((m) => (
-                  <li key={m.key} className="flex items-start gap-1.5 text-sm text-slate-600">
-                    <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-av-green" />
-                    {m.name}
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                type="button"
-                onClick={() => handlePurchase(plan)}
-                disabled={isCurrent || purchasingId === plan.id || isLegacy || (!purchasesOpen && plan.priceCents > 0)}
-                className="rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isCurrent
-                  ? "Active"
-                  : purchasingId === plan.id
-                    ? "Processing..."
-                    : !purchasesOpen && plan.priceCents > 0
-                      ? "Not available yet"
-                      : stripeConfigured
-                        ? "Subscribe"
-                        : "Get this plan (test)"}
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      <PlanCards plans={plans} currentPlanKey={currentPlanKey} actionFor={actionFor} />
     </div>
   );
 }

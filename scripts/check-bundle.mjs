@@ -7,8 +7,10 @@
 //   2. each public page's static closure must not either;
 //   3. the entry's gzip size must stay under the budget below. Raise the budget only on purpose, in the same
 //      change that adds the weight, and say why.
-import { readFileSync } from "node:fs";
+//   4. no personal email address is in anything we ship (see emailCheck.mjs).
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { gzipSync } from "node:zlib";
+import { personalEmails } from "./emailCheck.mjs";
 
 const DIST = "dist";
 const ENTRY_GZIP_BUDGET_KB = 90; // 79 kB measured after code splitting (was 166 kB): see README, "Bundle size"
@@ -80,6 +82,22 @@ for (const page of ["src/pages/BookingPublic.jsx", "src/pages/Login.jsx"]) {
 }
 console.log(`First-load JS+CSS (gzip): ${kb.toFixed(1)} kB, budget ${ENTRY_GZIP_BUDGET_KB} kB`);
 if (kb > ENTRY_GZIP_BUDGET_KB) problems.push(`the first-load bundle is ${kb.toFixed(1)} kB gzip, over the ${ENTRY_GZIP_BUDGET_KB} kB budget`);
+
+// Every file the build emitted, searched for addresses that are not ours or obvious placeholders.
+function emitted(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const path = `${dir}/${name}`;
+    if (statSync(path).isDirectory()) return name === ".vite" ? [] : emitted(path);
+    return /\.(js|css|html|json|webmanifest|txt)$/.test(name) ? [path] : [];
+  });
+}
+for (const file of emitted(DIST)) {
+  const addresses = personalEmails(readFileSync(file, "utf8"));
+  if (addresses.length)
+    problems.push(
+      `${file} contains an email address that is not ours: ${addresses.join(", ")} (a support contact belongs in server configuration)`
+    );
+}
 
 if (problems.length) {
   console.error("\nBundle check failed:\n - " + problems.join("\n - "));
