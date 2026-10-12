@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { FileStack, Plus, Download, FileText, Clock, CheckCircle2, XCircle } from "lucide-react";
+import usePagedList from "../hooks/usePagedList";
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
+import LoadMore from "../components/LoadMore";
 import SubmitDocumentModal from "../components/SubmitDocumentModal";
 
 const STATUS_META = {
@@ -12,30 +14,35 @@ const STATUS_META = {
 
 export default function Documents() {
   const { addToast } = useToast();
-  const [documents, setDocuments] = useState([]);
+  // The shared library is read a page at a time (it grows with every advisor's submissions); the advisor's own submissions are few and read whole.
+  const library = usePagedList("/api/documents");
+  const { items: documents, hasMore, loadingMore, loadMore } = library;
   const [mine, setMine] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loadingMine, setLoadingMine] = useState(true);
+  const [errorMine, setErrorMine] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
+  const loadMine = async () => {
+    setLoadingMine(true);
+    setErrorMine(null);
     try {
-      const [docs, own] = await Promise.all([api.getDocuments(), api.getMyDocuments()]);
-      setDocuments(docs);
-      setMine(own);
+      setMine(await api.getMyDocuments());
     } catch (err) {
-      setError(err);
+      setErrorMine(err);
     } finally {
-      setLoading(false);
+      setLoadingMine(false);
     }
   };
 
   useEffect(() => {
-    load();
+    loadMine();
   }, []);
+
+  const loading = library.loading || loadingMine;
+  // A failure to load the NEXT page of the library never replaces what is already shown: it is reported under the list, with a retry.
+  const error = (documents.length === 0 ? library.error : null) || errorMine;
+  const load = () => Promise.all([library.reload(), loadMine()]);
 
   const handleDownload = async (doc) => {
     setDownloadingId(doc.id);
@@ -153,6 +160,7 @@ export default function Documents() {
                     </div>
                   </div>
                 ))}
+                <LoadMore hasMore={hasMore} loadingMore={loadingMore} error={documents.length > 0 ? library.error : null} onLoadMore={loadMore} />
               </div>
             )}
           </section>
