@@ -376,7 +376,64 @@ async function requestMultipartDownload(path, formData, fallbackName) {
   URL.revokeObjectURL(url);
 }
 
+/** The page size the web app asks for (the server's own default; it caps what is asked at 200). */
+export const PAGE_SIZE = 50;
+
+/** `path` with the given query parameters; a parameter that is undefined, null or empty is left out. */
+export function withQuery(path, params = {}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params))
+    if (value !== undefined && value !== null && value !== "") query.set(key, String(value));
+  const text = query.toString();
+  return text ? `${path}?${text}` : path;
+}
+
+/**
+ * One page of a collection, whichever way the server answers: the paginated shape ({ results, nextCursor }) or, from a server that does not
+ * paginate yet, the whole plain list (which is then the only page). So the web app and the server can be deployed in either order.
+ * @template T
+ * @param {unknown} body
+ * @returns {{ results: T[], nextCursor: string | null }}
+ */
+export function toPage(body) {
+  if (Array.isArray(body)) return { results: body, nextCursor: null };
+  const page = /** @type {{ results?: unknown, nextCursor?: string | null } | null | undefined} */ (body);
+  return { results: Array.isArray(page?.results) ? page.results : [], nextCursor: page?.nextCursor || null };
+}
+
 export const api = {
+  /**
+   * One page of a collection (clients, tickets, ...): `getPage("/api/tickets", { cursor })`. Filters and sorting go in `params`.
+   * @template T
+   * @param {string} path
+   * @param {{ limit?: number, cursor?: string | null, [filter: string]: unknown }} [params]
+   * @returns {Promise<{ results: T[], nextCursor: string | null }>}
+   */
+  getPage: async (path, params = {}) => toPage(await request(withQuery(path, { limit: PAGE_SIZE, ...params }))),
+  /**
+   * Every page of a collection, one request at a time, for the places that need the whole set. `onPage(items, all)` is called after each page, so a
+   * caller can show the first page while the rest arrive. Stops with what it has if `isCancelled()` turns true. A server that returns the whole list
+   * at once is one page. The cap (`maxPages`) is a guard against a cursor that never ends, not a limit anyone is expected to meet.
+   * @template T
+   * @param {string} path
+   * @param {{ [filter: string]: unknown }} [params]
+   * @param {{ onPage?: (items: T[], all: T[]) => void, isCancelled?: () => boolean, maxPages?: number }} [options]
+   * @returns {Promise<T[]>}
+   */
+  getAllPages: async (path, params = {}, { onPage, isCancelled = () => false, maxPages = 200 } = {}) => {
+    const all = [];
+    let cursor = null;
+    for (let page = 0; page < maxPages; page += 1) {
+      const { results, nextCursor } = await api.getPage(path, { ...params, cursor });
+      if (isCancelled()) return all;
+      all.push(...results);
+      onPage?.(results, all);
+      if (!nextCursor) return all;
+      cursor = nextCursor;
+    }
+    return all;
+  },
+
   // auth
   register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
   login: (identifier, password) =>
@@ -403,6 +460,8 @@ export const api = {
 
   // clients (owner-scoped collection sync)
   getClients: () => request("/api/clients"),
+  /** One page of the advisor's clients, with the server's filters and sort: q, priority, province, stage, followUpDue, sort (-last, joined, ...). */
+  getClientsPage: (params) => api.getPage("/api/clients", params),
   createClient: (client) => request("/api/clients", { method: "POST", body: client }),
   patchClient: (ref, body) => request(`/api/clients/${encodeURIComponent(ref)}`, { method: "PATCH", body }),
   deleteClient: (ref) => request(`/api/clients/${encodeURIComponent(ref)}`, { method: "DELETE" }),
@@ -432,7 +491,8 @@ export const api = {
   addTicketComment: (id, message) => request(`/api/tickets/${id}/comments`, { method: "POST", body: { message } }),
 
   // reminders / to-do list (owner-scoped, never touches meetings/analytics)
-  getReminders: () => request("/api/reminders"),
+  /** Every reminder (read a page at a time; the server never has to build the whole list in one response). */
+  getReminders: () => api.getAllPages("/api/reminders"),
   createReminder: (payload) => request("/api/reminders", { method: "POST", body: payload }),
   updateReminder: (id, patch) => request(`/api/reminders/${id}`, { method: "PATCH", body: patch }),
   deleteReminder: (id) => request(`/api/reminders/${id}`, { method: "DELETE" }),
@@ -473,7 +533,8 @@ export const api = {
   // admin review, and get an AI-suggested topic/summary/keywords for a PDF
   // before submitting.
   getDocuments: () => request("/api/documents"),
-  getMyDocuments: () => request("/api/documents/mine"),
+  /** Every document the advisor submitted, read a page at a time. */
+  getMyDocuments: () => api.getAllPages("/api/documents/mine"),
   submitDocument: ({ title, summary, keywords, file }) => {
     const form = new FormData();
     form.append("title", title);
@@ -499,7 +560,8 @@ export const api = {
   getSalesPackageFunds: (companyId, investmentType) =>
     request(`/api/sales-packages/companies/${companyId}/funds?investmentType=${encodeURIComponent(investmentType)}`),
 
-  getSalesPackages: () => request("/api/sales-packages/packages"),
+  /** Every sales package of the advisor, read a page at a time. */
+  getSalesPackages: () => api.getAllPages("/api/sales-packages/packages"),
   createSalesPackage: () => request("/api/sales-packages/packages", { method: "POST" }),
   getSalesPackage: (id) => request(`/api/sales-packages/packages/${id}`),
   saveSalesPackageDraft: (id, data, version) =>
@@ -552,7 +614,8 @@ export const api = {
   updateBookingLink: (id, payload) => request(`/api/booking/links/${id}`, { method: "PATCH", body: payload }),
   deleteBookingLink: (id) => request(`/api/booking/links/${id}`, { method: "DELETE" }),
 
-  getBookingRequests: () => request("/api/booking/requests"),
+  /** Every booking request, read a page at a time. */
+  getBookingRequests: () => api.getAllPages("/api/booking/requests"),
   approveBookingRequest: (id) => request(`/api/booking/requests/${id}/approve`, { method: "POST" }),
   cancelBookingRequest: (id) => request(`/api/booking/requests/${id}/cancel`, { method: "POST" }),
   rescheduleBookingRequest: (id, date, time) =>
