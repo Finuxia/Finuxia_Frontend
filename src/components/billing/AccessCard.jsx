@@ -1,6 +1,7 @@
 import { AlertTriangle, CalendarClock, CheckCircle2, Infinity as InfinityIcon } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { accessCopy } from "../../lib/accessCopy";
+import ContinueIntent from "./ContinueIntent";
 
 const TONES = {
   ok: { box: "border-slate-200 bg-white", icon: CheckCircle2, iconClass: "text-av-green" },
@@ -16,7 +17,7 @@ const TONES = {
 export default function AccessCard() {
   const { billing } = useAuth();
   const plan = billing?.plan;
-  const copy = accessCopy(billing?.access);
+  const copy = accessCopy(billing?.access, { notContinuing: Boolean(billing?.notContinuingSince) });
   if (!plan || !copy) return null;
   const tone = TONES[copy.tone];
   const Icon = copy.headline === "Your access does not end." ? InfinityIcon : tone.icon;
@@ -32,6 +33,7 @@ export default function AccessCard() {
           {copy.detail && <span className="block font-normal text-slate-600">{copy.detail}</span>}
         </span>
       </p>
+      <ContinueIntent />
       <p className="mt-3 text-xs text-slate-500">
         Plans are paid for once, with a single payment. Nothing renews automatically and no card is kept on file. Buying again never adds
         up: you keep whichever end date is later.

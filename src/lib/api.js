@@ -562,6 +562,10 @@ export const api = {
   // where to return, and nothing about the amount, is sent from here. The amount charged is always the plan's price on the server.
   /** @param {number} planId @returns {Promise<import("./types").PurchaseResponse>} */
   purchasePlan: (planId) => request("/api/billing/purchase", { method: "POST", body: { planId } }),
+  // "I do not intend to continue" (true takes it back). Only a statement: it changes no access, plan or feature, charges nothing, and
+  // can be reversed until access ends; the answer is the billing status.
+  /** @param {boolean} willContinue @returns {Promise<import("./types").BillingStatus>} */
+  setContinueIntent: (willContinue) => request("/api/billing/intent", { method: "PUT", body: { willContinue } }),
   // The receipt (a PDF made by the server) of one of the customer's own payments that succeeded; saved through the browser's download.
   /** @param {number} paymentId @param {string} [fallbackName] */
   downloadReceipt: (paymentId, fallbackName) => downloadFile(`/api/billing/payments/${paymentId}/receipt`, fallbackName || "receipt.pdf"),

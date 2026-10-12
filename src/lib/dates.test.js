@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { birthDateError, daysLeft, formatLongDate, todayISO } from "./dates";
+import { birthDateError, daysLeft, formatLongDate, formatLongDateTime, todayISO } from "./dates";
 
 const originalTZ = process.env.TZ;
 afterEach(() => {
@@ -57,6 +57,17 @@ describe("formatLongDate", () => {
 
   it("is empty, not 'Invalid Date', for anything that is not a date", () => {
     for (const junk of [null, undefined, "", "not a date", "2026-13-45"]) expect(formatLongDate(junk), String(junk)).toBe("");
+  });
+});
+
+describe("formatLongDateTime", () => {
+  it("is the date, then the time, in the person's own time zone", () => {
+    expect(formatLongDateTime(new Date(2026, 11, 15, 15, 30).toISOString())).toMatch(/^December 15, 2026 at 3:30\s?PM [A-Z]/);
+    expect(formatLongDateTime(new Date(2026, 0, 2, 0, 5).toISOString())).toMatch(/^January 2, 2026 at 12:05\s?AM /);
+  });
+
+  it("is empty, not 'Invalid Date', for anything that is not a date", () => {
+    for (const junk of [null, undefined, "", "not a date", "2026-13-45"]) expect(formatLongDateTime(junk), String(junk)).toBe("");
   });
 });
 

@@ -191,6 +191,8 @@ export interface BillingStatus {
   accessEndsAt?: ISODateTime | null;
   currentPeriodEnd: ISODateTime | null;
   access?: AccessSummary | null;
+  /** When the customer said they do not intend to continue (null: they have not). Only a statement; it changes no access. */
+  notContinuingSince?: ISODateTime | null;
 }
 
 /** One row of GET /api/billing/payments: a payment as our own ledger holds it. */
