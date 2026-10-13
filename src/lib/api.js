@@ -594,6 +594,9 @@ export const api = {
   //     once: the server replays the first response instead of creating a second pending payment
   //   - successUrl / cancelUrl are where the provider returns the customer, to pages that confirm
   //     the payment with the server rather than trusting the URL (see PaymentReturn)
+  // "I do not intend to continue" (true takes it back). Only a statement: it changes no access, plan or feature, charges nothing, and
+  // can be reversed until access ends; the answer is the billing status.
+  setContinueIntent: (willContinue) => request("/api/billing/intent", { method: "PUT", body: { willContinue } }),
   purchasePlan: (planId, idempotencyKey) =>
     request("/api/billing/purchase", {
       method: "POST",
