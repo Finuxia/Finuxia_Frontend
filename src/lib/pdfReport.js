@@ -6,7 +6,7 @@
  * CSV export in lib/csv.js works the same way — pure browser APIs).
  */
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 }
 
 /**
@@ -34,9 +34,7 @@ export function openPrintableReport({ title, rangeLabel, stats, sections }) {
   const sectionsHtml = sections
     .map((section) => {
       const rowsHtml = section.rows.length
-        ? section.rows
-            .map((r) => `<tr><td>${escapeHtml(r.label)}</td><td class="num">${escapeHtml(r.value)}</td></tr>`)
-            .join("")
+        ? section.rows.map((r) => `<tr><td>${escapeHtml(r.label)}</td><td class="num">${escapeHtml(r.value)}</td></tr>`).join("")
         : `<tr><td colspan="2" class="empty">${escapeHtml(section.emptyText || "No data in this range.")}</td></tr>`;
       return `<section>
         <h2>${escapeHtml(section.heading)}</h2>

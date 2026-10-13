@@ -6,7 +6,7 @@ import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import Documents from "./Documents";
 
 // The submit form itself is not what is under test: a stand-in that reports "submitted" lets the page's reaction be seen.
-vi.mock("../components/SubmitDocumentModal", () => ({
+vi.mock("../components/documents/SubmitDocumentModal", () => ({
   default: ({ onSubmitted }) => (
     <button type="button" onClick={onSubmitted}>
       pretend submitted

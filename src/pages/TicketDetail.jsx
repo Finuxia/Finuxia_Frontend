@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Bug, Sparkles, Send, ShieldCheck } from "lucide-react";
 import { api } from "../lib/api";
+import useAsync from "../hooks/useAsync";
 import { useToast } from "../context/ToastContext";
-import { getTicketStatusMeta, getTicketTypeMeta } from "../lib/ticketMeta";
+import { getTicketStatusMeta, getTicketTypeMeta, toneClasses } from "../lib/statusMeta";
+import { Badge } from "../components/ui";
 
 function formatDateTime(iso) {
   if (!iso) return "";
@@ -16,29 +18,9 @@ export default function TicketDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: ticket, loading, error, setData: setTicket } = useAsync(() => api.getTicket(id), [id]);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
-
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.getTicket(id);
-      setTicket(data);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
 
   const handleReply = async (e) => {
     e.preventDefault();
@@ -92,7 +74,7 @@ export default function TicketDetail() {
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${typeMeta.badge}`}>
+            <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneClasses(typeMeta.tone).badge}`}>
               <TypeIcon size={18} />
             </div>
             <div>
@@ -102,9 +84,7 @@ export default function TicketDetail() {
               </p>
             </div>
           </div>
-          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badge}`}>
-            {statusMeta.label}
-          </span>
+          <Badge meta={statusMeta} className="shrink-0" />
         </div>
         <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600">{ticket.description}</p>
       </section>
@@ -128,9 +108,7 @@ export default function TicketDetail() {
                 <div className={`mb-1 flex items-center gap-1.5 text-xs font-semibold ${c.isAdmin ? "text-gold" : "text-slate-500"}`}>
                   {c.isAdmin && <ShieldCheck size={12} />}
                   {c.authorName}
-                  <span className={`font-normal ${c.isAdmin ? "text-slate-300" : "text-slate-400"}`}>
-                    · {formatDateTime(c.createdAt)}
-                  </span>
+                  <span className={`font-normal ${c.isAdmin ? "text-slate-300" : "text-slate-400"}`}>· {formatDateTime(c.createdAt)}</span>
                 </div>
                 <p className="whitespace-pre-line text-sm leading-relaxed">{c.message}</p>
               </div>

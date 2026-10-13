@@ -134,7 +134,7 @@ export function parseCsv(text, delimiter = ",") {
 /** Excel in many locales writes ";" (or tab) instead of ","; pick whichever the header line uses most. */
 function detectDelimiter(text) {
   const firstLine = text.split(/\r\n|\n|\r/, 1)[0].replace(/"[^"]*"/g, "");
-  const counts = [",", ";", "\t"].map((d) => [d, firstLine.split(d).length - 1]);
+  const counts = /** @type {[string, number][]} */ ([",", ";", "\t"].map((d) => [d, firstLine.split(d).length - 1]));
   counts.sort((a, b) => b[1] - a[1]);
   return counts[0][1] > 0 ? counts[0][0] : ",";
 }
@@ -148,7 +148,7 @@ function decodeText(buffer) {
 }
 
 function readCsv(buffer) {
-  const text = decodeText(buffer).replace(/^﻿/, "");
+  const text = decodeText(buffer).replace(/^\uFEFF/, "");
   return rowsFromGrid(parseCsv(text, detectDelimiter(text)));
 }
 
@@ -182,6 +182,7 @@ export async function readSpreadsheetFile(file) {
 
 // ---- writing -------------------------------------------------------------
 
+/** @returns {import("exceljs").Fill} */
 const solid = (argb) => ({ type: "pattern", pattern: "solid", fgColor: { argb } });
 
 /** The downloadable import template: bold header, sample row painted red. */

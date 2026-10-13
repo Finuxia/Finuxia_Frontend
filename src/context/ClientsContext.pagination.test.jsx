@@ -190,7 +190,10 @@ describe("clients arriving a page at a time", () => {
   });
 
   it("signing out while later pages are still on their way does not bring the clients back", async () => {
-    pagedServer([1, 2, 3, 4].map((n) => client(n)), { delays: [0, 250] });
+    pagedServer(
+      [1, 2, 3, 4].map((n) => client(n)),
+      { delays: [0, 250] }
+    );
     render();
     await waitFor(() => expect(names()).toEqual(["Client1", "Client2"])); // the first page is on screen, the second is in flight
     await act(async () => {

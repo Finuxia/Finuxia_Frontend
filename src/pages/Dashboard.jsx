@@ -7,9 +7,9 @@ import { isLead } from "../lib/pipeline";
 import { formatTime } from "../lib/notifications";
 import { todayISO, todayLong } from "../lib/followUp";
 import { runPipeline, filterByMonth, clientActivityDate, currentMonthKey, monthLabel } from "../lib/chartPipeline";
-import PipelineBarChart from "../components/PipelineBarChart";
-import FollowUpDonutChart from "../components/FollowUpDonutChart";
-import MonthFilter from "../components/MonthFilter";
+import PipelineBarChart from "../components/clients/PipelineBarChart";
+import FollowUpDonutChart from "../components/clients/FollowUpDonutChart";
+import MonthFilter from "../components/ui/MonthFilter";
 
 export default function Dashboard() {
   const { clients } = useClients();
@@ -19,10 +19,7 @@ export default function Dashboard() {
 
   // Charts default to the current calendar month.
   const [month, setMonth] = useState(currentMonthKey());
-  const monthClients = useMemo(
-    () => runPipeline(clients, [filterByMonth(month, clientActivityDate)]),
-    [clients, month]
-  );
+  const monthClients = useMemo(() => runPipeline(clients, [filterByMonth(month, clientActivityDate)]), [clients, month]);
 
   const totalLeads = clients.filter((c) => isLead(c.currentStage)).length;
   const totalClients = clients.filter((c) => !isLead(c.currentStage)).length;
@@ -36,18 +33,14 @@ export default function Dashboard() {
   }).length;
 
   const highPriority = useMemo(
-    () =>
-      clients.filter(
-        (c) => c.priority === "High" && (c.nextFollowUp === "Overdue" || c.nextFollowUp === "Today")
-      ),
+    () => clients.filter((c) => c.priority === "High" && (c.nextFollowUp === "Overdue" || c.nextFollowUp === "Today")),
     [clients]
   );
   const meetingsToday = useMemo(() => clients.filter((c) => c.meeting?.date === today), [clients, today]);
-  const meetingIds = new Set(meetingsToday.map((c) => c.id));
-  const calls = useMemo(
-    () => clients.filter((c) => c.nextFollowUp === "Today" && !meetingIds.has(c.id)),
-    [clients, today]
-  );
+  const calls = useMemo(() => {
+    const meetingIds = new Set(meetingsToday.map((c) => c.id));
+    return clients.filter((c) => c.nextFollowUp === "Today" && !meetingIds.has(c.id));
+  }, [clients, meetingsToday]);
   const pendingFiles = useMemo(() => {
     const items = [];
     clients.forEach((c) => (c.files || []).filter((f) => f.status === "pending").forEach((f) => items.push({ client: c, file: f })));
@@ -102,8 +95,20 @@ export default function Dashboard() {
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-base font-semibold text-navy">Today's Priorities</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <PriorityGroup icon={Flame} title="High Priority" items={highPriority.map((c) => ({ id: c.id, label: `${c.first} ${c.last}` }))} onSelect={(id) => navigate(`/clients/${id}`)} empty="Nothing urgent." />
-          <PriorityGroup icon={PhoneCall} title="Calls" items={calls.map((c) => ({ id: c.id, label: `${c.first} ${c.last}` }))} onSelect={(id) => navigate(`/clients/${id}`)} empty="No calls scheduled." />
+          <PriorityGroup
+            icon={Flame}
+            title="High Priority"
+            items={highPriority.map((c) => ({ id: c.id, label: `${c.first} ${c.last}` }))}
+            onSelect={(id) => navigate(`/clients/${id}`)}
+            empty="Nothing urgent."
+          />
+          <PriorityGroup
+            icon={PhoneCall}
+            title="Calls"
+            items={calls.map((c) => ({ id: c.id, label: `${c.first} ${c.last}` }))}
+            onSelect={(id) => navigate(`/clients/${id}`)}
+            empty="No calls scheduled."
+          />
           <PriorityGroup
             icon={CalendarClock}
             title="Meetings"

@@ -10,8 +10,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test",
-    "check:bundle": "node scripts/check-bundle.mjs"
+    "check:bundle": "node scripts/check-bundle.mjs",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -p tsconfig.json",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@sentry/react": "8.55.0",
@@ -22,6 +27,8 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "1.64.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
@@ -29,10 +36,17 @@
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^2.1.9",
     "autoprefixer": "^10.4.19",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
     "jsdom": "^25.0.1",
     "msw": "^2.15.0",
     "postcss": "^8.4.39",
+    "prettier": "^3.9.9",
     "tailwindcss": "^3.4.4",
+    "typescript": "^5.9.3",
     "vite": "^5.3.3",
     "vitest": "^2.1.9"
   }

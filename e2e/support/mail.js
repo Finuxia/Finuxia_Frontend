@@ -60,7 +60,10 @@ function bodyOf(path) {
   const raw = readFileSync(path, "utf8");
   const encoding = (raw.match(/^Content-Transfer-Encoding:\s*(\S+)/im) || [])[1]?.toLowerCase();
   // Headers end at the first blank line; everything after is the body.
-  const body = raw.split(/\r?\n\r?\n/).slice(1).join("\n\n");
+  const body = raw
+    .split(/\r?\n\r?\n/)
+    .slice(1)
+    .join("\n\n");
   if (encoding === "base64") return Buffer.from(body, "base64").toString("utf8");
   if (encoding === "quoted-printable") {
     return body

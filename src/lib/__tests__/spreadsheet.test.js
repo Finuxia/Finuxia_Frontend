@@ -3,14 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { mapImportRows, TEMPLATE_COLUMNS, TEMPLATE_SAMPLE } from "../clientImport";
-import {
-  MAX_FILE_BYTES,
-  SpreadsheetError,
-  buildFunnelWorkbook,
-  buildTemplateWorkbook,
-  parseCsv,
-  parseSpreadsheet,
-} from "../spreadsheet";
+import { MAX_FILE_BYTES, SpreadsheetError, buildFunnelWorkbook, buildTemplateWorkbook, parseCsv, parseSpreadsheet } from "../spreadsheet";
 
 // Excel dates are UTC-anchored; a zone behind UTC (the advisors' own) is where a
 // local-time read would shift every date back a day. Pin it so the suite catches that.
@@ -92,7 +85,10 @@ describe("importing a CSV", () => {
   });
 
   it("parseCsv is RFC 4180 compliant on edge cases", () => {
-    expect(parseCsv('a,"b ""q"" c",\r\n1,2,3')).toEqual([["a", 'b "q" c', ""], ["1", "2", "3"]]);
+    expect(parseCsv('a,"b ""q"" c",\r\n1,2,3')).toEqual([
+      ["a", 'b "q" c', ""],
+      ["1", "2", "3"],
+    ]);
     expect(parseCsv("a,b\n")).toEqual([["a", "b"]]);
     expect(parseCsv("")).toEqual([]);
   });

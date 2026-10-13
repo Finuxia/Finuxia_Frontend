@@ -36,15 +36,11 @@ beforeEach(() => {
 
 describe("stripQuery", () => {
   it("removes a password reset token from a URL", () => {
-    expect(stripQuery("https://finuxia.com/reset-password?uid=14&token=abc123")).toBe(
-      "https://finuxia.com/reset-password"
-    );
+    expect(stripQuery("https://finuxia.com/reset-password?uid=14&token=abc123")).toBe("https://finuxia.com/reset-password");
   });
 
   it("removes a fragment as well, because a token can be put there too", () => {
-    expect(stripQuery("https://finuxia.com/verify-email#token=abc123")).toBe(
-      "https://finuxia.com/verify-email"
-    );
+    expect(stripQuery("https://finuxia.com/verify-email#token=abc123")).toBe("https://finuxia.com/verify-email");
   });
 
   it("leaves a plain path alone", () => {
@@ -190,11 +186,7 @@ describe("scrubEvent: safety", () => {
 
 describe("the request id ties the two halves together", () => {
   it("picks up X-Request-ID from a response and tags the event with it", async () => {
-    server.use(
-      http.get(`${API}/api/clients`, () =>
-        HttpResponse.json([], { headers: { "X-Request-ID": "abc123def456" } })
-      )
-    );
+    server.use(http.get(`${API}/api/clients`, () => HttpResponse.json([], { headers: { "X-Request-ID": "abc123def456" } })));
 
     await api.getClients();
 
@@ -219,9 +211,7 @@ describe("the request id ties the two halves together", () => {
   });
 
   it("leaves the previous id in place when a response carries no header", async () => {
-    server.use(
-      http.get(`${API}/api/clients`, () => HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } }))
-    );
+    server.use(http.get(`${API}/api/clients`, () => HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } })));
     await api.getClients();
 
     server.use(http.get(`${API}/api/state`, () => HttpResponse.json({})));
@@ -231,9 +221,7 @@ describe("the request id ties the two halves together", () => {
   });
 
   it("keeps other tags when it adds the request id", async () => {
-    server.use(
-      http.get(`${API}/api/clients`, () => HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } }))
-    );
+    server.use(http.get(`${API}/api/clients`, () => HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } })));
     await api.getClients();
 
     const event = scrubEvent({ tags: { boundary: "route" } });

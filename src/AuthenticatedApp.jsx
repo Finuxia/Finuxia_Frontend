@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import Layout from "./components/Layout";
-import ModuleGate from "./components/ModuleGate";
-import PageSpinner from "./components/PageSpinner";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/layout/Layout";
+import ModuleGate from "./components/billing/ModuleGate";
+import PageSpinner from "./components/ui/PageSpinner";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 // Everything an advisor uses once signed in. It is its own chunk (see App.jsx), so the public pages (booking link,
@@ -49,8 +49,22 @@ export default function AuthenticatedApp() {
 
         {/* Where the payment provider sends the customer back to. Outside Layout like /subscribe, so an account
             whose trial has ended (the very person paying) is not bounced away before the page can confirm anything. */}
-        <Route path="/billing/success" element={<ProtectedRoute><PaymentReturn outcome="success" /></ProtectedRoute>} />
-        <Route path="/billing/cancel" element={<ProtectedRoute><PaymentReturn outcome="cancel" /></ProtectedRoute>} />
+        <Route
+          path="/billing/success"
+          element={
+            <ProtectedRoute>
+              <PaymentReturn outcome="success" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/billing/cancel"
+          element={
+            <ProtectedRoute>
+              <PaymentReturn outcome="cancel" />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           element={
@@ -67,7 +81,14 @@ export default function AuthenticatedApp() {
           <Route path="/clients" element={<Clients />} />
           <Route path="/clients/:id" element={<ClientDetail />} />
           <Route path="/groups" element={<Groups />} />
-          <Route path="/follow-ups" element={<ModuleGate moduleKey="followups" moduleName="Automated Follow-Ups"><FollowUps /></ModuleGate>} />
+          <Route
+            path="/follow-ups"
+            element={
+              <ModuleGate moduleKey="followups" moduleName="Automated Follow-Ups">
+                <FollowUps />
+              </ModuleGate>
+            }
+          />
           <Route path="/reports" element={<Reports />} />
           <Route path="/import" element={<Import />} />
           <Route path="/guide" element={<Guide />} />
@@ -76,9 +97,23 @@ export default function AuthenticatedApp() {
           <Route path="/booking-links" element={<BookingLinks />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/tickets/:id" element={<TicketDetail />} />
-          <Route path="/advisor-assistant/presentations" element={<ModuleGate moduleKey="presentations" moduleName="Presentations"><Presentations /></ModuleGate>} />
+          <Route
+            path="/advisor-assistant/presentations"
+            element={
+              <ModuleGate moduleKey="presentations" moduleName="Presentations">
+                <Presentations />
+              </ModuleGate>
+            }
+          />
           <Route path="/advisor-assistant/strategy-prep" element={<StrategyPrep />} />
-          <Route path="/advisor-assistant/sales-package" element={<ModuleGate moduleKey="sales_package_prep" moduleName="Sales Package Prep"><SalesPackagePrep /></ModuleGate>} />
+          <Route
+            path="/advisor-assistant/sales-package"
+            element={
+              <ModuleGate moduleKey="sales_package_prep" moduleName="Sales Package Prep">
+                <SalesPackagePrep />
+              </ModuleGate>
+            }
+          />
           <Route path="/profile" element={<Profile />} />
           <Route path="/billing" element={<Billing />} />
         </Route>

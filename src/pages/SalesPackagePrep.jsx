@@ -137,7 +137,15 @@ export default function SalesPackagePrep() {
   }
 
   if (mode === "picker") {
-    return <PackagePicker packages={myPackages} incomplete={packagesIncomplete} onResume={openPackage} onDelete={deleteDraft} onStartNew={startNewDraft} />;
+    return (
+      <PackagePicker
+        packages={myPackages}
+        incomplete={packagesIncomplete}
+        onResume={openPackage}
+        onDelete={deleteDraft}
+        onStartNew={startNewDraft}
+      />
+    );
   }
 
   const stepStatuses = computeStepStates({ data, documents, status: draft.status }).map((st, i) => {

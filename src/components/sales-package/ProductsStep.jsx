@@ -1,5 +1,5 @@
 import { Plus, Trash2, CheckCircle2, AlertTriangle } from "lucide-react";
-import SearchableSelect from "../SearchableSelect";
+import SearchableSelect from "../ui/SearchableSelect";
 import { ACCOUNT_TYPES, FREQUENCIES, INVESTMENT_BEARING_TYPES } from "../../lib/salesPackageOptions";
 import { StepCard, CurrencyInput } from "./shared";
 

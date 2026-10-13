@@ -97,7 +97,8 @@ describe("client sync", () => {
         http.post(`${API}/api/clients`, async ({ request }) => {
           const body = await request.json();
           bodies.push(body);
-          if (!created.has(body.clientToken)) created.set(body.clientToken, serverClient({ id: `c_${created.size + 10}`, first: body.first, version: 1 }));
+          if (!created.has(body.clientToken))
+            created.set(body.clientToken, serverClient({ id: `c_${created.size + 10}`, first: body.first, version: 1 }));
           return HttpResponse.json(created.get(body.clientToken), { status: created.size === 1 && bodies.length === 1 ? 201 : 200 });
         })
       );
@@ -140,7 +141,10 @@ describe("client sync", () => {
       server.use(
         http.patch(`${API}/api/clients/c_1`, async ({ request }) => {
           patches.push(await request.json());
-          return HttpResponse.json({ error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", phone: "999", version: 3 }) }, { status: 409 });
+          return HttpResponse.json(
+            { error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", phone: "999", version: 3 }) },
+            { status: 409 }
+          );
         })
       );
       render();
@@ -235,7 +239,9 @@ describe("client sync", () => {
       server.use(
         http.patch(`${API}/api/clients/c_1`, async ({ request }) => {
           const body = await request.json();
-          return ++attempts === 1 ? HttpResponse.json({ error: "Server busy" }, { status: 503 }) : HttpResponse.json(serverClient({ ...body, version: 2 }));
+          return ++attempts === 1
+            ? HttpResponse.json({ error: "Server busy" }, { status: 503 })
+            : HttpResponse.json(serverClient({ ...body, version: 2 }));
         })
       );
       render();
@@ -278,7 +284,12 @@ describe("a conflict message", () => {
         loads += 1;
         return HttpResponse.json([serverClient(loads === 1 ? {} : { first: "Ada (latest)", version: 6, phone: "123" })]);
       }),
-      http.patch(`${API}/api/clients/c_1`, () => HttpResponse.json({ error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", version: 3 }) }, { status: 409 }))
+      http.patch(`${API}/api/clients/c_1`, () =>
+        HttpResponse.json(
+          { error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", version: 3 }) },
+          { status: 409 }
+        )
+      )
     );
     render();
     await screen.findByText("Ada|");

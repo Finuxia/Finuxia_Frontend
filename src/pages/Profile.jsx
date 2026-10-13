@@ -4,11 +4,11 @@ import { Camera, LogOut, Trash2, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
-import GoogleCalendarPanel from "../components/GoogleCalendarPanel";
-import GoogleDrivePanel from "../components/GoogleDrivePanel";
-import ZoomPanel from "../components/ZoomPanel";
-import AvailabilityPanel from "../components/AvailabilityPanel";
-import ComplianceProfilePanel from "../components/ComplianceProfilePanel";
+import GoogleCalendarPanel from "../components/integrations/GoogleCalendarPanel";
+import GoogleDrivePanel from "../components/integrations/GoogleDrivePanel";
+import ZoomPanel from "../components/integrations/ZoomPanel";
+import AvailabilityPanel from "../components/booking/AvailabilityPanel";
+import ComplianceProfilePanel from "../components/account/ComplianceProfilePanel";
 import AiUsagePanel from "../components/AiUsagePanel";
 
 const TABS = [
@@ -124,7 +124,7 @@ export default function Profile() {
             {user.hasAvatar ? (
               <img src={`${api.avatarUrl(user.id)}?t=${avatarBust}`} alt="" className="h-full w-full object-cover" />
             ) : (
-              user.name?.[0]?.toUpperCase() ?? <User size={24} />
+              (user.name?.[0]?.toUpperCase() ?? <User size={24} />)
             )}
           </button>
           <button

@@ -60,27 +60,46 @@ export default function ContinueIntent() {
       {billing.notContinuingSince ? (
         <div data-testid="not-continuing" className="mt-3 flex flex-col gap-2 rounded-lg bg-slate-50 px-3 py-2 text-slate-600">
           <p>
-            {since ? `On ${since} you told us` : "You told us"} you don't plan to continue. Your access still runs until {endsAt}, and nothing more
-            will be charged.
+            {since ? `On ${since} you told us` : "You told us"} you don't plan to continue. Your access still runs until {endsAt}, and
+            nothing more will be charged.
           </p>
-          <button type="button" disabled={busy} onClick={() => say(true)} className="self-start text-xs font-semibold text-navy underline disabled:opacity-60">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => say(true)}
+            className="self-start text-xs font-semibold text-navy underline disabled:opacity-60"
+          >
             {busy ? "Saving..." : "I've changed my mind"}
           </button>
         </div>
       ) : (
-        <button type="button" onClick={() => setConfirming(true)} className="mt-3 text-xs font-semibold text-slate-500 underline hover:text-navy">
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="mt-3 text-xs font-semibold text-slate-500 underline hover:text-navy"
+        >
           I don't plan to continue
         </button>
       )}
 
       {confirming && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !busy && setConfirming(false)}>
+        <div
+          // The backdrop dismisses on a click, a mouse affordance only: the keyboard path is the
+          // Escape handler in the effect above, and focus moves into the dialog when it opens.
+          // `role="presentation"` states what this element is — a visual overlay, not a control.
+          // Without it jsx-a11y reports the click handler as an interactive element with no
+          // keyboard support, which is a fair complaint about the markup even though the behaviour
+          // is covered (FE-12). The dismiss checks the event target rather than relying on the
+          // dialog to stop propagation, so a click inside is ignored here instead of cancelled there.
+          role="presentation"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => e.target === e.currentTarget && !busy && setConfirming(false)}
+        >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="continue-intent-title"
             className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
           >
             <h2 id="continue-intent-title" className="text-lg font-bold text-navy">
               You don't plan to continue?

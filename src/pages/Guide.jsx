@@ -1,35 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, BookOpen, LifeBuoy } from "lucide-react";
 import { api } from "../lib/api";
+import useAsync from "../hooks/useAsync";
 
 export default function Guide() {
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [openId, setOpenId] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await api.getGuides();
-        if (!cancelled) {
-          setGroups(data);
-          // open the very first question by default
-          setOpenId(data?.[0]?.items?.[0]?.id ?? null);
-        }
-      } catch (err) {
-        if (!cancelled) setError(err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: groups, loading, error } = useAsync(() => api.getGuides(), [], { initial: [] });
+  const [openChoice, setOpenChoice] = useState(undefined);
+  // Until the reader chooses, the very first question is open by default.
+  const openId = openChoice === undefined ? (groups?.[0]?.items?.[0]?.id ?? null) : openChoice;
+  const setOpenId = setOpenChoice;
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -72,23 +51,15 @@ export default function Guide() {
                       className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
                       aria-expanded={open}
                     >
-                      <span className={`text-sm font-semibold ${open ? "text-navy" : "text-slate-700"}`}>
-                        {item.question}
-                      </span>
+                      <span className={`text-sm font-semibold ${open ? "text-navy" : "text-slate-700"}`}>{item.question}</span>
                       <ChevronDown
                         size={18}
                         className={`shrink-0 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                       />
                     </button>
-                    <div
-                      className={`grid transition-all duration-200 ease-out ${
-                        open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                      }`}
-                    >
+                    <div className={`grid transition-all duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                       <div className="overflow-hidden">
-                        <p className="whitespace-pre-line px-5 pb-4 text-sm leading-relaxed text-slate-600">
-                          {item.answer}
-                        </p>
+                        <p className="whitespace-pre-line px-5 pb-4 text-sm leading-relaxed text-slate-600">{item.answer}</p>
                       </div>
                     </div>
                   </div>

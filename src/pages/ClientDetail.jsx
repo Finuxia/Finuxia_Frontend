@@ -1,6 +1,24 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Sparkles, X, Phone, Mail, Send, CalendarDays, CalendarClock, Copy, Check, UserPlus, Pencil, Trash2, Briefcase, Cake, Instagram, BellPlus } from "lucide-react";
+import {
+  ArrowLeft,
+  Sparkles,
+  X,
+  Phone,
+  Mail,
+  Send,
+  CalendarDays,
+  CalendarClock,
+  Copy,
+  Check,
+  UserPlus,
+  Pencil,
+  Trash2,
+  Briefcase,
+  Cake,
+  Instagram,
+  BellPlus,
+} from "lucide-react";
 import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
 import { formatCanadianPhone } from "../lib/phone";
@@ -8,15 +26,15 @@ import { pipelineProgress, getStage } from "../lib/pipeline";
 import { formatDate, daysAgoLabel, todayISO } from "../lib/followUp";
 import { generateFollowUpMessage, MESSAGE_TONES } from "../lib/ai";
 import { api } from "../lib/api";
-import MeetingModal from "../components/MeetingModal";
-import Timeline from "../components/Timeline";
-import NotesSection from "../components/NotesSection";
-import AddClientModal from "../components/AddClientModal";
-import OpenDriveFolderButton from "../components/OpenDriveFolderButton";
-import UploadClientFileButton from "../components/UploadClientFileButton";
-import ClientGroupsPicker from "../components/ClientGroupsPicker";
-import FollowUpAutomationPanel from "../components/FollowUpAutomationPanel";
-import ReminderModal from "../components/ReminderModal";
+import MeetingModal from "../components/clients/MeetingModal";
+import Timeline from "../components/clients/Timeline";
+import NotesSection from "../components/clients/NotesSection";
+import AddClientModal from "../components/clients/AddClientModal";
+import OpenDriveFolderButton from "../components/integrations/OpenDriveFolderButton";
+import UploadClientFileButton from "../components/clients/UploadClientFileButton";
+import ClientGroupsPicker from "../components/clients/ClientGroupsPicker";
+import FollowUpAutomationPanel from "../components/clients/FollowUpAutomationPanel";
+import ReminderModal from "../components/clients/ReminderModal";
 
 const AVATAR_BG = {
   "av-blue": "bg-av-blue",
@@ -71,13 +89,17 @@ export default function ClientDetail() {
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white ${AVATAR_BG[client.color] ?? "bg-navy"}`}>
+            <div
+              className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white ${AVATAR_BG[client.color] ?? "bg-navy"}`}
+            >
               {client.first[0]}
               {client.last[0]}
             </div>
             <div>
               <h1 className="text-xl font-bold text-navy">{fullName}</h1>
-              <p className="text-sm text-slate-500">{client.priority} priority · Joined {formatDate(client.joined)}</p>
+              <p className="text-sm text-slate-500">
+                {client.priority} priority · Joined {formatDate(client.joined)}
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -176,9 +198,7 @@ export default function ClientDetail() {
         <Timeline client={client} onEditStage={(stage) => setEditingStageId(stage.id)} />
       </section>
 
-      {editingStageId && (
-        <MeetingModal client={client} stage={getStage(editingStageId)} onClose={() => setEditingStageId(null)} />
-      )}
+      {editingStageId && <MeetingModal client={client} stage={getStage(editingStageId)} onClose={() => setEditingStageId(null)} />}
 
       {aiOpen && <AIMessagePanel client={client} onClose={closeAi} />}
 
@@ -186,10 +206,15 @@ export default function ClientDetail() {
 
       {confirmDelete && (
         <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
           onClick={() => setConfirmDelete(false)}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div
+            role="presentation"
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-av-red/10 text-av-red">
               <Trash2 size={20} />
             </div>
@@ -232,6 +257,7 @@ function AIMessagePanel({ client, onClose }) {
   useEffect(() => {
     setMessage(generateFollowUpMessage(client, tone));
     setCopied(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- redrafts when the tone or the client (by id) changes, not on every edit of the same client, which would overwrite what was typed
   }, [tone, client.id]);
 
   const handleCopy = async () => {
@@ -246,8 +272,9 @@ function AIMessagePanel({ client, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div role="presentation" className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div
+        role="presentation"
         className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
@@ -256,17 +283,17 @@ function AIMessagePanel({ client, onClose }) {
             <Sparkles size={17} className="text-gold-dark" />
             Draft Message
           </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-          >
+          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy">
             <X size={20} />
           </button>
         </div>
 
         <p className="text-sm text-slate-500">
-          Suggested follow-up for <span className="font-semibold text-navy">{client.first} {client.last}</span>.
-          Communication only — no product or investment recommendations.
+          Suggested follow-up for{" "}
+          <span className="font-semibold text-navy">
+            {client.first} {client.last}
+          </span>
+          . Communication only — no product or investment recommendations.
         </p>
 
         <div className="mt-4 flex gap-1.5 rounded-lg bg-slate-100 p-1">

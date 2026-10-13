@@ -1,37 +1,18 @@
 import { useEffect, useState } from "react";
 import { Presentation as PresentationIcon, Info, Download, FileX, ChevronDown } from "lucide-react";
 import { api } from "../lib/api";
+import useAsync from "../hooks/useAsync";
 import { useToast } from "../context/ToastContext";
 
 export default function Presentations() {
   const { addToast } = useToast();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: items, loading, error } = useAsync(() => api.getPresentations(), [], { initial: [] });
   const [expanded, setExpanded] = useState(() => new Set());
 
+  // Auto-expand any item that has variants, so they're visible by default.
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await api.getPresentations();
-        if (!cancelled) {
-          setItems(data);
-          // Auto-expand any item that has variants, so they're visible by default.
-          setExpanded(new Set(data.filter((d) => d.variants?.length).map((d) => d.slug)));
-        }
-      } catch (err) {
-        if (!cancelled) setError(err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    setExpanded(new Set(items.filter((d) => d.variants?.length).map((d) => d.slug)));
+  }, [items]);
 
   const toggleExpanded = (slug) => {
     setExpanded((prev) => {

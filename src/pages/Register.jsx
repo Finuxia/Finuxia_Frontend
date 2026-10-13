@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthCard, { AuthField, authInputClass } from "../components/AuthCard";
+import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCard";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 
@@ -52,13 +52,7 @@ export default function Register() {
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <AuthField label="Full Name">
-          <input
-            required
-            value={form.name}
-            onChange={update("name")}
-            className={authInputClass()}
-            placeholder="Jane Doe"
-          />
+          <input required value={form.name} onChange={update("name")} className={authInputClass()} placeholder="Jane Doe" />
         </AuthField>
         <AuthField label="Email">
           <input

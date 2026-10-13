@@ -42,7 +42,12 @@ const FALLBACKS = {
   409: "This record changed elsewhere.",
 };
 
-/** The message for a failed request: the server's sentence if it sent one, else a sensible one for the status. */
+/**
+ * The message for a failed request: the server's sentence if it sent one, else a sensible one for the status.
+ * @param {number} status
+ * @param {unknown} serverMessage
+ * @param {{ retryAfter?: number | null, path?: string }} [options]
+ */
 export function messageForStatus(status, serverMessage, { retryAfter = null, path = "" } = {}) {
   const sent = typeof serverMessage === "string" ? serverMessage.trim() : "";
   if (status === 429) {
@@ -82,7 +87,8 @@ export function describeError(error) {
   }
   if (status === 402 || code === "ai_credit_exhausted") return { kind: "quota", message, retryAfter: null };
   if (status === 403) {
-    if (code === "ai_not_in_plan" || /plan (doesn't|does not) include|isn't included in your/i.test(message)) return { kind: "plan_gate", message, retryAfter: null };
+    if (code === "ai_not_in_plan" || /plan (doesn't|does not) include|isn't included in your/i.test(message))
+      return { kind: "plan_gate", message, retryAfter: null };
     if (/free trial has ended/i.test(message)) return { kind: "trial_ended", message, retryAfter: null };
   }
   if (status === 409) return { kind: "conflict", message, retryAfter: null };

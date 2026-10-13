@@ -40,7 +40,11 @@ describe("ErrorNotice", () => {
   });
 
   describe("out of credit", () => {
-    const quota = () => new ApiError("Your AI wallet balance is too low for this. Top up in Profile.", { status: 402, data: { code: "ai_credit_exhausted", actions: ["top_up", "upgrade"] } });
+    const quota = () =>
+      new ApiError("Your AI wallet balance is too low for this. Top up in Profile.", {
+        status: 402,
+        data: { code: "ai_credit_exhausted", actions: ["top_up", "upgrade"] },
+      });
 
     it("is an inline state with the server's sentence and an Add credit action, not a toast", () => {
       render(<ErrorNotice error={quota()} />);
@@ -57,7 +61,13 @@ describe("ErrorNotice", () => {
   });
 
   it("a plan-gate refusal shows the existing upgrade prompt", () => {
-    render(<ErrorNotice error={new ApiError("Your current plan doesn't include this feature (documents).", { status: 403, data: { code: "ai_not_in_plan" } })} />);
+    render(
+      <ErrorNotice
+        error={
+          new ApiError("Your current plan doesn't include this feature (documents).", { status: 403, data: { code: "ai_not_in_plan" } })
+        }
+      />
+    );
     expect(screen.getByText("Your current plan doesn't include this feature (documents).")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "View Plans" })).toHaveAttribute("href", "/billing");
   });
@@ -77,7 +87,9 @@ describe("ErrorNotice", () => {
 
   it("a network failure offers a retry, and any other error shows the server's message", async () => {
     const onRetry = vi.fn();
-    const { unmount } = render(<ErrorNotice error={new ApiError("Can't reach the server. Is the backend running?", { status: 0 })} onRetry={onRetry} />);
+    const { unmount } = render(
+      <ErrorNotice error={new ApiError("Can't reach the server. Is the backend running?", { status: 0 })} onRetry={onRetry} />
+    );
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(onRetry).toHaveBeenCalled();
     unmount();

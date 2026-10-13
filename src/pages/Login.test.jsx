@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { describe, expect, it } from "vitest";
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "../components/layout/ProtectedRoute";
 import { destinationAfterLogin } from "../lib/redirects";
 import { API, testUser } from "../test/handlers";
 import { server } from "../test/server";
@@ -95,7 +95,10 @@ describe("login rate limiting", () => {
       http.get(`${API}/api/auth/me`, () => new HttpResponse(null, { status: 401 })),
       http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 })),
       http.post(`${API}/api/auth/login`, () =>
-        HttpResponse.json({ detail: "Request was throttled. Expected available in 2 seconds." }, { status: 429, headers: { "Retry-After": String(retryAfter) } })
+        HttpResponse.json(
+          { detail: "Request was throttled. Expected available in 2 seconds." },
+          { status: 429, headers: { "Retry-After": String(retryAfter) } }
+        )
       )
     );
 

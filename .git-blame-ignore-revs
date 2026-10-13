@@ -1,0 +1,2 @@
+# Commits that only reformatted code. `git blame` skips them when configured:  git config blame.ignoreRevsFile .git-blame-ignore-revs
+63355230331f4e063e6d15434514dcf3631a540d # Format the code base with Prettier (FE-09)

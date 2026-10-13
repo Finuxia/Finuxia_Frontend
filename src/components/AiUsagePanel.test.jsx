@@ -19,8 +19,22 @@ const allowance = (over = {}) => ({
   ],
   wallet: { balanceCents: 1250 },
   recentUsage: [
-    { feature: "reason_why_letter", label: "Reason Why Letter draft", costCents: 5, credits: 5, pending: false, createdAt: "2026-10-12T10:00:00Z" },
-    { feature: "followup_draft", label: "Follow-up email draft", costCents: 2, credits: 2, pending: true, createdAt: "2026-10-12T11:00:00Z" },
+    {
+      feature: "reason_why_letter",
+      label: "Reason Why Letter draft",
+      costCents: 5,
+      credits: 5,
+      pending: false,
+      createdAt: "2026-10-12T10:00:00Z",
+    },
+    {
+      feature: "followup_draft",
+      label: "Follow-up email draft",
+      costCents: 2,
+      credits: 2,
+      pending: true,
+      createdAt: "2026-10-12T11:00:00Z",
+    },
   ],
   ...over,
 });
@@ -67,7 +81,13 @@ describe("AI usage panel", () => {
   });
 
   it("the progress bar never goes past full or below empty, however far over the period is", async () => {
-    serve(allowance({ percentUsed: 130, warning: "exhausted", credits: { included: 1000, extra: 0, total: 1000, used: 1300, inFlight: 0, remaining: 0 } }));
+    serve(
+      allowance({
+        percentUsed: 130,
+        warning: "exhausted",
+        credits: { included: 1000, extra: 0, total: 1000, used: 1300, inFlight: 0, remaining: 0 },
+      })
+    );
     const { unmount } = render();
     expect(await screen.findByRole("progressbar", { name: /ai credits used/i })).toHaveAttribute("aria-valuenow", "100");
     unmount();
@@ -77,13 +97,25 @@ describe("AI usage panel", () => {
   });
 
   it("warns at 80% and says how much is left", async () => {
-    serve(allowance({ percentUsed: 82, warning: "warning", credits: { included: 1000, extra: 0, total: 1000, used: 820, inFlight: 0, remaining: 180 } }));
+    serve(
+      allowance({
+        percentUsed: 82,
+        warning: "warning",
+        credits: { included: 1000, extra: 0, total: 1000, used: 820, inFlight: 0, remaining: 180 },
+      })
+    );
     render();
     expect(await screen.findByRole("status")).toHaveTextContent(/82%.*180 credits left/);
   });
 
   it("warns urgently at 95%", async () => {
-    serve(allowance({ percentUsed: 96, warning: "critical", credits: { included: 1000, extra: 0, total: 1000, used: 960, inFlight: 0, remaining: 40 } }));
+    serve(
+      allowance({
+        percentUsed: 96,
+        warning: "critical",
+        credits: { included: 1000, extra: 0, total: 1000, used: 960, inFlight: 0, remaining: 40 },
+      })
+    );
     render();
     const warning = await screen.findByRole("status");
     expect(warning).toHaveTextContent(/96%/);
@@ -98,7 +130,13 @@ describe("AI usage panel", () => {
   });
 
   it("when used up but the wallet can still pay, says the wallet is paying and does not call it blocked", async () => {
-    serve(allowance({ percentUsed: 100, warning: "exhausted", credits: { included: 1000, extra: 0, total: 1000, used: 1000, inFlight: 0, remaining: 0 } }));
+    serve(
+      allowance({
+        percentUsed: 100,
+        warning: "exhausted",
+        credits: { included: 1000, extra: 0, total: 1000, used: 1000, inFlight: 0, remaining: 0 },
+      })
+    );
     render();
     expect(await screen.findByRole("status")).toHaveTextContent(/paid from your wallet \(\$12\.50\)/);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -110,7 +148,10 @@ describe("AI usage panel", () => {
         percentUsed: 100,
         warning: "exhausted",
         wallet: { balanceCents: 0 },
-        blocked: { message: "You've used all of the 1,000 AI credits included in your plan for this period.", actions: ["top_up", "upgrade"] },
+        blocked: {
+          message: "You've used all of the 1,000 AI credits included in your plan for this period.",
+          actions: ["top_up", "upgrade"],
+        },
       })
     );
     render();
@@ -122,7 +163,13 @@ describe("AI usage panel", () => {
   });
 
   it("an unlimited plan says there is nothing to run out of, and shows what was used", async () => {
-    serve(allowance({ mode: "unlimited", credits: { included: null, extra: 0, total: null, used: 7, inFlight: 0, remaining: null }, percentUsed: null }));
+    serve(
+      allowance({
+        mode: "unlimited",
+        credits: { included: null, extra: 0, total: null, used: 7, inFlight: 0, remaining: null },
+        percentUsed: null,
+      })
+    );
     render();
     expect(await screen.findByText(/unlimited AI/)).toHaveTextContent("You've used 7 credits this period");
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
@@ -136,7 +183,18 @@ describe("AI usage panel", () => {
   });
 
   it("a plan without AI says so and links to the plans, with no wallet", async () => {
-    serve({ aiIncluded: false, mode: "none", period: null, credits: null, percentUsed: null, warning: null, blocked: null, byFeature: [], wallet: { balanceCents: 0 }, recentUsage: [] });
+    serve({
+      aiIncluded: false,
+      mode: "none",
+      period: null,
+      credits: null,
+      percentUsed: null,
+      warning: null,
+      blocked: null,
+      byFeature: [],
+      wallet: { balanceCents: 0 },
+      recentUsage: [],
+    });
     render();
     expect(await screen.findByText(/doesn't include the AI features/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /see plans/i })).toHaveAttribute("href", "/billing");
@@ -209,7 +267,9 @@ describe("AI wallet top-up", () => {
   it("after a failure that may not have reached the server, trying again is the same request (same key)", async () => {
     serve(allowance());
     let n = 0;
-    serveTopUp(() => (++n === 1 ? HttpResponse.json({ error: "Something went wrong" }, { status: 500 }) : HttpResponse.json({ mock: true })));
+    serveTopUp(() =>
+      ++n === 1 ? HttpResponse.json({ error: "Something went wrong" }, { status: 500 }) : HttpResponse.json({ mock: true })
+    );
     render();
     await userEvent.click(await screen.findByRole("button", { name: "Add $5.00" }));
     expect(await screen.findByText("Something went wrong")).toBeInTheDocument();

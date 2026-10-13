@@ -36,7 +36,7 @@ export function calcNextFollowUp(dateStr) {
   if (Number.isNaN(target.getTime())) return "TBD";
 
   const today = startOfDay(new Date());
-  const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) return "Overdue";
   if (diffDays === 0) return "Today";
@@ -81,7 +81,7 @@ export function daysUntil(dateStr) {
   const target = startOfDay(dateStr);
   if (Number.isNaN(target.getTime())) return null;
   const today = startOfDay(new Date());
-  return Math.round((target - today) / (1000 * 60 * 60 * 24));
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 export function daysAgoLabel(dateStr) {
@@ -89,7 +89,7 @@ export function daysAgoLabel(dateStr) {
   const target = startOfDay(dateStr);
   if (Number.isNaN(target.getTime())) return "Never contacted";
   const today = startOfDay(new Date());
-  const diffDays = Math.round((today - target) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round((today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24));
   if (diffDays <= 0) return "Today";
   if (diffDays === 1) return "1 day ago";
   return `${diffDays} days ago`;

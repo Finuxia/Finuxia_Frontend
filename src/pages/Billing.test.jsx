@@ -14,7 +14,10 @@ const realLocation = window.location;
 
 beforeEach(() => {
   sessionStorage.clear();
-  Object.defineProperty(window, "location", { configurable: true, value: { ...realLocation, origin: realLocation.origin, href: "http://localhost/billing" } });
+  Object.defineProperty(window, "location", {
+    configurable: true,
+    value: { ...realLocation, origin: realLocation.origin, href: "http://localhost/billing" },
+  });
 });
 afterEach(() => Object.defineProperty(window, "location", { configurable: true, value: realLocation }));
 
@@ -22,7 +25,9 @@ describe("starting a purchase", () => {
   it("remembers the plan the account is on, so the return page can tell the purchase really went through", async () => {
     server.use(
       http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans, stripeConfigured: true, purchasesOpen: true })),
-      http.get(`${API}/api/billing/me`, () => HttpResponse.json({ ...testBilling, plan: { key: "professional", name: "Professional", priceCents: 4900 } })),
+      http.get(`${API}/api/billing/me`, () =>
+        HttpResponse.json({ ...testBilling, plan: { key: "professional", name: "Professional", priceCents: 4900 } })
+      ),
       http.post(`${API}/api/billing/purchase`, () => HttpResponse.json({ checkoutUrl: "https://checkout.example/session" }))
     );
     renderWithProviders(<Billing />, { providers: ["router", "toast", "auth"] });
@@ -34,7 +39,14 @@ describe("starting a purchase", () => {
 });
 
 describe("saying you do not plan to continue", () => {
-  const access = { status: "valid", warning: "none", endsAt: new Date(2026, 11, 15, 15, 30).toISOString(), daysLeft: 60, valid: true, warnDays: 14 };
+  const access = {
+    status: "valid",
+    warning: "none",
+    endsAt: new Date(2026, 11, 15, 15, 30).toISOString(),
+    daysLeft: 60,
+    valid: true,
+    warnDays: 14,
+  };
   const serveBilling = (over) =>
     server.use(
       http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans, stripeConfigured: true, purchasesOpen: true })),

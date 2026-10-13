@@ -14,7 +14,16 @@ const usage = (over = {}) => ({
 
 describe("formatCents", () => {
   it("shows whole cents exactly, with thousands separators", () => {
-    const cases = { 0: "$0.00", 1: "$0.01", 9: "$0.09", 100: "$1.00", 1005: "$10.05", 123456: "$1,234.56", 99999999: "$999,999.99", [-250]: "-$2.50" };
+    const cases = {
+      0: "$0.00",
+      1: "$0.01",
+      9: "$0.09",
+      100: "$1.00",
+      1005: "$10.05",
+      123456: "$1,234.56",
+      99999999: "$999,999.99",
+      [-250]: "-$2.50",
+    };
     for (const [cents, text] of Object.entries(cases)) expect(formatCents(Number(cents)), cents).toBe(text);
   });
 
@@ -45,7 +54,8 @@ describe("formatResetDay", () => {
 describe("isAiBlocked", () => {
   it("is a refusal to pay (402) and nothing else", () => {
     expect(isAiBlocked({ status: 402 })).toBe(true);
-    for (const other of [{ status: 403 }, { status: 429 }, { status: 502 }, { status: 0 }, null, undefined]) expect(isAiBlocked(other)).toBe(false);
+    for (const other of [{ status: 403 }, { status: 429 }, { status: 502 }, { status: 0 }, null, undefined])
+      expect(isAiBlocked(other)).toBe(false);
   });
 });
 

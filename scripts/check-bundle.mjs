@@ -29,8 +29,15 @@ const FORBIDDEN_SOURCES = [
   "src/pages/ClientDetail.jsx",
 ];
 const PUBLIC_PAGES = [
-  "src/pages/Login.jsx", "src/pages/Register.jsx", "src/pages/ForgotPassword.jsx", "src/pages/ResetPassword.jsx",
-  "src/pages/Privacy.jsx", "src/pages/Terms.jsx", "src/pages/SupportPublic.jsx", "src/pages/BookingPublic.jsx", "src/pages/ZoomIntegrationDocs.jsx",
+  "src/pages/Login.jsx",
+  "src/pages/Register.jsx",
+  "src/pages/ForgotPassword.jsx",
+  "src/pages/ResetPassword.jsx",
+  "src/pages/Privacy.jsx",
+  "src/pages/Terms.jsx",
+  "src/pages/SupportPublic.jsx",
+  "src/pages/BookingPublic.jsx",
+  "src/pages/ZoomIntegrationDocs.jsx",
 ];
 
 function staticClosure(key, seen = new Set()) {
@@ -44,12 +51,14 @@ const problems = [];
 const entryKey = Object.keys(manifest).find((k) => manifest[k].isEntry);
 const entryClosure = staticClosure(entryKey);
 
-if (!Object.keys(manifest).some((k) => AUTHENTICATED_SHELL.test(k))) problems.push("the signed-in app is not a separate chunk (AuthenticatedApp not found; renamed?)");
+if (!Object.keys(manifest).some((k) => AUTHENTICATED_SHELL.test(k)))
+  problems.push("the signed-in app is not a separate chunk (AuthenticatedApp not found; renamed?)");
 for (const forbidden of FORBIDDEN_SOURCES) {
   if (!manifest[forbidden]) problems.push(`${forbidden} is not in the build manifest (renamed? update this script)`);
   else if (entryClosure.has(forbidden)) problems.push(`the first-load bundle statically imports ${forbidden}: it must be loaded lazily`);
 }
-if ([...entryClosure].some((k) => AUTHENTICATED_SHELL.test(k))) problems.push("the first-load bundle statically imports the signed-in app shell (layout and routes)");
+if ([...entryClosure].some((k) => AUTHENTICATED_SHELL.test(k)))
+  problems.push("the first-load bundle statically imports the signed-in app shell (layout and routes)");
 for (const page of PUBLIC_PAGES) {
   if (!manifest[page]) {
     problems.push(`${page} is not a separate chunk (not lazily loaded?)`);
@@ -59,7 +68,8 @@ for (const page of PUBLIC_PAGES) {
   for (const forbidden of FORBIDDEN_SOURCES) {
     if (closure.has(forbidden)) problems.push(`public page ${page} statically pulls in ${forbidden}`);
   }
-  if ([...closure].some((k) => AUTHENTICATED_SHELL.test(k))) problems.push(`public page ${page} statically pulls in the signed-in app shell`);
+  if ([...closure].some((k) => AUTHENTICATED_SHELL.test(k)))
+    problems.push(`public page ${page} statically pulls in the signed-in app shell`);
   if ([...closure].some((k) => /xlsx|exceljs/i.test(k))) problems.push(`public page ${page} pulls in an Excel library`);
 }
 if ([...entryClosure].some((k) => /xlsx|exceljs/i.test(k))) problems.push("the first-load bundle includes an Excel library");
@@ -78,10 +88,14 @@ function gzipOf(keys) {
 }
 const kb = gzipOf(entryClosure);
 for (const page of ["src/pages/BookingPublic.jsx", "src/pages/Login.jsx"]) {
-  if (manifest[page]) console.log(`  first visit to ${page.replace("src/pages/", "").replace(".jsx", "")}: ${gzipOf(staticClosure(page)).toFixed(1)} kB gzip`);
+  if (manifest[page])
+    console.log(
+      `  first visit to ${page.replace("src/pages/", "").replace(".jsx", "")}: ${gzipOf(staticClosure(page)).toFixed(1)} kB gzip`
+    );
 }
 console.log(`First-load JS+CSS (gzip): ${kb.toFixed(1)} kB, budget ${ENTRY_GZIP_BUDGET_KB} kB`);
-if (kb > ENTRY_GZIP_BUDGET_KB) problems.push(`the first-load bundle is ${kb.toFixed(1)} kB gzip, over the ${ENTRY_GZIP_BUDGET_KB} kB budget`);
+if (kb > ENTRY_GZIP_BUDGET_KB)
+  problems.push(`the first-load bundle is ${kb.toFixed(1)} kB gzip, over the ${ENTRY_GZIP_BUDGET_KB} kB budget`);
 
 // Every file the build emitted, searched for addresses that are not ours or obvious placeholders.
 function emitted(dir) {

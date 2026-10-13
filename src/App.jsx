@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import PageSpinner from "./components/PageSpinner";
+import PageSpinner from "./components/ui/PageSpinner";
 
 // Public pages: each its own small chunk, and none of them imports the signed-in application. A prospective client
 // opening a booking link on a phone downloads the shell and that one page, nothing else.

@@ -238,7 +238,10 @@ describe("saving and the version", () => {
     server.use(
       http.put(`${P}/packages/:id`, () =>
         HttpResponse.json(
-          { error: "Upstream trouble", package: { ...server_pkg, version: 9, data: validData({ policyOwner: "Somebody Else", insuredPerson: "Somebody Else" }) } },
+          {
+            error: "Upstream trouble",
+            package: { ...server_pkg, version: 9, data: validData({ policyOwner: "Somebody Else", insuredPerson: "Somebody Else" }) },
+          },
           { status: 502 }
         )
       )
@@ -408,8 +411,13 @@ describe("the Reason Why Letter", () => {
   };
 
   it("an AI draft the account cannot pay for names the limit and offers the way out, not a toast", async () => {
-    const message = "You've used all of the 100 AI credits included in your plan for this period, and your wallet balance ($0.00) is too low.";
-    server.use(http.post(`${P}/packages/:id/reason-why-letter`, () => HttpResponse.json({ error: message, code: "ai_credit_exhausted", actions: ["top_up", "upgrade"] }, { status: 402 })));
+    const message =
+      "You've used all of the 100 AI credits included in your plan for this period, and your wallet balance ($0.00) is too low.";
+    server.use(
+      http.post(`${P}/packages/:id/reason-why-letter`, () =>
+        HttpResponse.json({ error: message, code: "ai_credit_exhausted", actions: ["top_up", "upgrade"] }, { status: 402 })
+      )
+    );
     await userEvent.click(await openLetterStep());
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(message);
@@ -424,7 +432,9 @@ describe("the Reason Why Letter", () => {
     let allowed = false;
     server.use(
       http.post(`${P}/packages/:id/reason-why-letter`, () =>
-        allowed ? HttpResponse.json({ text: "Now it works" }) : HttpResponse.json({ error: "Out of credit.", actions: ["top_up"] }, { status: 402 })
+        allowed
+          ? HttpResponse.json({ text: "Now it works" })
+          : HttpResponse.json({ error: "Out of credit.", actions: ["top_up"] }, { status: 402 })
       )
     );
     const button = await openLetterStep();
@@ -927,7 +937,6 @@ describe("details the split must keep", () => {
     await userEvent.click(stepper("review"));
     expect(await screen.findByRole("button", { name: "Generate Package" })).toBeInTheDocument();
   });
-
 
   it("only the letter's file chooser accepts a Word file", async () => {
     renderWizard();

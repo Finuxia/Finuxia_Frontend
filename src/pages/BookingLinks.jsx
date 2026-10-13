@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link2, Plus, Copy, Check, ExternalLink, Pencil, Trash2, Users, ListChecks } from "lucide-react";
 import { api, bookingPublicUrl } from "../lib/api";
 import { useToast } from "../context/ToastContext";
-import BookingLinkModal from "../components/BookingLinkModal";
+import BookingLinkModal from "../components/booking/BookingLinkModal";
 
 /**
  * An advisor's booking links — each a separately-customized "event type"

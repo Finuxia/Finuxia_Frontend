@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
-import AuthCard, { AuthField, authInputClass } from "../components/AuthCard";
+import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCard";
 import { api } from "../lib/api";
 
 export default function ResetPassword() {

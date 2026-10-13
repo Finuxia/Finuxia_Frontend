@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MailCheck } from "lucide-react";
-import AuthCard, { AuthField, authInputClass } from "../components/AuthCard";
+import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCard";
 import { useAuth } from "../context/AuthContext";
 
 export default function ForgotPassword() {
@@ -29,8 +29,8 @@ export default function ForgotPassword() {
             <MailCheck size={22} />
           </div>
           <p className="text-sm text-slate-600">
-            If an account exists for <span className="font-semibold text-navy">{email}</span>, we've emailed a
-            link to reset the password. It works once and expires in one hour.
+            If an account exists for <span className="font-semibold text-navy">{email}</span>, we've emailed a link to reset the password.
+            It works once and expires in one hour.
           </p>
           <Link to="/login" className="mt-2 text-sm font-semibold text-gold-dark hover:underline">
             Back to log in
