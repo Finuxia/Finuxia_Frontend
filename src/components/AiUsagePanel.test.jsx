@@ -66,6 +66,16 @@ describe("AI usage panel", () => {
     for (const word of ["token", "gpt", "model", "micro"]) expect(text, word).not.toContain(word);
   });
 
+  it("the progress bar never goes past full or below empty, however far over the period is", async () => {
+    serve(allowance({ percentUsed: 130, warning: "exhausted", credits: { included: 1000, extra: 0, total: 1000, used: 1300, inFlight: 0, remaining: 0 } }));
+    const { unmount } = render();
+    expect(await screen.findByRole("progressbar", { name: /ai credits used/i })).toHaveAttribute("aria-valuenow", "100");
+    unmount();
+    serve(allowance({ percentUsed: -5 }));
+    render();
+    expect(await screen.findByRole("progressbar", { name: /ai credits used/i })).toHaveAttribute("aria-valuenow", "0");
+  });
+
   it("warns at 80% and says how much is left", async () => {
     serve(allowance({ percentUsed: 82, warning: "warning", credits: { included: 1000, extra: 0, total: 1000, used: 820, inFlight: 0, remaining: 180 } }));
     render();
@@ -175,6 +185,38 @@ describe("AI wallet top-up", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Add $5.00" }));
     expect(await screen.findByText("$17.50")).toBeInTheDocument();
     expect(screen.getByText(/test top-up, no real charge/)).toBeInTheDocument();
+  });
+
+  it("when the plans answer does not say, purchases are taken to be open", async () => {
+    serve(allowance());
+    server.use(http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans: [] })));
+    render();
+    expect(await screen.findByRole("button", { name: "Add $5.00" })).toBeInTheDocument();
+  });
+
+  it("a finished top-up is a finished attempt: the next one is a new request with its own key", async () => {
+    serve(allowance());
+    serveTopUp(() => HttpResponse.json({ mock: true }));
+    render();
+    await userEvent.click(await screen.findByRole("button", { name: "Add $5.00" }));
+    await waitFor(() => expect(topUps).toHaveLength(1));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Add $5.00" })).toBeEnabled());
+    await userEvent.click(screen.getByRole("button", { name: "Add $5.00" }));
+    await waitFor(() => expect(topUps).toHaveLength(2));
+    expect(topUps[1].key).not.toBe(topUps[0].key);
+  });
+
+  it("after a failure that may not have reached the server, trying again is the same request (same key)", async () => {
+    serve(allowance());
+    let n = 0;
+    serveTopUp(() => (++n === 1 ? HttpResponse.json({ error: "Something went wrong" }, { status: 500 }) : HttpResponse.json({ mock: true })));
+    render();
+    await userEvent.click(await screen.findByRole("button", { name: "Add $5.00" }));
+    expect(await screen.findByText("Something went wrong")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Add $5.00" })).toBeEnabled());
+    await userEvent.click(screen.getByRole("button", { name: "Add $5.00" }));
+    await waitFor(() => expect(topUps).toHaveLength(2));
+    expect(topUps[1].key).toBe(topUps[0].key);
   });
 
   it("only one top-up goes out at a time", async () => {

@@ -54,6 +54,22 @@ describe("the document suggestion and the AI allowance", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("trying again clears the earlier refusal", async () => {
+    let allowed = false;
+    server.use(
+      http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json(usage({ warning: null }))),
+      http.post(`${API}/api/documents/suggest`, () =>
+        allowed ? HttpResponse.json({ topic: "T", summary: "S", keywords: ["k"] }) : HttpResponse.json({ error: "Out of credit.", actions: ["top_up"] }, { status: 402 })
+      )
+    );
+    const button = await open();
+    await userEvent.click(button);
+    await screen.findByRole("alert");
+    allowed = true;
+    await userEvent.click(button);
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+  });
+
   it("another failure stays a toast", async () => {
     server.use(http.post(`${API}/api/documents/suggest`, () => HttpResponse.json({ error: "Provider error" }, { status: 502 })));
     await userEvent.click(await open());
