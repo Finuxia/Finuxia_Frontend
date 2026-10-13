@@ -100,6 +100,16 @@ describe("what the customer sees before confirming", () => {
     expect(screen.getByText(/Nothing is deleted/)).toBeInTheDocument();
   });
 
+  it("a storage limit is said in words, not as a long number of bytes", async () => {
+    preview(
+      downgrade({
+        overLimits: [{ key: "storage_bytes", label: "Storage cap", limit: 5242880, used: 7340032, limitText: "5 MB", usedText: "7 MB" }],
+      })
+    );
+    show(plan({ id: 3, key: "starter", name: "Starter", priceCents: 0 }));
+    expect(await screen.findByText("You are using 7 MB of storage; this plan allows 5 MB.")).toBeInTheDocument();
+  });
+
   it("a change the server will not allow shows why and cannot be confirmed", async () => {
     preview(quote({ canChange: false, blockers: [{ code: "access_ended", message: "Your access has ended. Buy a plan instead." }] }));
     show();

@@ -293,5 +293,12 @@ export interface PlanChangeQuote {
   /** False when what the account already has lasts longer than the new plan's window would: the change buys features, not extra time. */
   addsTime: boolean;
   lost: { kind: string; key: string; label: string; was: string; becomes: string }[];
-  overLimits: { key: string; label: string; limit: number; used: number }[];
+  overLimits: {
+    key: string;
+    label: string;
+    limit: number;
+    used: number;
+    /** Only for a cap counted in bytes: the amounts in words ("5 MB"). */ limitText?: string;
+    usedText?: string;
+  }[];
 }

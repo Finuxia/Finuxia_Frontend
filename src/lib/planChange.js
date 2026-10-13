@@ -37,7 +37,9 @@ export function accessEndSentence(quote) {
   return after ? `Your access will end on ${after}.` : "Your access end will be set when the payment is confirmed.";
 }
 
-/** "You have 300 clients; this plan allows 100." */
+/** "You have 300 clients; this plan allows 100." A cap counted in bytes comes with its amounts in words: "You are using 7 MB of storage; this plan allows 5 MB." */
 export function overLimitSentence(item) {
+  if (item.usedText && item.limitText)
+    return `You are using ${item.usedText} of ${item.label.replace(/ cap$/i, "").toLowerCase()}; this plan allows ${item.limitText}.`;
   return `You have ${item.used.toLocaleString("en-US")} ${item.label.toLowerCase()}; this plan allows ${item.limit.toLocaleString("en-US")}.`;
 }
