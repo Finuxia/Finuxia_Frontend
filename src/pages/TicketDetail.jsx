@@ -9,12 +9,7 @@ function formatDateTime(iso) {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 export default function TicketDetail() {
@@ -72,13 +67,8 @@ export default function TicketDetail() {
   if (error || !ticket) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
-        <p className="text-sm text-slate-500">
-          {error?.message || "Ticket not found."}
-        </p>
-        <Link
-          to="/tickets"
-          className="mt-3 inline-block text-sm font-semibold text-gold-dark"
-        >
+        <p className="text-sm text-slate-500">{error?.message || "Ticket not found."}</p>
+        <Link to="/tickets" className="mt-3 inline-block text-sm font-semibold text-gold-dark">
           Back to Tickets
         </Link>
       </div>
@@ -102,9 +92,7 @@ export default function TicketDetail() {
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div
-              className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${typeMeta.badge}`}
-            >
+            <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${typeMeta.badge}`}>
               <TypeIcon size={18} />
             </div>
             <div>
@@ -114,15 +102,11 @@ export default function TicketDetail() {
               </p>
             </div>
           </div>
-          <span
-            className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badge}`}
-          >
+          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badge}`}>
             {statusMeta.label}
           </span>
         </div>
-        <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600">
-          {ticket.description}
-        </p>
+        <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600">{ticket.description}</p>
       </section>
 
       <section className="flex flex-col gap-3">
@@ -138,25 +122,17 @@ export default function TicketDetail() {
               <div
                 key={c.id}
                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                  c.isAdmin
-                    ? "self-start bg-navy text-white"
-                    : "self-end bg-slate-100 text-navy"
+                  c.isAdmin ? "self-start bg-navy text-white" : "self-end bg-slate-100 text-navy"
                 }`}
               >
-                <div
-                  className={`mb-1 flex items-center gap-1.5 text-xs font-semibold ${c.isAdmin ? "text-gold" : "text-slate-500"}`}
-                >
+                <div className={`mb-1 flex items-center gap-1.5 text-xs font-semibold ${c.isAdmin ? "text-gold" : "text-slate-500"}`}>
                   {c.isAdmin && <ShieldCheck size={12} />}
                   {c.authorName}
-                  <span
-                    className={`font-normal ${c.isAdmin ? "text-slate-300" : "text-slate-400"}`}
-                  >
+                  <span className={`font-normal ${c.isAdmin ? "text-slate-300" : "text-slate-400"}`}>
                     · {formatDateTime(c.createdAt)}
                   </span>
                 </div>
-                <p className="whitespace-pre-line text-sm leading-relaxed">
-                  {c.message}
-                </p>
+                <p className="whitespace-pre-line text-sm leading-relaxed">{c.message}</p>
               </div>
             ))}
           </div>

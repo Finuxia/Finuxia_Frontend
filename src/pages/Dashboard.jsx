@@ -1,28 +1,12 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Users,
-  UserCheck,
-  CalendarClock,
-  AlertTriangle,
-  Sparkles,
-  Flame,
-  PhoneCall,
-  FileText,
-  ArrowRight,
-} from "lucide-react";
+import { Users, UserCheck, CalendarClock, AlertTriangle, Sparkles, Flame, PhoneCall, FileText, ArrowRight } from "lucide-react";
 import { useClients } from "../context/ClientsContext";
 import { useAuth } from "../context/AuthContext";
 import { isLead } from "../lib/pipeline";
 import { formatTime } from "../lib/notifications";
 import { todayISO, todayLong } from "../lib/followUp";
-import {
-  runPipeline,
-  filterByMonth,
-  clientActivityDate,
-  currentMonthKey,
-  monthLabel,
-} from "../lib/chartPipeline";
+import { runPipeline, filterByMonth, clientActivityDate, currentMonthKey, monthLabel } from "../lib/chartPipeline";
 import PipelineBarChart from "../components/PipelineBarChart";
 import FollowUpDonutChart from "../components/FollowUpDonutChart";
 import MonthFilter from "../components/MonthFilter";
@@ -37,7 +21,7 @@ export default function Dashboard() {
   const [month, setMonth] = useState(currentMonthKey());
   const monthClients = useMemo(
     () => runPipeline(clients, [filterByMonth(month, clientActivityDate)]),
-    [clients, month],
+    [clients, month]
   );
 
   const totalLeads = clients.filter((c) => isLead(c.currentStage)).length;
@@ -47,88 +31,42 @@ export default function Dashboard() {
   const newLeadsThisWeek = clients.filter((c) => {
     if (!isLead(c.currentStage)) return false;
     const joined = new Date(c.joined);
-    const diffDays = Math.round(
-      (Date.now() - joined.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const diffDays = Math.round((Date.now() - joined.getTime()) / (1000 * 60 * 60 * 24));
     return diffDays <= 7;
   }).length;
 
   const highPriority = useMemo(
     () =>
       clients.filter(
-        (c) =>
-          c.priority === "High" &&
-          (c.nextFollowUp === "Overdue" || c.nextFollowUp === "Today"),
+        (c) => c.priority === "High" && (c.nextFollowUp === "Overdue" || c.nextFollowUp === "Today")
       ),
-    [clients],
+    [clients]
   );
-  const meetingsToday = useMemo(
-    () => clients.filter((c) => c.meeting?.date === today),
-    [clients, today],
-  );
+  const meetingsToday = useMemo(() => clients.filter((c) => c.meeting?.date === today), [clients, today]);
   const meetingIds = new Set(meetingsToday.map((c) => c.id));
   const calls = useMemo(
-    () =>
-      clients.filter(
-        (c) => c.nextFollowUp === "Today" && !meetingIds.has(c.id),
-      ),
-    [clients, today],
+    () => clients.filter((c) => c.nextFollowUp === "Today" && !meetingIds.has(c.id)),
+    [clients, today]
   );
   const pendingFiles = useMemo(() => {
     const items = [];
-    clients.forEach((c) =>
-      (c.files || [])
-        .filter((f) => f.status === "pending")
-        .forEach((f) => items.push({ client: c, file: f })),
-    );
+    clients.forEach((c) => (c.files || []).filter((f) => f.status === "pending").forEach((f) => items.push({ client: c, file: f })));
     return items;
   }, [clients]);
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy">
-          Welcome back, {user?.name?.split(" ")[0]}.
-        </h1>
+        <h1 className="text-2xl font-bold text-navy">Welcome back, {user?.name?.split(" ")[0]}.</h1>
         <p className="text-sm text-slate-500">{todayLong()}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard
-          icon={Users}
-          label="Total Leads"
-          value={totalLeads}
-          color="text-av-blue"
-          bg="bg-av-blue/10"
-        />
-        <StatCard
-          icon={UserCheck}
-          label="Total Clients"
-          value={totalClients}
-          color="text-av-green"
-          bg="bg-av-green/10"
-        />
-        <StatCard
-          icon={CalendarClock}
-          label="Due Today"
-          value={dueToday}
-          color="text-av-amber"
-          bg="bg-av-amber/10"
-        />
-        <StatCard
-          icon={AlertTriangle}
-          label="Overdue"
-          value={overdue}
-          color="text-av-red"
-          bg="bg-av-red/10"
-        />
-        <StatCard
-          icon={Sparkles}
-          label="New Leads This Week"
-          value={newLeadsThisWeek}
-          color="text-av-purple"
-          bg="bg-av-purple/10"
-        />
+        <StatCard icon={Users} label="Total Leads" value={totalLeads} color="text-av-blue" bg="bg-av-blue/10" />
+        <StatCard icon={UserCheck} label="Total Clients" value={totalClients} color="text-av-green" bg="bg-av-green/10" />
+        <StatCard icon={CalendarClock} label="Due Today" value={dueToday} color="text-av-amber" bg="bg-av-amber/10" />
+        <StatCard icon={AlertTriangle} label="Overdue" value={overdue} color="text-av-red" bg="bg-av-red/10" />
+        <StatCard icon={Sparkles} label="New Leads This Week" value={newLeadsThisWeek} color="text-av-purple" bg="bg-av-purple/10" />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -145,57 +83,27 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-3">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-navy">
-              Pipeline by Stage
-            </h2>
+            <h2 className="text-base font-semibold text-navy">Pipeline by Stage</h2>
             <span className="text-xs text-slate-400">
-              {monthClients.length}{" "}
-              {month ? `in ${monthLabel(month)}` : "total"}
+              {monthClients.length} {month ? `in ${monthLabel(month)}` : "total"}
             </span>
           </div>
-          <PipelineBarChart
-            clients={monthClients}
-            onSelectStage={(stageId) =>
-              navigate(`/reports?month=${month}&stage=${stageId}`)
-            }
-          />
+          <PipelineBarChart clients={monthClients} onSelectStage={(stageId) => navigate(`/reports?month=${month}&stage=${stageId}`)} />
         </section>
 
         <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-navy">
-              Follow-ups by Urgency
-            </h2>
+            <h2 className="text-base font-semibold text-navy">Follow-ups by Urgency</h2>
           </div>
           <FollowUpDonutChart clients={monthClients} />
         </section>
       </div>
 
       <section className="rounded-2xl bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold text-navy">
-          Today's Priorities
-        </h2>
+        <h2 className="mb-4 text-base font-semibold text-navy">Today's Priorities</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <PriorityGroup
-            icon={Flame}
-            title="High Priority"
-            items={highPriority.map((c) => ({
-              id: c.id,
-              label: `${c.first} ${c.last}`,
-            }))}
-            onSelect={(id) => navigate(`/clients/${id}`)}
-            empty="Nothing urgent."
-          />
-          <PriorityGroup
-            icon={PhoneCall}
-            title="Calls"
-            items={calls.map((c) => ({
-              id: c.id,
-              label: `${c.first} ${c.last}`,
-            }))}
-            onSelect={(id) => navigate(`/clients/${id}`)}
-            empty="No calls scheduled."
-          />
+          <PriorityGroup icon={Flame} title="High Priority" items={highPriority.map((c) => ({ id: c.id, label: `${c.first} ${c.last}` }))} onSelect={(id) => navigate(`/clients/${id}`)} empty="Nothing urgent." />
+          <PriorityGroup icon={PhoneCall} title="Calls" items={calls.map((c) => ({ id: c.id, label: `${c.first} ${c.last}` }))} onSelect={(id) => navigate(`/clients/${id}`)} empty="No calls scheduled." />
           <PriorityGroup
             icon={CalendarClock}
             title="Meetings"
@@ -209,10 +117,7 @@ export default function Dashboard() {
           <PriorityGroup
             icon={FileText}
             title="Files Waiting"
-            items={pendingFiles.map(({ client, file }) => ({
-              id: client.id,
-              label: `${file.name} — ${client.first} ${client.last}`,
-            }))}
+            items={pendingFiles.map(({ client, file }) => ({ id: client.id, label: `${file.name} — ${client.first} ${client.last}` }))}
             onSelect={(id) => navigate(`/clients/${id}`)}
             empty="No pending files."
           />
@@ -225,9 +130,7 @@ export default function Dashboard() {
 function StatCard({ icon: Icon, label, value, color, bg }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-      <div
-        className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${bg} ${color}`}
-      >
+      <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${bg} ${color}`}>
         <Icon size={17} />
       </div>
       <p className="text-2xl font-bold text-navy">{value}</p>

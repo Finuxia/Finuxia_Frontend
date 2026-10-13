@@ -1,25 +1,11 @@
 import { useState } from "react";
-import {
-  CalendarClock,
-  Link2,
-  RefreshCcw,
-  AlertTriangle,
-  Clock,
-  User,
-  UserPlus,
-  CalendarCheck,
-  Trash2,
-  Mail,
-} from "lucide-react";
+import { CalendarClock, Link2, RefreshCcw, AlertTriangle, Clock, User, UserPlus, CalendarCheck, Trash2, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
 import { isAllDay, eventStart } from "../services/googleCalendarApi";
-import {
-  matchClientForEvent,
-  guessClientNameFromEvent,
-} from "../services/meetingClients";
+import { matchClientForEvent, guessClientNameFromEvent } from "../services/meetingClients";
 import { openGmailCompose, feedbackEmailDraft } from "../lib/gmail";
 import { todayISO } from "../lib/followUp";
 import AddClientModal from "./AddClientModal";
@@ -29,13 +15,7 @@ import AddClientModal from "./AddClientModal";
  * the events/loading/error come from My Day (which owns the per-day cache);
  * this component adds connection controls, client-matching and done-toggling.
  */
-export default function GoogleMeetingsSection({
-  date,
-  events = [],
-  loading = false,
-  error = null,
-  onRefresh,
-}) {
+export default function GoogleMeetingsSection({ date, events = [], loading = false, error = null, onRefresh }) {
   const { isConfigured, status, connect, deleteEvent } = useGoogleCalendar();
   const { clients, isTaskDoneToday, toggleDailyTask } = useClients();
   const { addToast } = useToast();
@@ -54,10 +34,7 @@ export default function GoogleMeetingsSection({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-slate-200 bg-white px-4 py-4">
           <div className="flex items-start gap-2">
             {(status === "expired" || status === "revoked") && (
-              <AlertTriangle
-                size={15}
-                className="mt-0.5 shrink-0 text-av-red"
-              />
+              <AlertTriangle size={15} className="mt-0.5 shrink-0 text-av-red" />
             )}
             <p className="text-sm text-slate-500">
               {status === "expired" || status === "revoked"
@@ -65,11 +42,7 @@ export default function GoogleMeetingsSection({
                 : "Connect Google Calendar to see meetings here."}
             </p>
           </div>
-          <ConnectButton
-            status={status}
-            onConnect={connect}
-            onToast={addToast}
-          />
+          <ConnectButton status={status} onConnect={connect} onToast={addToast} />
         </div>
       </div>
     );
@@ -107,9 +80,7 @@ export default function GoogleMeetingsSection({
       if (err.needsReconnect) {
         addToast("Google session expired — click Reconnect and try again.");
       } else if (err.accessDenied) {
-        addToast(
-          "Google doesn't allow this event to be deleted from this calendar.",
-        );
+        addToast("Google doesn't allow this event to be deleted from this calendar.");
       } else {
         addToast(err.message || "Could not cancel the meeting");
       }
@@ -125,9 +96,7 @@ export default function GoogleMeetingsSection({
           <CalendarClock size={16} />
         </div>
         <h2 className="text-sm font-semibold text-navy">Google Calendar</h2>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
-          {events.length}
-        </span>
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">{events.length}</span>
         <button
           onClick={onRefresh}
           disabled={loading}
@@ -139,9 +108,7 @@ export default function GoogleMeetingsSection({
       </div>
 
       {error && (
-        <p className="mb-2 text-xs text-av-red">
-          {error.message || "Couldn't load calendar."}
-        </p>
+        <p className="mb-2 text-xs text-av-red">{error.message || "Couldn't load calendar."}</p>
       )}
 
       {loading && events.length === 0 ? (
@@ -156,17 +123,12 @@ export default function GoogleMeetingsSection({
             const client = matchClientForEvent(event, clients);
             const done = isTaskDoneToday(event.id, "gcal", date);
             return (
-              <div
-                key={event.id}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
-              >
+              <div key={event.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                 <button
                   onClick={() => toggleDailyTask(event.id, "gcal", date)}
                   aria-label={done ? "Mark as not done" : "Mark as done"}
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition ${
-                    done
-                      ? "border-gold bg-gold"
-                      : "border-slate-300 hover:border-gold"
+                    done ? "border-gold bg-gold" : "border-slate-300 hover:border-gold"
                   }`}
                 >
                   {done && <span className="h-2 w-2 rounded-full bg-white" />}
@@ -177,16 +139,12 @@ export default function GoogleMeetingsSection({
                   ) : (
                     <>
                       <span>{formatHour(event)}</span>
-                      <span className="font-semibold">
-                        {formatMeridiem(event)}
-                      </span>
+                      <span className="font-semibold">{formatMeridiem(event)}</span>
                     </>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className={`truncate text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-navy"}`}
-                  >
+                  <p className={`truncate text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-navy"}`}>
                     {event.summary || "(No title)"}
                   </p>
                   <p className="flex items-center gap-1 truncate text-xs text-slate-400">
@@ -212,9 +170,7 @@ export default function GoogleMeetingsSection({
                       Add as client
                     </button>
                     <button
-                      onClick={() =>
-                        handleAddClient(event, { asFollowUp: true })
-                      }
+                      onClick={() => handleAddClient(event, { asFollowUp: true })}
                       title="Add as client, and drop them into today's Follow-ups"
                       className="flex shrink-0 items-center gap-1.5 rounded-lg border border-av-blue/30 bg-av-blue/10 px-2.5 py-1.5 text-xs font-semibold text-av-blue transition hover:bg-av-blue/20"
                     >
@@ -225,13 +181,7 @@ export default function GoogleMeetingsSection({
                 )}
                 {done && client?.email && (
                   <button
-                    onClick={() =>
-                      openGmailCompose(
-                        feedbackEmailDraft(client, {
-                          meetingLabel: event.summary,
-                        }),
-                      )
-                    }
+                    onClick={() => openGmailCompose(feedbackEmailDraft(client, { meetingLabel: event.summary }))}
                     className="flex shrink-0 items-center gap-1.5 rounded-lg bg-av-blue/10 px-2.5 py-1.5 text-xs font-semibold text-av-blue transition hover:bg-av-blue/20"
                   >
                     <Mail size={13} />
@@ -285,8 +235,7 @@ function ConnectButton({ status, onConnect, onToast }) {
       onToast(err.message || "Could not connect to Google Calendar");
     }
   };
-  const label =
-    status === "expired" || status === "revoked" ? "Reconnect" : "Connect";
+  const label = status === "expired" || status === "revoked" ? "Reconnect" : "Connect";
   return (
     <button
       onClick={handle}

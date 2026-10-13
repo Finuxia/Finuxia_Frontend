@@ -33,57 +33,23 @@ import { lastRequestId } from "./api";
 
 const DSN = import.meta.env.VITE_SENTRY_DSN || "";
 const ENVIRONMENT =
-  import.meta.env.VITE_SENTRY_ENVIRONMENT ||
-  (import.meta.env.DEV ? "development" : "production");
+  import.meta.env.VITE_SENTRY_ENVIRONMENT || (import.meta.env.DEV ? "development" : "production");
 // The commit the bundle was built from, so a regression maps to a deploy rather than to a date.
 // Nothing sets this yet; empty is better than wrong, because Sentry then groups the event with no
 // release instead of blaming whichever build happened to be last.
 const RELEASE = import.meta.env.VITE_SENTRY_RELEASE || "";
-const TRACES_SAMPLE_RATE =
-  Number(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || 0) || 0;
+const TRACES_SAMPLE_RATE = Number(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || 0) || 0;
 
 export const REDACTED = "[redacted]";
 export const DROPPED_BODY = "[dropped: request bodies are never sent]";
 
 const SENSITIVE_KEY_FRAGMENTS = [
-  "password",
-  "passwd",
-  "secret",
-  "token",
-  "authorization",
-  "auth",
-  "cookie",
-  "csrf",
-  "signature",
-  "api_key",
-  "apikey",
-  "private",
-  "credential",
-  "card",
-  "cvc",
-  "cvv",
-  "iban",
-  "account_number",
-  "routing",
-  "ssn",
-  "social_insurance",
-  "insurance_number",
-  "passport",
-  "licence",
-  "license",
-  "email",
-  "phone",
-  "mobile",
-  "address",
-  "postal",
-  "dob",
-  "birth",
-  "first_name",
-  "last_name",
-  "full_name",
-  "client_name",
-  "given_name",
-  "surname",
+  "password", "passwd", "secret", "token", "authorization", "auth", "cookie", "csrf", "signature",
+  "api_key", "apikey", "private", "credential",
+  "card", "cvc", "cvv", "iban", "account_number", "routing",
+  "ssn", "social_insurance", "insurance_number", "passport", "licence", "license",
+  "email", "phone", "mobile", "address", "postal", "dob", "birth",
+  "first_name", "last_name", "full_name", "client_name", "given_name", "surname",
 ];
 
 const MAX_DEPTH = 6;
@@ -122,8 +88,7 @@ export function scrubBreadcrumb(crumb) {
   if (crumb.data && typeof crumb.data === "object") {
     const data = { ...crumb.data };
     for (const field of ["url", "from", "to"]) {
-      if (typeof data[field] === "string")
-        data[field] = stripQuery(data[field]);
+      if (typeof data[field] === "string") data[field] = stripQuery(data[field]);
     }
     crumb.data = redact(data);
   }
@@ -131,10 +96,7 @@ export function scrubBreadcrumb(crumb) {
   // holding a client. The level and the fact it happened are useful; the arguments are not worth
   // the risk.
   if (crumb.category === "console") {
-    crumb.message =
-      typeof crumb.message === "string"
-        ? crumb.message.slice(0, 200)
-        : undefined;
+    crumb.message = typeof crumb.message === "string" ? crumb.message.slice(0, 200) : undefined;
     if (crumb.data) crumb.data = undefined;
   }
   return crumb;
@@ -148,8 +110,7 @@ export function scrubEvent(event) {
     if (event.request && typeof event.request === "object") {
       const request = {};
       if (event.request.method) request.method = event.request.method;
-      if (typeof event.request.url === "string")
-        request.url = stripQuery(event.request.url);
+      if (typeof event.request.url === "string") request.url = stripQuery(event.request.url);
       if (event.request.data !== undefined && event.request.data !== null) {
         request.data = DROPPED_BODY;
       }
@@ -158,10 +119,7 @@ export function scrubEvent(event) {
     }
 
     if (event.user && typeof event.user === "object") {
-      event.user =
-        event.user.id === undefined || event.user.id === null
-          ? {}
-          : { id: event.user.id };
+      event.user = event.user.id === undefined || event.user.id === null ? {} : { id: event.user.id };
     }
 
     for (const key of ["extra", "contexts", "tags"]) {
@@ -175,11 +133,7 @@ export function scrubEvent(event) {
     }
 
     // The URL of the page the error happened on lives here too.
-    if (
-      event.contexts &&
-      event.contexts.page &&
-      typeof event.contexts.page === "object"
-    ) {
+    if (event.contexts && event.contexts.page && typeof event.contexts.page === "object") {
       if (typeof event.contexts.page.url === "string") {
         event.contexts.page.url = stripQuery(event.contexts.page.url);
       }
@@ -190,10 +144,7 @@ export function scrubEvent(event) {
     // of the story (OPS-02, and the second half of OPS-08).
     const requestId = lastRequestId();
     if (requestId) {
-      event.tags = {
-        ...(event.tags && typeof event.tags === "object" ? event.tags : {}),
-        request_id: requestId,
-      };
+      event.tags = { ...(event.tags && typeof event.tags === "object" ? event.tags : {}), request_id: requestId };
     }
 
     return event;
@@ -218,9 +169,7 @@ export function reportPayload(context = {}) {
 
   const contexts = {};
   if (context.componentStack) {
-    contexts.react = {
-      componentStack: String(context.componentStack).slice(0, 4000),
-    };
+    contexts.react = { componentStack: String(context.componentStack).slice(0, 4000) };
   }
   return { tags, contexts };
 }

@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ChevronDown,
-  MessageSquareText,
-  PhoneCall,
-  Clock3,
-  CalendarClock,
-  Mail,
-} from "lucide-react";
+import { ChevronDown, MessageSquareText, PhoneCall, Clock3, CalendarClock, Mail } from "lucide-react";
 import { pipelineProgress, getStage } from "../lib/pipeline";
 import { daysAgoLabel } from "../lib/followUp";
 import { formatCanadianPhone } from "../lib/phone";
@@ -34,15 +27,7 @@ const FOLLOWUP_BADGE = {
   TBD: "bg-slate-100 text-slate-500",
 };
 
-export default function ClientCard({
-  client,
-  done,
-  onToggleDone,
-  onSnooze,
-  onReschedule,
-  subtitle,
-  showFeedbackEmail,
-}) {
+export default function ClientCard({ client, done, onToggleDone, onSnooze, onReschedule, subtitle, showFeedbackEmail }) {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -57,9 +42,7 @@ export default function ClientCard({
       addToast(`No email on file for ${fullName}`.trim());
       return;
     }
-    openGmailCompose(
-      feedbackEmailDraft(client, { meetingLabel: client.meeting?.label }),
-    );
+    openGmailCompose(feedbackEmailDraft(client, { meetingLabel: client.meeting?.label }));
   };
 
   return (
@@ -75,9 +58,7 @@ export default function ClientCard({
           {done && <span className="h-2 w-2 rounded-full bg-white" />}
         </button>
 
-        <span
-          className={`h-2.5 w-2.5 shrink-0 rounded-full ${PRIORITY_DOT[client.priority]}`}
-        />
+        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${PRIORITY_DOT[client.priority]}`} />
 
         <button
           onClick={() => setExpanded((e) => !e)}
@@ -91,16 +72,10 @@ export default function ClientCard({
             >
               {fullName}
             </span>
-            {subtitle && (
-              <span className="block truncate text-xs text-slate-400">
-                {subtitle}
-              </span>
-            )}
+            {subtitle && <span className="block truncate text-xs text-slate-400">{subtitle}</span>}
           </span>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_BADGE[client.priority]}`}
-            >
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_BADGE[client.priority]}`}>
               {client.priority}
             </span>
             <span
@@ -156,20 +131,12 @@ export default function ClientCard({
           <div className="space-y-3 border-t border-slate-100 px-4 py-4">
             <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Phone
-                </p>
-                <p className="text-navy">
-                  {formatCanadianPhone(client.phone) || "—"}
-                </p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Phone</p>
+                <p className="text-navy">{formatCanadianPhone(client.phone) || "—"}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Last Contact
-                </p>
-                <p className="text-navy">
-                  {daysAgoLabel(client.lastContactDate)}
-                </p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Last Contact</p>
+                <p className="text-navy">{daysAgoLabel(client.lastContactDate)}</p>
               </div>
             </div>
 
@@ -190,9 +157,7 @@ export default function ClientCard({
 
             {firstNote && (
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Note
-                </p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Note</p>
                 <p className="text-sm text-slate-600">{firstNote}</p>
               </div>
             )}

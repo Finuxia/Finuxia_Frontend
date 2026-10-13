@@ -14,14 +14,7 @@ import TimeInput from "./TimeInput";
  * Follow-ups page instead of My Day. lockClient pins the client picker to a
  * single client (used from ClientDetail, where the client is already known).
  */
-export default function ReminderModal({
-  initial,
-  kind = "reminder",
-  lockClient,
-  onSubmit,
-  onDelete,
-  onClose,
-}) {
+export default function ReminderModal({ initial, kind = "reminder", lockClient, onSubmit, onDelete, onClose }) {
   const { clients } = useClients();
   const isEdit = Boolean(initial?.id);
   const isFollowUp = (initial?.kind || kind) === "followup";
@@ -29,9 +22,7 @@ export default function ReminderModal({
   const [note, setNote] = useState(initial?.note || "");
   const [dueDate, setDueDate] = useState(initial?.dueDate || todayISO());
   const [dueTime, setDueTime] = useState(initial?.dueTime || "");
-  const [clientRef, setClientRef] = useState(
-    initial?.clientRef || lockClient?.id || "",
-  );
+  const [clientRef, setClientRef] = useState(initial?.clientRef || lockClient?.id || "");
   const [repeat, setRepeat] = useState(initial?.repeat || "none");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -48,7 +39,7 @@ export default function ReminderModal({
         note: note.trim(),
         dueDate,
         dueTime: dueTime || null,
-        clientRef: lockClient?.id || clientRef || null,
+        clientRef: (lockClient?.id || clientRef) || null,
         repeat,
         kind: initial?.kind || kind,
       });
@@ -62,19 +53,15 @@ export default function ReminderModal({
 
   const handleDelete = async () => {
     if (!onDelete) return;
-    const isRecurring = Boolean(
-      initial?.repeat && initial.repeat !== "none" && initial?.seriesId,
-    );
+    const isRecurring = Boolean(initial?.repeat && initial.repeat !== "none" && initial?.seriesId);
     let scope = "single";
     if (isRecurring) {
       const deleteAll = window.confirm(
-        "This repeats. Click OK to delete the entire series (every occurrence), or Cancel to only delete this one.",
+        "This repeats. Click OK to delete the entire series (every occurrence), or Cancel to only delete this one."
       );
       if (deleteAll) {
         scope = "series";
-      } else if (
-        !window.confirm("Delete just this occurrence? This can't be undone.")
-      ) {
+      } else if (!window.confirm("Delete just this occurrence? This can't be undone.")) {
         return;
       }
     } else if (!window.confirm("Delete this reminder? This can't be undone.")) {
@@ -101,28 +88,16 @@ export default function ReminderModal({
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-navy">
-            {isFollowUp
-              ? isEdit
-                ? "Edit Follow-up"
-                : "New Follow-up"
-              : isEdit
-                ? "Edit Reminder"
-                : "New Reminder"}
+            {isFollowUp ? (isEdit ? "Edit Follow-up" : "New Follow-up") : isEdit ? "Edit Reminder" : "New Reminder"}
           </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
+          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Title
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
             <input
               autoFocus
               value={title}
@@ -133,9 +108,7 @@ export default function ReminderModal({
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Note (optional)
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Note (optional)</span>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -146,9 +119,7 @@ export default function ReminderModal({
 
           <div className="grid grid-cols-2 gap-4">
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Due date
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Due date</span>
               <input
                 type="date"
                 value={dueDate}
@@ -157,28 +128,20 @@ export default function ReminderModal({
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
-            <TimeInput
-              label="Due time (optional)"
-              value={dueTime}
-              onChange={setDueTime}
-            />
+            <TimeInput label="Due time (optional)" value={dueTime} onChange={setDueTime} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {lockClient ? (
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Client
-                </span>
+                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</span>
                 <div className="flex w-full items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-navy">
                   {lockClient.first} {lockClient.last}
                 </div>
               </label>
             ) : (
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Client (optional)
-                </span>
+                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Client (optional)</span>
                 <select
                   value={clientRef}
                   onChange={(e) => setClientRef(e.target.value)}
@@ -194,9 +157,7 @@ export default function ReminderModal({
               </label>
             )}
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Repeat
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Repeat</span>
               <select
                 value={repeat}
                 onChange={(e) => setRepeat(e.target.value)}
@@ -228,11 +189,7 @@ export default function ReminderModal({
               <span />
             )}
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-              >
+              <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100">
                 Cancel
               </button>
               <button

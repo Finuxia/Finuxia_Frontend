@@ -2,13 +2,7 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
-import {
-  act,
-  renderWithProviders,
-  screen,
-  userEvent,
-  waitFor,
-} from "../test/utils";
+import { act, renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import { useAuth } from "./AuthContext";
 import { useClients } from "./ClientsContext";
 
@@ -48,30 +42,20 @@ function Probe() {
   );
 }
 
-const render = () =>
-  renderWithProviders(<Probe />, {
-    providers: ["router", "toast", "auth", "clients"],
-  });
-const serve = (clients) =>
-  server.use(http.get(`${API}/api/clients`, () => HttpResponse.json(clients)));
+const render = () => renderWithProviders(<Probe />, { providers: ["router", "toast", "auth", "clients"] });
+const serve = (clients) => server.use(http.get(`${API}/api/clients`, () => HttpResponse.json(clients)));
 const loaded = () => screen.findByText("loaded");
 const slow = { timeout: 4000 };
 
 describe("client sync", () => {
   describe("cache, then reconcile with the server", () => {
     it("paints from the cache at once, then replaces it with the server's state", async () => {
-      localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify([serverClient({ first: "Cached" })]),
-      );
+      localStorage.setItem(CACHE_KEY, JSON.stringify([serverClient({ first: "Cached" })]));
       server.use(
         http.get(`${API}/api/clients`, async () => {
           await new Promise((r) => setTimeout(r, 150));
-          return HttpResponse.json([
-            serverClient({ first: "Server", version: 4 }),
-            serverClient({ id: "c_2", first: "Newer" }),
-          ]);
-        }),
+          return HttpResponse.json([serverClient({ first: "Server", version: 4 }), serverClient({ id: "c_2", first: "Newer" })]);
+        })
       );
       render();
       expect(await screen.findByText("Cached|")).toBeInTheDocument(); // before the server has answered
@@ -79,18 +63,11 @@ describe("client sync", () => {
       expect(await screen.findByText("Server|")).toBeInTheDocument();
       expect(screen.queryByText("Cached|")).not.toBeInTheDocument();
       expect(screen.getByText("Newer|")).toBeInTheDocument();
-      await waitFor(() =>
-        expect(
-          JSON.parse(localStorage.getItem(CACHE_KEY)).map((c) => c.first),
-        ).toEqual(["Server", "Newer"]),
-      );
+      await waitFor(() => expect(JSON.parse(localStorage.getItem(CACHE_KEY)).map((c) => c.first)).toEqual(["Server", "Newer"]));
     });
 
     it("keeps showing the cache, and an error state, when the server cannot be reached", async () => {
-      localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify([serverClient({ first: "Cached" })]),
-      );
+      localStorage.setItem(CACHE_KEY, JSON.stringify([serverClient({ first: "Cached" })]));
       server.use(http.get(`${API}/api/clients`, () => HttpResponse.error()));
       render();
       await waitFor(() => expect(api?.syncError).toBeTruthy(), slow); // the load has failed
@@ -99,18 +76,10 @@ describe("client sync", () => {
     });
 
     it("never writes cached clients back to the server (nothing is confirmed, so nothing is PATCHed)", async () => {
-      localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify([serverClient({ first: "Cached" })]),
-      );
+      localStorage.setItem(CACHE_KEY, JSON.stringify([serverClient({ first: "Cached" })]));
       server.use(http.get(`${API}/api/clients`, () => HttpResponse.error()));
       let patches = 0;
-      server.use(
-        http.patch(
-          `${API}/api/clients/c_1`,
-          () => ++patches && HttpResponse.json(serverClient()),
-        ),
-      );
+      server.use(http.patch(`${API}/api/clients/c_1`, () => ++patches && HttpResponse.json(serverClient())));
       render();
       await waitFor(() => expect(api?.syncError).toBeTruthy(), slow); // the load has failed: nothing is confirmed
       act(() => api.updateClient("c_1", { phone: "555" }));
@@ -128,19 +97,9 @@ describe("client sync", () => {
         http.post(`${API}/api/clients`, async ({ request }) => {
           const body = await request.json();
           bodies.push(body);
-          if (!created.has(body.clientToken))
-            created.set(
-              body.clientToken,
-              serverClient({
-                id: `c_${created.size + 10}`,
-                first: body.first,
-                version: 1,
-              }),
-            );
-          return HttpResponse.json(created.get(body.clientToken), {
-            status: created.size === 1 && bodies.length === 1 ? 201 : 200,
-          });
-        }),
+          if (!created.has(body.clientToken)) created.set(body.clientToken, serverClient({ id: `c_${created.size + 10}`, first: body.first, version: 1 }));
+          return HttpResponse.json(created.get(body.clientToken), { status: created.size === 1 && bodies.length === 1 ? 201 : 200 });
+        })
       );
       render();
       await loaded();
@@ -156,10 +115,7 @@ describe("client sync", () => {
       expect(replay.id).toBe(first.id);
       expect(screen.getAllByText("Grace|")).toHaveLength(1);
       await act(async () => {
-        await api.addClient(
-          { first: "Alan", last: "Turing" },
-          { clientToken: "tok-2" },
-        );
+        await api.addClient({ first: "Alan", last: "Turing" }, { clientToken: "tok-2" });
       });
       expect(screen.getByText("Alan|")).toBeInTheDocument();
       expect(screen.getAllByRole("listitem")).toHaveLength(2);
@@ -167,17 +123,11 @@ describe("client sync", () => {
 
     it("a failed create adds nothing locally", async () => {
       serve([]);
-      server.use(
-        http.post(`${API}/api/clients`, () =>
-          HttpResponse.json({ error: "Too many clients" }, { status: 402 }),
-        ),
-      );
+      server.use(http.post(`${API}/api/clients`, () => HttpResponse.json({ error: "Too many clients" }, { status: 402 })));
       render();
       await loaded();
       await act(async () => {
-        await expect(
-          api.addClient({ first: "X", last: "Y" }, { clientToken: "t" }),
-        ).rejects.toThrow("Too many clients");
+        await expect(api.addClient({ first: "X", last: "Y" }, { clientToken: "t" })).rejects.toThrow("Too many clients");
       });
       expect(screen.queryAllByRole("listitem")).toHaveLength(0);
     });
@@ -190,28 +140,14 @@ describe("client sync", () => {
       server.use(
         http.patch(`${API}/api/clients/c_1`, async ({ request }) => {
           patches.push(await request.json());
-          return HttpResponse.json(
-            {
-              error: "Changed elsewhere",
-              client: serverClient({
-                first: "Ada (edited elsewhere)",
-                phone: "999",
-                version: 3,
-              }),
-            },
-            { status: 409 },
-          );
-        }),
+          return HttpResponse.json({ error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", phone: "999", version: 3 }) }, { status: 409 });
+        })
       );
       render();
       await screen.findByText("Ada|");
       act(() => api.updateClient("c_1", { phone: "555" }));
-      expect(
-        await screen.findByText("Ada (edited elsewhere)|999", {}, slow),
-      ).toBeInTheDocument();
-      expect(
-        await screen.findByText(/was changed elsewhere/),
-      ).toBeInTheDocument();
+      expect(await screen.findByText("Ada (edited elsewhere)|999", {}, slow)).toBeInTheDocument();
+      expect(await screen.findByText(/was changed elsewhere/)).toBeInTheDocument();
       expect(patches).toHaveLength(1); // not retried with our stale copy, not looped
       expect(patches[0].version).toBe(1);
       await new Promise((r) => setTimeout(r, 900));
@@ -226,18 +162,9 @@ describe("client sync", () => {
           const body = await request.json();
           versions.push(body.version);
           return versions.length === 1
-            ? HttpResponse.json(
-                {
-                  client: serverClient({
-                    first: "Ada",
-                    phone: "999",
-                    version: 3,
-                  }),
-                },
-                { status: 409 },
-              )
+            ? HttpResponse.json({ client: serverClient({ first: "Ada", phone: "999", version: 3 }) }, { status: 409 })
             : HttpResponse.json(serverClient({ ...body, version: 4 }));
-        }),
+        })
       );
       render();
       await screen.findByText("Ada|");
@@ -255,18 +182,14 @@ describe("client sync", () => {
           const body = await request.json();
           patches.push(body);
           return HttpResponse.json(serverClient({ ...body, version: 2 }));
-        }),
+        })
       );
       render();
       await screen.findByText("Ada|");
       act(() => api.updateClient("c_1", { first: "Augusta" }));
       act(() => api.updateClient("c_1", { phone: "555" }));
       await waitFor(() => expect(patches).toHaveLength(1), slow);
-      expect(patches[0]).toMatchObject({
-        first: "Augusta",
-        phone: "555",
-        version: 1,
-      });
+      expect(patches[0]).toMatchObject({ first: "Augusta", phone: "555", version: 1 });
     });
 
     it("an edit made while the previous save is in flight is saved after it, with both changes", async () => {
@@ -279,10 +202,8 @@ describe("client sync", () => {
           const body = await request.json();
           patches.push(body);
           if (patches.length === 1) await gate; // hold the first save open
-          return HttpResponse.json(
-            serverClient({ ...body, version: body.version + 1 }),
-          );
-        }),
+          return HttpResponse.json(serverClient({ ...body, version: body.version + 1 }));
+        })
       );
       render();
       await screen.findByText("Ada|");
@@ -294,28 +215,17 @@ describe("client sync", () => {
       await waitFor(() => expect(patches).toHaveLength(2), slow);
       expect(patches[0]).toMatchObject({ first: "Augusta", version: 1 });
       expect(patches[0].phone).toBe("");
-      expect(patches[1]).toMatchObject({
-        first: "Augusta",
-        phone: "555",
-        version: 2,
-      }); // the first edit is still there
+      expect(patches[1]).toMatchObject({ first: "Augusta", phone: "555", version: 2 }); // the first edit is still there
       expect(screen.getByText("Augusta|555")).toBeInTheDocument();
     });
 
     it("a client removed elsewhere disappears locally, with a message, instead of failing forever", async () => {
       serve([serverClient()]);
-      server.use(
-        http.patch(`${API}/api/clients/c_1`, () =>
-          HttpResponse.json({ error: "Not found" }, { status: 404 }),
-        ),
-      );
+      server.use(http.patch(`${API}/api/clients/c_1`, () => HttpResponse.json({ error: "Not found" }, { status: 404 })));
       render();
       await screen.findByText("Ada|");
       act(() => api.updateClient("c_1", { phone: "1" }));
-      await waitFor(
-        () => expect(screen.queryByText(/Ada\|/)).not.toBeInTheDocument(),
-        slow,
-      );
+      await waitFor(() => expect(screen.queryByText(/Ada\|/)).not.toBeInTheDocument(), slow);
       expect(await screen.findByText(/no longer exists/)).toBeInTheDocument();
     });
 
@@ -325,10 +235,8 @@ describe("client sync", () => {
       server.use(
         http.patch(`${API}/api/clients/c_1`, async ({ request }) => {
           const body = await request.json();
-          return ++attempts === 1
-            ? HttpResponse.json({ error: "Server busy" }, { status: 503 })
-            : HttpResponse.json(serverClient({ ...body, version: 2 }));
-        }),
+          return ++attempts === 1 ? HttpResponse.json({ error: "Server busy" }, { status: 503 }) : HttpResponse.json(serverClient({ ...body, version: 2 }));
+        })
       );
       render();
       await screen.findByText("Ada|");
@@ -344,17 +252,11 @@ describe("client sync", () => {
       serve([serverClient({ first: "Private" })]);
       render();
       await screen.findByText("Private|");
-      await waitFor(() =>
-        expect(localStorage.getItem(CACHE_KEY)).toContain("Private"),
-      );
+      await waitFor(() => expect(localStorage.getItem(CACHE_KEY)).toContain("Private"));
       act(() => api.logout());
-      await waitFor(() =>
-        expect(screen.queryAllByRole("listitem")).toHaveLength(0),
-      );
+      await waitFor(() => expect(screen.queryAllByRole("listitem")).toHaveLength(0));
       expect(localStorage.getItem(CACHE_KEY)).toBeNull();
-      expect(
-        Object.keys(localStorage).filter((k) => k.startsWith("advisorpilot.")),
-      ).toEqual([]);
+      expect(Object.keys(localStorage).filter((k) => k.startsWith("advisorpilot."))).toEqual([]);
     });
 
     it("does not write the cleared state back into the cache afterwards", async () => {
@@ -363,9 +265,7 @@ describe("client sync", () => {
       await screen.findByText("Private|");
       act(() => api.logout());
       await new Promise((r) => setTimeout(r, 900));
-      expect(
-        Object.keys(localStorage).filter((k) => k.startsWith("advisorpilot.")),
-      ).toEqual([]);
+      expect(Object.keys(localStorage).filter((k) => k.startsWith("advisorpilot."))).toEqual([]);
     });
   });
 });

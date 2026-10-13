@@ -1,23 +1,10 @@
 import { useEffect, useState } from "react";
-import {
-  Upload,
-  Download,
-  Package,
-  AlertTriangle,
-  ExternalLink,
-} from "lucide-react";
+import { Upload, Download, Package, AlertTriangle, ExternalLink } from "lucide-react";
 import { api } from "../../lib/api";
 import { StepCard, SummaryRow } from "./shared";
 import { DocumentFileInput, UploadProgressBar } from "./DocumentUpload";
 
-function DocReviewCard({
-  packageId,
-  doc,
-  version,
-  progress,
-  onUpload,
-  onDownload,
-}) {
+function DocReviewCard({ packageId, doc, version, progress, onUpload, onDownload }) {
   const [url, setUrl] = useState(null);
   const [failed, setFailed] = useState(false);
 
@@ -50,9 +37,7 @@ function DocReviewCard({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-navy">{doc.label}</p>
-          <p className="truncate text-xs text-slate-400">
-            {doc.uploaded ? doc.fileName : "Missing — go back and add it"}
-          </p>
+          <p className="truncate text-xs text-slate-400">{doc.uploaded ? doc.fileName : "Missing — go back and add it"}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {doc.uploaded && (
@@ -82,19 +67,11 @@ function DocReviewCard({
       )}
       {doc.uploaded &&
         (failed ? (
-          <p className="px-4 py-6 text-center text-xs text-av-red">
-            Couldn't load the preview — you can still download it.
-          </p>
+          <p className="px-4 py-6 text-center text-xs text-av-red">Couldn't load the preview — you can still download it.</p>
         ) : url ? (
-          <iframe
-            title={doc.label}
-            src={url}
-            className="h-[560px] w-full rounded-b-xl"
-          />
+          <iframe title={doc.label} src={url} className="h-[560px] w-full rounded-b-xl" />
         ) : (
-          <p className="px-4 py-6 text-center text-xs text-slate-400">
-            Loading preview...
-          </p>
+          <p className="px-4 py-6 text-center text-xs text-slate-400">Loading preview...</p>
         ))}
     </div>
   );
@@ -121,9 +98,7 @@ export default function ReviewStep({
     !data.policyOwner && "Policy Owner is missing (Client step)",
     !data.insuredPerson && "Insured Person is missing (Client step)",
     data.products.length === 0 && "No products added (Products step)",
-    ...missingDocs.map(
-      (d) => `${d.label} hasn't been uploaded yet (Documents step)`,
-    ),
+    ...missingDocs.map((d) => `${d.label} hasn't been uploaded yet (Documents step)`),
     !confirmChecked && "Check the confirmation box below",
   ].filter(Boolean);
   const canGenerate = blockers.length === 0;
@@ -136,12 +111,8 @@ export default function ReviewStep({
       >
         <div className="flex flex-col gap-4 text-sm">
           <SummaryRow label="Advisor">{advisorName || "—"}</SummaryRow>
-          <SummaryRow label="Policy Owner">
-            {data.policyOwner || "—"}
-          </SummaryRow>
-          <SummaryRow label="Insured Person">
-            {data.insuredPerson || "—"}
-          </SummaryRow>
+          <SummaryRow label="Policy Owner">{data.policyOwner || "—"}</SummaryRow>
+          <SummaryRow label="Insured Person">{data.insuredPerson || "—"}</SummaryRow>
           <SummaryRow label="Dependants">
             {data.dependants.filter((d) => d.fullName).length
               ? data.dependants
@@ -150,13 +121,9 @@ export default function ReviewStep({
                   .join(", ")
               : "None"}
           </SummaryRow>
-          <SummaryRow label="Needs">
-            {data.needs.length ? data.needs.join(", ") : "None selected"}
-          </SummaryRow>
+          <SummaryRow label="Needs">{data.needs.length ? data.needs.join(", ") : "None selected"}</SummaryRow>
           <div>
-            <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-              Products
-            </p>
+            <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Products</p>
             {data.products.filter((p) => p.productName).length === 0 ? (
               <p className="text-slate-400">No products added.</p>
             ) : (
@@ -171,14 +138,11 @@ export default function ReviewStep({
                       </span>
                       <span className="text-slate-500">
                         {" "}
-                        · {p.coverageAmount || "—"} · {p.premium || "—"}{" "}
-                        {p.frequency}
+                        · {p.coverageAmount || "—"} · {p.premium || "—"} {p.frequency}
                       </span>
                       {p.allocations.length > 0 && (
                         <div className="mt-1 text-xs text-slate-500">
-                          {p.allocations
-                            .map((a) => `${a.fundName} (${a.allocationPct}%)`)
-                            .join(", ")}
+                          {p.allocations.map((a) => `${a.fundName} (${a.allocationPct}%)`).join(", ")}
                         </div>
                       )}
                     </li>
@@ -187,8 +151,7 @@ export default function ReviewStep({
             )}
           </div>
           <SummaryRow label="Documents">
-            {documents.filter((d) => d.uploaded).length} / {documents.length}{" "}
-            ready
+            {documents.filter((d) => d.uploaded).length} / {documents.length} ready
           </SummaryRow>
         </div>
       </StepCard>
@@ -212,10 +175,7 @@ export default function ReviewStep({
         </div>
       </StepCard>
 
-      <StepCard
-        title="Generate"
-        subtitle="Confirm and create the final package."
-      >
+      <StepCard title="Generate" subtitle="Confirm and create the final package.">
         {error && <p className="mb-3 text-xs text-av-red">{error}</p>}
 
         <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-navy">
@@ -225,8 +185,8 @@ export default function ReviewStep({
             onChange={(e) => setConfirmChecked(e.target.checked)}
             className="mt-0.5 accent-gold"
           />
-          I have reviewed the information above and confirm that it accurately
-          reflects the client's circumstances, needs and recommendations.
+          I have reviewed the information above and confirm that it accurately reflects the client's circumstances, needs and
+          recommendations.
         </label>
 
         {blockers.length > 0 && (
@@ -254,21 +214,14 @@ export default function ReviewStep({
           ) : (
             <Package size={15} />
           )}
-          {generating
-            ? "Generating..."
-            : status === "completed"
-              ? "Regenerate Package"
-              : "Generate Package"}
+          {generating ? "Generating..." : status === "completed" ? "Regenerate Package" : "Generate Package"}
         </button>
 
         {status === "completed" && (
           <div className="mt-5 border-t border-slate-100 pt-5">
-            <p className="mb-2 text-sm font-semibold text-navy">
-              Send for signature
-            </p>
+            <p className="mb-2 text-sm font-semibold text-navy">Send for signature</p>
             <p className="mb-3 text-xs text-slate-500">
-              Download the generated package above, then upload it into DocuSeal
-              to add signature/date fields and send it to the client.
+              Download the generated package above, then upload it into DocuSeal to add signature/date fields and send it to the client.
             </p>
             <div className="flex flex-wrap gap-2">
               <a

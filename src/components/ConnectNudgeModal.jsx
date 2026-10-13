@@ -14,11 +14,7 @@ import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 export default function ConnectNudgeModal() {
   const location = useLocation();
   const justRegistered = Boolean(location.state?.justRegistered);
-  const {
-    isConfigured: calConfigured,
-    status: calStatus,
-    connect: connectCalendar,
-  } = useGoogleCalendar();
+  const { isConfigured: calConfigured, status: calStatus, connect: connectCalendar } = useGoogleCalendar();
 
   const [driveStatus, setDriveStatus] = useState(null);
   const [driveConfigured, setDriveConfigured] = useState(true);
@@ -37,8 +33,7 @@ export default function ConnectNudgeModal() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justRegistered]);
 
-  const driveNeeded =
-    driveConfigured && driveStatus !== null && driveStatus !== "connected";
+  const driveNeeded = driveConfigured && driveStatus !== null && driveStatus !== "connected";
   const calendarNeeded = calConfigured && calStatus !== "connected";
 
   if (!justRegistered || dismissed || driveStatus === null) return null;
@@ -67,9 +62,7 @@ export default function ConnectNudgeModal() {
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-navy">
-            Connect your Google account
-          </h2>
+          <h2 className="text-lg font-semibold text-navy">Connect your Google account</h2>
           <button
             onClick={() => setDismissed(true)}
             className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
@@ -79,8 +72,8 @@ export default function ConnectNudgeModal() {
           </button>
         </div>
         <p className="mb-4 text-sm text-slate-500">
-          For the best experience, connect Google Drive and Google Calendar —
-          client folders, meetings, and booking links all depend on them.
+          For the best experience, connect Google Drive and Google Calendar — client folders, meetings, and booking
+          links all depend on them.
         </p>
 
         <div className="flex flex-col gap-2.5">

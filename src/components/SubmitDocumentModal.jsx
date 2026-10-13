@@ -51,11 +51,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
     } catch (err) {
       // Out of credit: say which limit was hit and offer the way out, rather than flashing a toast.
       if (isAiBlocked(err)) setBlocked(err);
-      else
-        addToast(
-          err.message ||
-            "Could not generate an AI suggestion. You can still fill this in yourself.",
-        );
+      else addToast(err.message || "Could not generate an AI suggestion. You can still fill this in yourself.");
     } finally {
       setSuggesting(false);
       refreshAiUsage();
@@ -97,9 +93,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
     setError("");
     try {
       await api.submitDocument({ title, summary, keywords, file });
-      addToast(
-        "Submitted — an admin will review it before it appears for everyone.",
-      );
+      addToast("Submitted — an admin will review it before it appears for everyone.");
       onSubmitted?.();
       onClose();
     } catch (err) {
@@ -120,34 +114,22 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <h2 className="text-lg font-semibold text-navy">Submit a Document</h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
+          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 overflow-y-auto px-6 py-5"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 overflow-y-auto px-6 py-5">
           <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
-            Submitted documents are only visible to you until an admin approves
-            them.
+            Submitted documents are only visible to you until an admin approves them.
           </p>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              PDF File
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">PDF File</span>
             {file ? (
               <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5">
                 <FileText size={16} className="shrink-0 text-gold-dark" />
-                <span className="min-w-0 flex-1 truncate text-sm text-navy">
-                  {file.name}
-                </span>
+                <span className="min-w-0 flex-1 truncate text-sm text-navy">{file.name}</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -170,23 +152,11 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
                 Choose a PDF...
               </button>
             )}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/pdf"
-              onChange={handlePickFile}
-              className="hidden"
-            />
+            <input ref={fileRef} type="file" accept="application/pdf" onChange={handlePickFile} className="hidden" />
           </div>
 
           <AiUsageInline usage={aiUsage} />
-          {blocked && (
-            <AiBlockedNotice
-              message={blocked.message}
-              actions={blocked.data?.actions}
-              onDismiss={() => setBlocked(null)}
-            />
-          )}
+          {blocked && <AiBlockedNotice message={blocked.message} actions={blocked.data?.actions} onDismiss={() => setBlocked(null)} />}
 
           <button
             type="button"
@@ -195,15 +165,11 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
             className="flex items-center justify-center gap-1.5 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-sm font-semibold text-gold-dark transition hover:bg-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Sparkles size={14} />
-            {suggesting
-              ? "Reading document..."
-              : "Suggest topic, summary & keywords with AI"}
+            {suggesting ? "Reading document..." : "Suggest topic, summary & keywords with AI"}
           </button>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Topic
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Topic</span>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -213,9 +179,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Summary
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Summary</span>
             <textarea
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
@@ -226,22 +190,12 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
           </label>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Keywords
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Keywords</span>
             <div className="flex flex-wrap gap-1.5 rounded-lg border border-slate-200 px-2.5 py-2">
               {keywords.map((k) => (
-                <span
-                  key={k}
-                  className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy"
-                >
+                <span key={k} className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy">
                   {k}
-                  <button
-                    type="button"
-                    onClick={() => removeKeyword(k)}
-                    aria-label={`Remove ${k}`}
-                    className="text-slate-400 hover:text-av-red"
-                  >
+                  <button type="button" onClick={() => removeKeyword(k)} aria-label={`Remove ${k}`} className="text-slate-400 hover:text-av-red">
                     <X size={11} />
                   </button>
                 </span>
@@ -251,9 +205,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
                 onChange={(e) => setKeywordInput(e.target.value)}
                 onKeyDown={handleKeywordKeyDown}
                 onBlur={addKeyword}
-                placeholder={
-                  keywords.length ? "" : "Type a keyword, press Enter..."
-                }
+                placeholder={keywords.length ? "" : "Type a keyword, press Enter..."}
                 className="min-w-[8rem] flex-1 border-0 py-1 text-sm text-navy outline-none placeholder:text-slate-400"
               />
             </div>
@@ -262,11 +214,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
           {error && <p className="text-xs text-av-red">{error}</p>}
 
           <div className="mt-1 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-            >
+            <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100">
               Cancel
             </button>
             <button

@@ -16,34 +16,25 @@ const COLOR_OPTIONS = [
  * themselves (family, company, referral circle, whatever). Not a pipeline
  * concept: membership is just a list of client ids on the group.
  */
-export default function GroupModal({
-  group,
-  initialMemberIds,
-  onClose,
-  onDelete,
-}) {
+export default function GroupModal({ group, initialMemberIds, onClose, onDelete }) {
   const { clients, addGroup, updateGroup, setGroupMembers } = useClients();
   const isEdit = Boolean(group);
   const [name, setName] = useState(group?.name || "");
   const [color, setColor] = useState(group?.color || COLOR_OPTIONS[0].id);
-  const [memberIds, setMemberIds] = useState(
-    group?.memberIds || initialMemberIds || [],
-  );
+  const [memberIds, setMemberIds] = useState(group?.memberIds || initialMemberIds || []);
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return clients;
-    return clients.filter((c) =>
-      `${c.first} ${c.last}`.toLowerCase().includes(q),
-    );
+    return clients.filter((c) => `${c.first} ${c.last}`.toLowerCase().includes(q));
   }, [clients, query]);
 
   const toggleMember = (clientId) => {
     setMemberIds((prev) =>
       prev.some((id) => String(id) === String(clientId))
         ? prev.filter((id) => String(id) !== String(clientId))
-        : [...prev, clientId],
+        : [...prev, clientId]
     );
   };
 
@@ -60,10 +51,7 @@ export default function GroupModal({
   };
 
   const handleDelete = () => {
-    if (
-      !window.confirm(`Delete "${group.name}"? This won't delete any clients.`)
-    )
-      return;
+    if (!window.confirm(`Delete "${group.name}"? This won't delete any clients.`)) return;
     onDelete(group.id);
     onClose();
   };
@@ -78,23 +66,15 @@ export default function GroupModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-navy">
-            {isEdit ? "Edit Group" : "New Group"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
+          <h2 className="text-lg font-semibold text-navy">{isEdit ? "Edit Group" : "New Group"}</h2>
+          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
         <div className="flex flex-col gap-4 overflow-y-auto px-6 py-5">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Group name
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Group name</span>
             <input
               autoFocus
               value={name}
@@ -105,9 +85,7 @@ export default function GroupModal({
           </label>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Color
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Color</span>
             <div className="flex gap-2">
               {COLOR_OPTIONS.map((c) => (
                 <button
@@ -127,12 +105,8 @@ export default function GroupModal({
 
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Members
-              </span>
-              <span className="text-xs font-medium text-slate-400">
-                {memberIds.length} selected
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Members</span>
+              <span className="text-xs font-medium text-slate-400">{memberIds.length} selected</span>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
               <Search size={14} className="shrink-0 text-slate-400" />
@@ -145,14 +119,10 @@ export default function GroupModal({
             </div>
             <div className="max-h-56 overflow-y-auto rounded-lg border border-slate-100">
               {filtered.length === 0 ? (
-                <p className="px-3 py-4 text-center text-sm text-slate-400">
-                  No clients found.
-                </p>
+                <p className="px-3 py-4 text-center text-sm text-slate-400">No clients found.</p>
               ) : (
                 filtered.map((c) => {
-                  const checked = memberIds.some(
-                    (id) => String(id) === String(c.id),
-                  );
+                  const checked = memberIds.some((id) => String(id) === String(c.id));
                   return (
                     <button
                       key={c.id}
@@ -193,10 +163,7 @@ export default function GroupModal({
             <span />
           )}
           <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-            >
+            <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100">
               Cancel
             </button>
             <button

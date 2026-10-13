@@ -16,14 +16,7 @@ import { api } from "../lib/api";
  * - `setItems` changes the shown items locally (after an edit) without another request.
  */
 export default function usePagedList(path, params = {}) {
-  const [state, setState] = useState({
-    items: [],
-    cursor: null,
-    hasMore: false,
-    loading: true,
-    loadingMore: false,
-    error: null,
-  });
+  const [state, setState] = useState({ items: [], cursor: null, hasMore: false, loading: true, loadingMore: false, error: null });
   const run = useRef(0);
   const stateRef = useRef(state);
   const fetching = useRef(false);
@@ -40,34 +33,14 @@ export default function usePagedList(path, params = {}) {
     const changed = key !== shownFor.current;
     shownFor.current = key;
     setState((s) =>
-      changed
-        ? {
-            items: [],
-            cursor: null,
-            hasMore: false,
-            loading: true,
-            loadingMore: false,
-            error: null,
-          }
-        : { ...s, loading: true, loadingMore: false, error: null },
+      changed ? { items: [], cursor: null, hasMore: false, loading: true, loadingMore: false, error: null } : { ...s, loading: true, loadingMore: false, error: null }
     );
     try {
-      const { results, nextCursor } = await api.getPage(
-        path,
-        paramsRef.current,
-      );
+      const { results, nextCursor } = await api.getPage(path, paramsRef.current);
       if (id === run.current)
-        setState({
-          items: results,
-          cursor: nextCursor,
-          hasMore: Boolean(nextCursor),
-          loading: false,
-          loadingMore: false,
-          error: null,
-        });
+        setState({ items: results, cursor: nextCursor, hasMore: Boolean(nextCursor), loading: false, loadingMore: false, error: null });
     } catch (error) {
-      if (id === run.current)
-        setState((s) => ({ ...s, loading: false, error }));
+      if (id === run.current) setState((s) => ({ ...s, loading: false, error }));
     }
   }, [path]);
 
@@ -85,34 +58,17 @@ export default function usePagedList(path, params = {}) {
     fetching.current = true;
     setState((s) => ({ ...s, loadingMore: true, error: null }));
     try {
-      const { results, nextCursor } = await api.getPage(path, {
-        ...paramsRef.current,
-        cursor,
-      });
+      const { results, nextCursor } = await api.getPage(path, { ...paramsRef.current, cursor });
       if (id !== run.current) return;
-      setState((s) => ({
-        ...s,
-        items: [...s.items, ...results],
-        cursor: nextCursor,
-        hasMore: Boolean(nextCursor),
-        loadingMore: false,
-      }));
+      setState((s) => ({ ...s, items: [...s.items, ...results], cursor: nextCursor, hasMore: Boolean(nextCursor), loadingMore: false }));
     } catch (error) {
-      if (id === run.current)
-        setState((s) => ({ ...s, loadingMore: false, error }));
+      if (id === run.current) setState((s) => ({ ...s, loadingMore: false, error }));
     } finally {
       fetching.current = false;
     }
   }, [path]);
 
-  const setItems = useCallback(
-    (next) =>
-      setState((s) => ({
-        ...s,
-        items: typeof next === "function" ? next(s.items) : next,
-      })),
-    [],
-  );
+  const setItems = useCallback((next) => setState((s) => ({ ...s, items: typeof next === "function" ? next(s.items) : next })), []);
 
   return { ...state, loadMore, reload: loadFirst, setItems };
 }

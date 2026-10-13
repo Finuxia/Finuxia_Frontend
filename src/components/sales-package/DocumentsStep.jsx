@@ -3,15 +3,7 @@ import { Upload, Download, CheckCircle2, FileCheck2 } from "lucide-react";
 import { StepCard } from "./shared";
 import { DocumentFileInput, UploadProgressBar } from "./DocumentUpload";
 
-function GeneratedDocCard({
-  label,
-  subtitle,
-  doc,
-  onDownload,
-  onDownloadPdf,
-  onGenerate,
-  generating,
-}) {
+function GeneratedDocCard({ label, subtitle, doc, onDownload, onDownloadPdf, onGenerate, generating }) {
   return (
     <div className="rounded-xl border border-gold/40 bg-gold/5 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -27,9 +19,7 @@ function GeneratedDocCard({
               className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-navy transition hover:bg-slate-50"
             >
               <Download size={13} />
-              {doc.generatedFileName.endsWith(".docx")
-                ? "Download Word"
-                : "Download"}
+              {doc.generatedFileName.endsWith(".docx") ? "Download Word" : "Download"}
             </button>
           )}
           {doc?.generatedFileName && onDownloadPdf && (
@@ -50,11 +40,7 @@ function GeneratedDocCard({
               className="flex items-center gap-1.5 rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-navy-light disabled:opacity-60"
             >
               <FileCheck2 size={13} />
-              {generating
-                ? "Generating..."
-                : doc?.generatedFileName
-                  ? "Regenerate"
-                  : "Generate for Me"}
+              {generating ? "Generating..." : doc?.generatedFileName ? "Regenerate" : "Generate for Me"}
             </button>
           )}
         </div>
@@ -65,9 +51,7 @@ function GeneratedDocCard({
           Ready to download — {doc.generatedFileName}
         </p>
       ) : (
-        !onGenerate && (
-          <p className="mt-2 text-xs text-slate-400">Not generated yet.</p>
-        )
+        !onGenerate && <p className="mt-2 text-xs text-slate-400">Not generated yet.</p>
       )}
     </div>
   );
@@ -132,9 +116,7 @@ export default function DocumentsStep({
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy/5 text-xs font-bold text-navy">
                   {i + 1}
                 </div>
-                <span className="w-full shrink-0 text-sm font-medium text-navy sm:w-48">
-                  {d.label} *
-                </span>
+                <span className="w-full shrink-0 text-sm font-medium text-navy sm:w-48">{d.label} *</span>
                 <DocumentFileInput
                   doc={d}
                   onUpload={onUpload}
@@ -152,9 +134,7 @@ export default function DocumentsStep({
                     </span>
                   )}
                 </DocumentFileInput>
-                <span className="shrink-0 text-xs text-slate-400">
-                  {sizeHint(d.key)}
-                </span>
+                <span className="shrink-0 text-xs text-slate-400">{sizeHint(d.key)}</span>
               </div>
               <UploadProgressBar percent={uploadProgress[d.key]} />
             </div>

@@ -37,9 +37,7 @@ export default function Meetings() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-navy">Meetings</h1>
-          <p className="text-sm text-slate-500">
-            Your calendar, on its own — nothing here needs a client to exist.
-          </p>
+          <p className="text-sm text-slate-500">Your calendar, on its own — nothing here needs a client to exist.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -55,9 +53,7 @@ export default function Meetings() {
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) =>
-                e.target.value && setSelectedDate(e.target.value)
-              }
+              onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
               onClick={(e) => {
                 try {
                   e.currentTarget.showPicker?.();
@@ -92,9 +88,7 @@ export default function Meetings() {
         events={dayState.events}
         loading={dayState.status === "loading"}
         error={dayState.error}
-        onRefresh={() =>
-          fetchDay(selectedDate, { force: true }).catch(() => {})
-        }
+        onRefresh={() => fetchDay(selectedDate, { force: true }).catch(() => {})}
       />
     </div>
   );

@@ -2,11 +2,7 @@
  * Fixed-interval candidate time labels for a day, e.g. ["09:00","09:30",...].
  * This is the dropdown's option list — independent of any availability data.
  */
-export function generateSlotTimes({
-  startHour = 0,
-  endHour = 24,
-  stepMinutes = 30,
-} = {}) {
+export function generateSlotTimes({ startHour = 0, endHour = 24, stepMinutes = 30 } = {}) {
   const times = [];
   for (let mins = startHour * 60; mins < endHour * 60; mins += stepMinutes) {
     const h = Math.floor(mins / 60);
@@ -31,17 +27,10 @@ export function generateSlotTimes({
  * @param {{start:string,end:string}[]} busyIntervals - ISO datetime ranges from FreeBusy
  * @returns {{time:string, startISO:string, endISO:string, available:boolean, reason?:'CALENDAR_BUSY'}[]}
  */
-export function buildTimeSlots({
-  date,
-  times,
-  durationMinutes,
-  busyIntervals = [],
-}) {
+export function buildTimeSlots({ date, times, durationMinutes, busyIntervals = [] }) {
   const busy = busyIntervals
     .map((b) => ({ start: new Date(b.start), end: new Date(b.end) }))
-    .filter(
-      (b) => !Number.isNaN(b.start.getTime()) && !Number.isNaN(b.end.getTime()),
-    );
+    .filter((b) => !Number.isNaN(b.start.getTime()) && !Number.isNaN(b.end.getTime()));
 
   return times.map((time) => {
     const start = new Date(`${date}T${time}`);

@@ -34,13 +34,7 @@ const EMPTY_FORM = {
  * review/edit before anything is actually saved. Nothing is created until
  * they submit the form.
  */
-export default function AddClientModal({
-  open,
-  onClose,
-  client = null,
-  initialValues = null,
-  onCreated,
-}) {
+export default function AddClientModal({ open, onClose, client = null, initialValues = null, onCreated }) {
   const { addClient, editClient } = useClients();
   const { addToast } = useToast();
   const [form, setForm] = useState(EMPTY_FORM);
@@ -82,8 +76,7 @@ export default function AddClientModal({
 
   if (!open) return null;
 
-  const update = (key) => (e) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleClose = () => {
     setForm(EMPTY_FORM);
@@ -96,8 +89,7 @@ export default function AddClientModal({
     if (saving) return;
     const nextErrors = {};
     if (!form.first.trim()) nextErrors.first = "First name is required";
-    if (birthDateError(form.dateOfBirth))
-      nextErrors.dateOfBirth = birthDateError(form.dateOfBirth);
+    if (birthDateError(form.dateOfBirth)) nextErrors.dateOfBirth = birthDateError(form.dateOfBirth);
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors);
       return;
@@ -107,15 +99,10 @@ export default function AddClientModal({
       editClient(client.id, form);
       addToast(`${form.first} ${form.last}`.trim() + " updated");
     } else {
-      clientTokenRef.current ??=
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : String(Math.random()).slice(2);
+      clientTokenRef.current ??= typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
       setSaving(true);
       try {
-        const created = await addClient(form, {
-          clientToken: clientTokenRef.current,
-        });
+        const created = await addClient(form, { clientToken: clientTokenRef.current });
         clientTokenRef.current = null;
         addToast(`${created.first} ${created.last} added to pipeline`.trim());
         onCreated?.(created);
@@ -140,9 +127,7 @@ export default function AddClientModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-          <h2 className="text-lg font-semibold text-navy">
-            {isEdit ? "Edit Client" : "Add Client"}
-          </h2>
+          <h2 className="text-lg font-semibold text-navy">{isEdit ? "Edit Client" : "Add Client"}</h2>
           <button
             onClick={handleClose}
             className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
@@ -177,12 +162,7 @@ export default function AddClientModal({
             <input
               type="tel"
               value={form.phone}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  phone: formatCanadianPhone(e.target.value),
-                }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, phone: formatCanadianPhone(e.target.value) }))}
               className={inputClass()}
               placeholder="(555) 123-4567"
             />
@@ -248,16 +228,10 @@ export default function AddClientModal({
               />
             </Field>
             <Field label="Province">
-              <select
-                value={form.province}
-                onChange={update("province")}
-                className={inputClass()}
-              >
+              <select value={form.province} onChange={update("province")} className={inputClass()}>
                 <option value="">Select...</option>
                 {PROVINCES.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
+                  <option key={p} value={p}>{p}</option>
                 ))}
               </select>
             </Field>
@@ -265,22 +239,14 @@ export default function AddClientModal({
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Priority">
-              <select
-                value={form.priority}
-                onChange={update("priority")}
-                className={inputClass()}
-              >
+              <select value={form.priority} onChange={update("priority")} className={inputClass()}>
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
               </select>
             </Field>
             <Field label="Preferred Contact">
-              <select
-                value={form.preferredContact}
-                onChange={update("preferredContact")}
-                className={inputClass()}
-              >
+              <select value={form.preferredContact} onChange={update("preferredContact")} className={inputClass()}>
                 <option value="phone">Phone</option>
                 <option value="email">Email</option>
                 <option value="telegram">Telegram</option>

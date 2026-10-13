@@ -23,9 +23,7 @@ export default function FollowUpDonutChart({ clients }) {
     ...seg,
     count:
       seg.key === "Later"
-        ? clients.filter(
-            (c) => c.nextFollowUp === "Next month" || c.nextFollowUp === "TBD",
-          ).length
+        ? clients.filter((c) => c.nextFollowUp === "Next month" || c.nextFollowUp === "TBD").length
         : clients.filter((c) => c.nextFollowUp === seg.key).length,
   }));
 
@@ -44,13 +42,7 @@ export default function FollowUpDonutChart({ clients }) {
   return (
     <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-center">
       <div className="relative shrink-0">
-        <svg
-          viewBox={`0 0 ${SIZE} ${SIZE}`}
-          width={200}
-          height={200}
-          role="img"
-          aria-label="Follow-ups by urgency"
-        >
+        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} width={200} height={200} role="img" aria-label="Follow-ups by urgency">
           {arcs.map((seg) =>
             seg.fraction > 0 ? (
               <path
@@ -63,26 +55,13 @@ export default function FollowUpDonutChart({ clients }) {
                 onMouseLeave={() => setHover(null)}
                 onClick={() => navigate(`/follow-ups`)}
               />
-            ) : null,
+            ) : null
           )}
           <circle cx={CX} cy={CY} r={R_INNER - 1} fill="white" />
-          <text
-            x={CX}
-            y={CY - 4}
-            textAnchor="middle"
-            fontSize="26"
-            fontWeight="700"
-            fill="#0f1c2e"
-          >
+          <text x={CX} y={CY - 4} textAnchor="middle" fontSize="26" fontWeight="700" fill="#0f1c2e">
             {total}
           </text>
-          <text
-            x={CX}
-            y={CY + 16}
-            textAnchor="middle"
-            fontSize="10"
-            fill="#94a3b8"
-          >
+          <text x={CX} y={CY + 16} textAnchor="middle" fontSize="10" fill="#94a3b8">
             follow-ups
           </text>
         </svg>
@@ -90,9 +69,7 @@ export default function FollowUpDonutChart({ clients }) {
         {hover && (
           <div className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white shadow-lg">
             {counts.find((s) => s.key === hover).label}:{" "}
-            <span className="font-bold text-gold">
-              {counts.find((s) => s.key === hover).count}
-            </span>
+            <span className="font-bold text-gold">{counts.find((s) => s.key === hover).count}</span>
           </div>
         )}
       </div>
@@ -106,10 +83,7 @@ export default function FollowUpDonutChart({ clients }) {
             onClick={() => navigate(`/follow-ups`)}
             className="flex items-center gap-2.5 rounded-lg px-2 py-1 text-left transition hover:bg-slate-50"
           >
-            <span
-              className="h-2.5 w-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: seg.color }}
-            />
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
             <span className="w-20 text-sm text-slate-600">{seg.label}</span>
             <span className="text-sm font-semibold text-navy">{seg.count}</span>
           </button>

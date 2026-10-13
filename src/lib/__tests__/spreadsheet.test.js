@@ -2,11 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import {
-  mapImportRows,
-  TEMPLATE_COLUMNS,
-  TEMPLATE_SAMPLE,
-} from "../clientImport";
+import { mapImportRows, TEMPLATE_COLUMNS, TEMPLATE_SAMPLE } from "../clientImport";
 import {
   MAX_FILE_BYTES,
   SpreadsheetError,
@@ -26,8 +22,7 @@ const load = (name) => {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 };
 const COLORS = ["c1", "c2", "c3"];
-const importFixture = async (name) =>
-  mapImportRows(await parseSpreadsheet(load(name)), { colors: COLORS });
+const importFixture = async (name) => mapImportRows(await parseSpreadsheet(load(name)), { colors: COLORS });
 
 describe("importing an Excel export (independent writer, Excel-style OOXML)", () => {
   it("reads the first sheet only, skipping blank rows", async () => {
@@ -37,15 +32,9 @@ describe("importing an Excel export (independent writer, Excel-style OOXML)", ()
   });
 
   it("keeps per-row success/failure reporting and silently skips the sample row", async () => {
-    const { created, failedRows, successCount } = await importFixture(
-      "customers-export.xlsx",
-    );
+    const { created, failedRows, successCount } = await importFixture("customers-export.xlsx");
     expect(successCount).toBe(3);
-    expect(created.map((c) => `${c.first} ${c.last}`)).toEqual([
-      "Jane Doe",
-      "John Smith Jr",
-      "Mary O'Neil-Brown",
-    ]);
+    expect(created.map((c) => `${c.first} ${c.last}`)).toEqual(["Jane Doe", "John Smith Jr", "Mary O'Neil-Brown"]);
     // rows: 1 Jane, 2 SAMPLE, 3 nameless (blank row is not counted), 4 John, 5 Mary
     expect(failedRows).toEqual([{ row: 3, error: "Missing Name" }]);
   });
@@ -66,18 +55,12 @@ describe("importing an Excel export (independent writer, Excel-style OOXML)", ()
     expect(created[0].phone).toBe("5551234567");
     expect(created[0].email).toBe("jane.doe@email.com");
     expect(created[1].name).toBeUndefined();
-    for (const c of created)
-      for (const k of ["phone", "email", "telegram", "referredBy"])
-        expect(typeof c[k]).toBe("string");
+    for (const c of created) for (const k of ["phone", "email", "telegram", "referredBy"]) expect(typeof c[k]).toBe("string");
   });
 
   it("matches stages by label/id and falls back to the first stage", async () => {
     const { created } = await importFixture("customers-export.xlsx");
-    expect(created.map((c) => c.currentStage)).toEqual([
-      "cp",
-      "strategy_meeting",
-      "cp",
-    ]);
+    expect(created.map((c) => c.currentStage)).toEqual(["cp", "strategy_meeting", "cp"]);
   });
 
   it("understands the 1904 date system", async () => {
@@ -99,30 +82,17 @@ describe("importing a CSV", () => {
   it("parses US dates, ISO dates and a serial number written as text", async () => {
     const { created, failedRows } = await importFixture("customers-export.csv");
     expect(failedRows).toEqual([]);
-    expect(created.map((c) => c.lastContactDate)).toEqual([
-      "2026-08-01",
-      "",
-      "",
-    ]);
-    expect(created.map((c) => c.followUpDate)).toEqual([
-      "2026-08-20",
-      "2026-08-21",
-      "",
-    ]);
+    expect(created.map((c) => c.lastContactDate)).toEqual(["2026-08-01", "", ""]);
+    expect(created.map((c) => c.followUpDate)).toEqual(["2026-08-20", "2026-08-21", ""]);
   });
 
   it("copes with semicolon delimiters and Windows-1252 text", async () => {
     const rows = await parseSpreadsheet(load("semicolon-cp1252.csv"));
-    expect(rows).toEqual([
-      { Name: "Zoë Müller", Phone: "5559990000", Email: "zoe@x.com" },
-    ]);
+    expect(rows).toEqual([{ Name: "Zoë Müller", Phone: "5559990000", Email: "zoe@x.com" }]);
   });
 
   it("parseCsv is RFC 4180 compliant on edge cases", () => {
-    expect(parseCsv('a,"b ""q"" c",\r\n1,2,3')).toEqual([
-      ["a", 'b "q" c', ""],
-      ["1", "2", "3"],
-    ]);
+    expect(parseCsv('a,"b ""q"" c",\r\n1,2,3')).toEqual([["a", 'b "q" c', ""], ["1", "2", "3"]]);
     expect(parseCsv("a,b\n")).toEqual([["a", "b"]]);
     expect(parseCsv("")).toEqual([]);
   });
@@ -140,21 +110,14 @@ describe("hostile input", () => {
   });
 
   it("rejects legacy .xls with a clear message", async () => {
-    const xls = new Uint8Array([
-      0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, 0, 0,
-    ]).buffer;
+    const xls = new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, 0, 0]).buffer;
     await expect(parseSpreadsheet(xls)).rejects.toThrow(/\.xls/);
   });
 
   it("rejects oversized files and corrupt zips without leaking internals", async () => {
-    await expect(
-      parseSpreadsheet(new ArrayBuffer(MAX_FILE_BYTES + 1)),
-    ).rejects.toBeInstanceOf(SpreadsheetError);
-    const corrupt = new Uint8Array([0x50, 0x4b, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8])
-      .buffer;
-    await expect(parseSpreadsheet(corrupt)).rejects.toThrow(
-      /valid \.xlsx or \.csv/,
-    );
+    await expect(parseSpreadsheet(new ArrayBuffer(MAX_FILE_BYTES + 1))).rejects.toBeInstanceOf(SpreadsheetError);
+    const corrupt = new Uint8Array([0x50, 0x4b, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8]).buffer;
+    await expect(parseSpreadsheet(corrupt)).rejects.toThrow(/valid \.xlsx or \.csv/);
   });
 });
 
@@ -170,10 +133,7 @@ describe("writing styled workbooks", () => {
     expect(ws.getColumn(1).width).toBe(22);
 
     const bytes = await wb.xlsx.writeBuffer();
-    const buf = bytes.buffer.slice(
-      bytes.byteOffset,
-      bytes.byteOffset + bytes.byteLength,
-    );
+    const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
     const rows = await parseSpreadsheet(buf);
     expect(rows).toHaveLength(1);
     const { created, failedRows } = mapImportRows(rows, { colors: COLORS });

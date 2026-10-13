@@ -5,9 +5,7 @@
  * sends them with `credentials: "include"`, and state-changing requests echo the
  * readable CSRF cookie in `X-CSRF-Token`.
  */
-const BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:4000"
-).replace(/\/$/, "");
+const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:4000").replace(/\/$/, "");
 const CSRF_COOKIE = "fx_csrf";
 const LEGACY_TOKEN_KEY = "advisorpilot.token";
 
@@ -34,9 +32,7 @@ export function clearLocalData() {
 }
 
 function readCookie(name) {
-  const match = document.cookie
-    .split("; ")
-    .find((c) => c.startsWith(`${name}=`));
+  const match = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`));
   return match ? decodeURIComponent(match.slice(name.length + 1)) : "";
 }
 
@@ -63,12 +59,7 @@ function refreshSession() {
   return refreshing;
 }
 
-const NO_REFRESH_PATHS = [
-  "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/refresh",
-  "/api/auth/logout",
-];
+const NO_REFRESH_PATHS = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout"];
 
 // The id of the most recent API response (OPS-01 / OPS-08). The backend puts one on every log line
 // for a request and returns it in X-Request-ID, so attaching it to a UI error report makes a
@@ -96,11 +87,7 @@ async function authedFetch(path, init = {}) {
       const csrf = readCookie(CSRF_COOKIE);
       if (csrf) headers["X-CSRF-Token"] = csrf;
     }
-    const response = await fetch(`${BASE_URL}${path}`, {
-      ...init,
-      headers,
-      credentials: "include",
-    });
+    const response = await fetch(`${BASE_URL}${path}`, { ...init, headers, credentials: "include" });
     // Every request in this client funnels through here, so this is the one place it needs doing.
     // Guarded because a network failure and some test doubles give a response with no headers.
     try {
@@ -129,8 +116,7 @@ async function authedFetch(path, init = {}) {
 // Turns a Retry-After header (seconds) into "about 12 minutes" for the "too many requests" message.
 function waitPhrase(seconds) {
   if (!Number.isFinite(seconds) || seconds <= 0) return "a little while";
-  if (seconds < 60)
-    return `${Math.ceil(seconds)} second${Math.ceil(seconds) === 1 ? "" : "s"}`;
+  if (seconds < 60) return `${Math.ceil(seconds)} second${Math.ceil(seconds) === 1 ? "" : "s"}`;
   if (seconds < 3600) {
     const m = Math.ceil(seconds / 60);
     return `about ${m} minute${m === 1 ? "" : "s"}`;
@@ -183,10 +169,7 @@ function firstErrorMessage(data) {
   return null;
 }
 
-async function request(
-  path,
-  { method = "GET", body, headers: extraHeaders } = {},
-) {
+async function request(path, { method = "GET", body, headers: extraHeaders } = {}) {
   const headers = { "Content-Type": "application/json", ...extraHeaders };
 
   let res;
@@ -197,9 +180,7 @@ async function request(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiError("Can't reach the server. Is the backend running?", {
-      status: 0,
-    });
+    throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
 
   if (res.status === 204) return null;
@@ -217,11 +198,7 @@ async function request(
   if (!res.ok) {
     if (res.status === 429) {
       const header = res.headers.get("Retry-After");
-      throw new ApiError(throttledMessage(header), {
-        status: 429,
-        data,
-        retryAfter: parseInt(header, 10) || undefined,
-      });
+      throw new ApiError(throttledMessage(header), { status: 429, data, retryAfter: parseInt(header, 10) || undefined });
     }
     const message =
       data?.error ||
@@ -240,9 +217,7 @@ async function requestMultipart(path, formData) {
   try {
     res = await authedFetch(path, { method: "POST", body: formData });
   } catch {
-    throw new ApiError("Can't reach the server. Is the backend running?", {
-      status: 0,
-    });
+    throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
 
   const text = await res.text();
@@ -257,10 +232,7 @@ async function requestMultipart(path, formData) {
   if (!res.ok) {
     if (res.status === 429) {
       const header = res.headers.get("Retry-After");
-      throw new ApiError(throttledMessage(header), {
-        status: 429,
-        retryAfter: parseInt(header, 10) || undefined,
-      });
+      throw new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header, 10) || undefined });
     }
     const message =
       data?.error ||
@@ -278,9 +250,7 @@ async function downloadFile(path, fallbackName) {
   try {
     res = await authedFetch(path);
   } catch {
-    throw new ApiError("Can't reach the server. Is the backend running?", {
-      status: 0,
-    });
+    throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
@@ -315,14 +285,9 @@ async function fetchBlobUrl(path) {
   try {
     res = await authedFetch(path);
   } catch {
-    throw new ApiError("Can't reach the server. Is the backend running?", {
-      status: 0,
-    });
+    throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
-  if (!res.ok)
-    throw new ApiError(`Request failed (${res.status})`, {
-      status: res.status,
-    });
+  if (!res.ok) throw new ApiError(`Request failed (${res.status})`, { status: res.status });
   return URL.createObjectURL(await res.blob());
 }
 
@@ -350,16 +315,10 @@ function sendMultipartXHR(path, formData, onProgress) {
     if (csrf) xhr.setRequestHeader("X-CSRF-Token", csrf);
     if (onProgress) {
       xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable)
-          onProgress(Math.round((e.loaded / e.total) * 100));
+        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
       };
     }
-    xhr.onerror = () =>
-      reject(
-        new ApiError("Can't reach the server. Is the backend running?", {
-          status: 0,
-        }),
-      );
+    xhr.onerror = () => reject(new ApiError("Can't reach the server. Is the backend running?", { status: 0 }));
     xhr.onload = () => {
       let data = null;
       try {
@@ -371,17 +330,9 @@ function sendMultipartXHR(path, formData, onProgress) {
         resolve(data);
       } else if (xhr.status === 429) {
         const header = xhr.getResponseHeader("Retry-After");
-        reject(
-          new ApiError(throttledMessage(header), {
-            status: 429,
-            retryAfter: parseInt(header, 10) || undefined,
-          }),
-        );
+        reject(new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header, 10) || undefined }));
       } else {
-        const message =
-          data?.error ||
-          firstErrorMessage(data) ||
-          `Request failed (${xhr.status})`;
+        const message = data?.error || firstErrorMessage(data) || `Request failed (${xhr.status})`;
         reject(new ApiError(String(message), { status: xhr.status }));
       }
     };
@@ -397,9 +348,7 @@ async function requestMultipartDownload(path, formData, fallbackName) {
   try {
     res = await authedFetch(path, { method: "POST", body: formData });
   } catch {
-    throw new ApiError("Can't reach the server. Is the backend running?", {
-      status: 0,
-    });
+    throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
@@ -434,8 +383,7 @@ export const PAGE_SIZE = 50;
 export function withQuery(path, params = {}) {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params))
-    if (value !== undefined && value !== null && value !== "")
-      query.set(key, String(value));
+    if (value !== undefined && value !== null && value !== "") query.set(key, String(value));
   const text = query.toString();
   return text ? `${path}?${text}` : path;
 }
@@ -449,14 +397,8 @@ export function withQuery(path, params = {}) {
  */
 export function toPage(body) {
   if (Array.isArray(body)) return { results: body, nextCursor: null };
-  const page =
-    /** @type {{ results?: unknown, nextCursor?: string | null } | null | undefined} */ (
-      body
-    );
-  return {
-    results: Array.isArray(page?.results) ? page.results : [],
-    nextCursor: page?.nextCursor || null,
-  };
+  const page = /** @type {{ results?: unknown, nextCursor?: string | null } | null | undefined} */ (body);
+  return { results: Array.isArray(page?.results) ? page.results : [], nextCursor: page?.nextCursor || null };
 }
 
 export const api = {
@@ -467,8 +409,7 @@ export const api = {
    * @param {{ limit?: number, cursor?: string | null, [filter: string]: unknown }} [params]
    * @returns {Promise<{ results: T[], nextCursor: string | null }>}
    */
-  getPage: async (path, params = {}) =>
-    toPage(await request(withQuery(path, { limit: PAGE_SIZE, ...params }))),
+  getPage: async (path, params = {}) => toPage(await request(withQuery(path, { limit: PAGE_SIZE, ...params }))),
   /**
    * Every page of a collection, one request at a time, for the places that need the whole set. `onPage(items, all)` is called after each page, so a
    * caller can show the first page while the rest arrive. Stops with what it has if `isCancelled()` turns true. A server that returns the whole list
@@ -479,18 +420,11 @@ export const api = {
    * @param {{ onPage?: (items: T[], all: T[]) => void, isCancelled?: () => boolean, maxPages?: number }} [options]
    * @returns {Promise<T[]>}
    */
-  getAllPages: async (
-    path,
-    params = {},
-    { onPage, isCancelled = () => false, maxPages = 200 } = {},
-  ) => {
+  getAllPages: async (path, params = {}, { onPage, isCancelled = () => false, maxPages = 200 } = {}) => {
     const all = [];
     let cursor = null;
     for (let page = 0; page < maxPages; page += 1) {
-      const { results, nextCursor } = await api.getPage(path, {
-        ...params,
-        cursor,
-      });
+      const { results, nextCursor } = await api.getPage(path, { ...params, cursor });
       if (isCancelled()) return all;
       all.push(...results);
       onPage?.(results, all);
@@ -501,22 +435,13 @@ export const api = {
   },
 
   // auth
-  register: (payload) =>
-    request("/api/auth/register", { method: "POST", body: payload }),
+  register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
   login: (identifier, password) =>
-    request("/api/auth/login", {
-      method: "POST",
-      body: { identifier, password },
-    }),
+    request("/api/auth/login", { method: "POST", body: { identifier, password } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
   me: () => request("/api/auth/me"),
-  updateMe: (patch) =>
-    request("/api/auth/me", { method: "PATCH", body: patch }),
-  updateComplianceProfile: (patch) =>
-    request("/api/auth/me/compliance-profile", {
-      method: "PATCH",
-      body: patch,
-    }),
+  updateMe: (patch) => request("/api/auth/me", { method: "PATCH", body: patch }),
+  updateComplianceProfile: (patch) => request("/api/auth/me/compliance-profile", { method: "PATCH", body: patch }),
   uploadAvatar: (file) => {
     const form = new FormData();
     form.append("file", file);
@@ -527,42 +452,25 @@ export const api = {
   forgotPassword: (email) =>
     request("/api/auth/forgot-password", { method: "POST", body: { email } }),
   resetPassword: (uid, token, password) =>
-    request("/api/auth/reset-password", {
-      method: "POST",
-      body: { uid, token, password },
-    }),
+    request("/api/auth/reset-password", { method: "POST", body: { uid, token, password } }),
   changePassword: (currentPassword, newPassword) =>
-    request("/api/auth/change-password", {
-      method: "POST",
-      body: { currentPassword, newPassword },
-    }),
-  verifyEmail: (uid, token) =>
-    request("/api/auth/verify-email", { method: "POST", body: { uid, token } }),
-  resendVerification: () =>
-    request("/api/auth/resend-verification", { method: "POST" }),
+    request("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
+  verifyEmail: (uid, token) => request("/api/auth/verify-email", { method: "POST", body: { uid, token } }),
+  resendVerification: () => request("/api/auth/resend-verification", { method: "POST" }),
 
   // clients (owner-scoped collection sync)
   getClients: () => request("/api/clients"),
   /** One page of the advisor's clients, with the server's filters and sort: q, priority, province, stage, followUpDue, sort (-last, joined, ...). */
   getClientsPage: (params) => api.getPage("/api/clients", params),
-  createClient: (client) =>
-    request("/api/clients", { method: "POST", body: client }),
-  patchClient: (ref, body) =>
-    request(`/api/clients/${encodeURIComponent(ref)}`, {
-      method: "PATCH",
-      body,
-    }),
-  deleteClient: (ref) =>
-    request(`/api/clients/${encodeURIComponent(ref)}`, { method: "DELETE" }),
-  importClients: (clients) =>
-    request("/api/clients/import", { method: "POST", body: { clients } }),
+  createClient: (client) => request("/api/clients", { method: "POST", body: client }),
+  patchClient: (ref, body) => request(`/api/clients/${encodeURIComponent(ref)}`, { method: "PATCH", body }),
+  deleteClient: (ref) => request(`/api/clients/${encodeURIComponent(ref)}`, { method: "DELETE" }),
+  importClients: (clients) => request("/api/clients/import", { method: "POST", body: { clients } }),
 
   // per-user daily-task state
   getState: () => request("/api/state"),
-  putState: (doneTasks) =>
-    request("/api/state", { method: "PUT", body: { doneTasks } }),
-  putGroups: (groups) =>
-    request("/api/state", { method: "PUT", body: { groups } }),
+  putState: (doneTasks) => request("/api/state", { method: "PUT", body: { doneTasks } }),
+  putGroups: (groups) => request("/api/state", { method: "PUT", body: { groups } }),
 
   // tutorial / help content (managed from the Django admin panel)
   getGuides: () => request("/api/guides", { auth: false }),
@@ -571,68 +479,40 @@ export const api = {
   getPresentations: () => request("/api/presentations"),
   // Authenticated downloads (cookie + silent refresh); the PDFs are part of a paid plan.
   downloadPresentationPdf: (slug, fallbackName) =>
-    downloadFile(
-      `/api/presentations/${encodeURIComponent(slug)}/pdf`,
-      fallbackName,
-    ),
+    downloadFile(`/api/presentations/${encodeURIComponent(slug)}/pdf`, fallbackName),
   downloadPresentationVariantPdf: (slug, variantId, fallbackName) =>
-    downloadFile(
-      `/api/presentations/${encodeURIComponent(slug)}/variants/${encodeURIComponent(variantId)}/pdf`,
-      fallbackName,
-    ),
+    downloadFile(`/api/presentations/${encodeURIComponent(slug)}/variants/${encodeURIComponent(variantId)}/pdf`, fallbackName),
 
   // support tickets (bug reports / feature requests) — own tickets only;
   // status changes and admin replies happen in the Django admin panel.
   getTickets: () => request("/api/tickets"),
   getTicket: (id) => request(`/api/tickets/${id}`),
-  createTicket: (payload) =>
-    request("/api/tickets", { method: "POST", body: payload }),
-  addTicketComment: (id, message) =>
-    request(`/api/tickets/${id}/comments`, {
-      method: "POST",
-      body: { message },
-    }),
+  createTicket: (payload) => request("/api/tickets", { method: "POST", body: payload }),
+  addTicketComment: (id, message) => request(`/api/tickets/${id}/comments`, { method: "POST", body: { message } }),
 
   // reminders / to-do list (owner-scoped, never touches meetings/analytics)
   /** Every reminder (read a page at a time; the server never has to build the whole list in one response). */
   getReminders: () => api.getAllPages("/api/reminders"),
-  createReminder: (payload) =>
-    request("/api/reminders", { method: "POST", body: payload }),
-  updateReminder: (id, patch) =>
-    request(`/api/reminders/${id}`, { method: "PATCH", body: patch }),
+  createReminder: (payload) => request("/api/reminders", { method: "POST", body: payload }),
+  updateReminder: (id, patch) => request(`/api/reminders/${id}`, { method: "PATCH", body: patch }),
   deleteReminder: (id) => request(`/api/reminders/${id}`, { method: "DELETE" }),
-  deleteReminderSeries: (seriesId) =>
-    request(`/api/reminders/series/${encodeURIComponent(seriesId)}`, {
-      method: "DELETE",
-    }),
-  setReminderStatus: (id, status) =>
-    request(`/api/reminders/${id}/status`, {
-      method: "POST",
-      body: { status },
-    }),
+  deleteReminderSeries: (seriesId) => request(`/api/reminders/series/${encodeURIComponent(seriesId)}`, { method: "DELETE" }),
+  setReminderStatus: (id, status) => request(`/api/reminders/${id}/status`, { method: "POST", body: { status } }),
 
   // Automated follow-ups — a per-client rule ("keep emailing them every N
   // days, AI-drafted, until I turn it off"). Sending itself stays a no-op
   // server-side until real SMTP credentials are configured.
-  getFollowUpRule: (clientRef) =>
-    request(`/api/followups/rules/${encodeURIComponent(clientRef)}`),
+  getFollowUpRule: (clientRef) => request(`/api/followups/rules/${encodeURIComponent(clientRef)}`),
   setFollowUpRule: (clientRef, payload) =>
-    request(`/api/followups/rules/${encodeURIComponent(clientRef)}`, {
-      method: "PUT",
-      body: payload,
-    }),
+    request(`/api/followups/rules/${encodeURIComponent(clientRef)}`, { method: "PUT", body: payload }),
 
   // Google Drive (server-held OAuth) — per-advisor connect status + client folders
   getDriveConnectUrl: (nextPath) =>
-    request(
-      `/api/drive/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`,
-    ),
+    request(`/api/drive/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
   getDriveStatus: () => request("/api/drive/status"),
   disconnectDrive: () => request("/api/drive/disconnect", { method: "POST" }),
-  setDriveRootFolder: (folder) =>
-    request("/api/drive/root-folder", { method: "PUT", body: { folder } }),
-  resetDriveRootFolder: () =>
-    request("/api/drive/root-folder", { method: "DELETE" }),
+  setDriveRootFolder: (folder) => request("/api/drive/root-folder", { method: "PUT", body: { folder } }),
+  resetDriveRootFolder: () => request("/api/drive/root-folder", { method: "DELETE" }),
   openClientDriveFolder: (clientRef, displayName) =>
     request(`/api/drive/clients/${encodeURIComponent(clientRef)}/folder`, {
       method: "POST",
@@ -646,10 +526,7 @@ export const api = {
     form.append("displayName", displayName);
     if (clientEmail) form.append("clientEmail", clientEmail);
     form.append("file", file);
-    return requestMultipart(
-      `/api/drive/clients/${encodeURIComponent(clientRef)}/files`,
-      form,
-    );
+    return requestMultipart(`/api/drive/clients/${encodeURIComponent(clientRef)}/files`, form);
   },
 
   // Client documents — browse/download approved ones, submit new ones for
@@ -671,8 +548,7 @@ export const api = {
     form.append("file", file);
     return requestMultipart("/api/documents/suggest", form);
   },
-  downloadDocument: (id, fallbackName) =>
-    downloadFile(`/api/documents/${id}/file`, fallbackName),
+  downloadDocument: (id, fallbackName) => downloadFile(`/api/documents/${id}/file`, fallbackName),
 
   // Sales Package Prep (Advisor Assistant) — a 6-step wizard whose draft
   // state is persisted server-side (so it survives navigating away and
@@ -680,72 +556,36 @@ export const api = {
   // dropdowns and a final generate step that merges a cover/summary page +
   // AI-drafted Reason Why Letter + the 6 uploaded documents into one PDF.
   getSalesPackageCompanies: () => request("/api/sales-packages/companies"),
-  getSalesPackageProducts: (companyId) =>
-    request(`/api/sales-packages/companies/${companyId}/products`),
+  getSalesPackageProducts: (companyId) => request(`/api/sales-packages/companies/${companyId}/products`),
   getSalesPackageFunds: (companyId, investmentType) =>
-    request(
-      `/api/sales-packages/companies/${companyId}/funds?investmentType=${encodeURIComponent(investmentType)}`,
-    ),
+    request(`/api/sales-packages/companies/${companyId}/funds?investmentType=${encodeURIComponent(investmentType)}`),
 
   /** Every sales package of the advisor, read a page at a time. */
   getSalesPackages: () => api.getAllPages("/api/sales-packages/packages"),
-  createSalesPackage: () =>
-    request("/api/sales-packages/packages", { method: "POST" }),
+  createSalesPackage: () => request("/api/sales-packages/packages", { method: "POST" }),
   getSalesPackage: (id) => request(`/api/sales-packages/packages/${id}`),
   saveSalesPackageDraft: (id, data, version) =>
-    request(`/api/sales-packages/packages/${id}`, {
-      method: "PUT",
-      body: version ? { data, version } : { data },
-    }),
-  deleteSalesPackage: (id) =>
-    request(`/api/sales-packages/packages/${id}`, { method: "DELETE" }),
+    request(`/api/sales-packages/packages/${id}`, { method: "PUT", body: version ? { data, version } : { data } }),
+  deleteSalesPackage: (id) => request(`/api/sales-packages/packages/${id}`, { method: "DELETE" }),
   uploadSalesPackageDocument: (id, docKey, file, onProgress) => {
     const form = new FormData();
     form.append("file", file);
-    return requestMultipartXHR(
-      `/api/sales-packages/packages/${id}/documents/${docKey}`,
-      form,
-      onProgress,
-    );
+    return requestMultipartXHR(`/api/sales-packages/packages/${id}/documents/${docKey}`, form, onProgress);
   },
-  previewSalesPackageDocument: (id, docKey) =>
-    fetchBlobUrl(`/api/sales-packages/packages/${id}/documents/${docKey}`),
+  previewSalesPackageDocument: (id, docKey) => fetchBlobUrl(`/api/sales-packages/packages/${id}/documents/${docKey}`),
   downloadReasonWhyLetterPdf: (id) =>
-    downloadFile(
-      `/api/sales-packages/packages/${id}/documents/reasonWhyLetter?as=pdf`,
-      "Reason_Why_Letter.pdf",
-    ),
+    downloadFile(`/api/sales-packages/packages/${id}/documents/reasonWhyLetter?as=pdf`, "Reason_Why_Letter.pdf"),
   downloadSalesPackageDocument: (id, docKey, fallbackName, generated = false) =>
-    downloadFile(
-      `/api/sales-packages/packages/${id}/documents/${docKey}${generated ? "?source=generated" : ""}`,
-      fallbackName,
-    ),
-  confirmSalesPackage: (id) =>
-    request(`/api/sales-packages/packages/${id}/confirm`, { method: "POST" }),
-  draftReasonWhyLetter: (id) =>
-    request(`/api/sales-packages/packages/${id}/reason-why-letter`, {
-      method: "POST",
-    }),
+    downloadFile(`/api/sales-packages/packages/${id}/documents/${docKey}${generated ? "?source=generated" : ""}`, fallbackName),
+  confirmSalesPackage: (id) => request(`/api/sales-packages/packages/${id}/confirm`, { method: "POST" }),
+  draftReasonWhyLetter: (id) => request(`/api/sales-packages/packages/${id}/reason-why-letter`, { method: "POST" }),
   saveReasonWhyLetter: (id, text, version) =>
-    request(`/api/sales-packages/packages/${id}/reason-why-letter`, {
-      method: "PUT",
-      body: version ? { text, version } : { text },
-    }),
-  generateAgentDisclosure: (id) =>
-    request(`/api/sales-packages/packages/${id}/agent-disclosure`, {
-      method: "POST",
-    }),
+    request(`/api/sales-packages/packages/${id}/reason-why-letter`, { method: "PUT", body: version ? { text, version } : { text } }),
+  generateAgentDisclosure: (id) => request(`/api/sales-packages/packages/${id}/agent-disclosure`, { method: "POST" }),
   generateSupervisionForm: (id, confirmations) =>
-    request(`/api/sales-packages/packages/${id}/supervision-form`, {
-      method: "POST",
-      body: confirmations,
-    }),
+    request(`/api/sales-packages/packages/${id}/supervision-form`, { method: "POST", body: confirmations }),
   generateSalesPackage: (id, fallbackName) =>
-    requestMultipartDownload(
-      `/api/sales-packages/packages/${id}/generate`,
-      new FormData(),
-      fallbackName,
-    ),
+    requestMultipartDownload(`/api/sales-packages/packages/${id}/generate`, new FormData(), fallbackName),
 
   // Billing / subscription plans — modules, plans, purchase (real Stripe
   // Checkout once configured, an instant "mock" purchase until then).
@@ -763,9 +603,7 @@ export const api = {
         successUrl: `${window.location.origin}/profile?tab=ai-usage&topup=success`,
         cancelUrl: `${window.location.origin}/profile?tab=ai-usage&topup=canceled`,
       },
-      headers: idempotencyKey
-        ? { "Idempotency-Key": idempotencyKey }
-        : undefined,
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
     }),
   // Two separate concerns, both required:
   //   - the idempotency key (SEC-08) makes a double click or a retry after a slow response act
@@ -775,58 +613,37 @@ export const api = {
   purchasePlan: (planId, idempotencyKey) =>
     request("/api/billing/purchase", {
       method: "POST",
-      body: {
-        planId,
-        successUrl: `${window.location.origin}/billing/success`,
-        cancelUrl: `${window.location.origin}/billing/cancel`,
-      },
-      headers: idempotencyKey
-        ? { "Idempotency-Key": idempotencyKey }
-        : undefined,
+      body: { planId, successUrl: `${window.location.origin}/billing/success`, cancelUrl: `${window.location.origin}/billing/cancel` },
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
     }),
 
   // Booking (Calendly-style) — an advisor's shared availability, their
   // (possibly several) named booking links, and the request queue are all
   // authenticated; the /public/* endpoints power the client-facing page.
   getBookingAvailability: () => request("/api/booking/availability"),
-  updateBookingAvailability: (payload) =>
-    request("/api/booking/availability", { method: "PUT", body: payload }),
+  updateBookingAvailability: (payload) => request("/api/booking/availability", { method: "PUT", body: payload }),
 
   getBookingLinks: () => request("/api/booking/links"),
-  createBookingLink: (payload) =>
-    request("/api/booking/links", { method: "POST", body: payload }),
-  updateBookingLink: (id, payload) =>
-    request(`/api/booking/links/${id}`, { method: "PATCH", body: payload }),
-  deleteBookingLink: (id) =>
-    request(`/api/booking/links/${id}`, { method: "DELETE" }),
+  createBookingLink: (payload) => request("/api/booking/links", { method: "POST", body: payload }),
+  updateBookingLink: (id, payload) => request(`/api/booking/links/${id}`, { method: "PATCH", body: payload }),
+  deleteBookingLink: (id) => request(`/api/booking/links/${id}`, { method: "DELETE" }),
 
   /** Every booking request, read a page at a time. */
   getBookingRequests: () => api.getAllPages("/api/booking/requests"),
-  approveBookingRequest: (id) =>
-    request(`/api/booking/requests/${id}/approve`, { method: "POST" }),
-  cancelBookingRequest: (id) =>
-    request(`/api/booking/requests/${id}/cancel`, { method: "POST" }),
+  approveBookingRequest: (id) => request(`/api/booking/requests/${id}/approve`, { method: "POST" }),
+  cancelBookingRequest: (id) => request(`/api/booking/requests/${id}/cancel`, { method: "POST" }),
   rescheduleBookingRequest: (id, date, time) =>
-    request(`/api/booking/requests/${id}/reschedule`, {
-      method: "POST",
-      body: { date, time },
-    }),
+    request(`/api/booking/requests/${id}/reschedule`, { method: "POST", body: { date, time } }),
   setBookingRequestGoogleEvent: (id, googleEventId) =>
-    request(`/api/booking/requests/${id}/google-event`, {
-      method: "PUT",
-      body: { googleEventId },
-    }),
+    request(`/api/booking/requests/${id}/google-event`, { method: "PUT", body: { googleEventId } }),
 
   // Server-side Calendar connection (see src.calendar_connect) — separate
   // from the browser-held one; this is what lets a booking auto-confirm and
   // land on the advisor's calendar instantly, no one logged in required.
   getCalendarConnectUrl: (nextPath) =>
-    request(
-      `/api/calendar-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`,
-    ),
+    request(`/api/calendar-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
   getCalendarConnectStatus: () => request("/api/calendar-connect/status"),
-  disconnectCalendarConnect: () =>
-    request("/api/calendar-connect/disconnect", { method: "POST" }),
+  disconnectCalendarConnect: () => request("/api/calendar-connect/disconnect", { method: "POST" }),
 
   // Calendar event data — proxied through the server-side connection above,
   // so the browser never needs its own Google token/login at all.
@@ -838,58 +655,36 @@ export const api = {
     const qs = params.toString();
     return request(`/api/calendar-connect/events${qs ? `?${qs}` : ""}`);
   },
-  createCalendarEvent: ({
-    summary,
-    description,
-    startISO,
-    endISO,
-    clientId,
-    attendees,
-  }) =>
+  createCalendarEvent: ({ summary, description, startISO, endISO, clientId, attendees }) =>
     request("/api/calendar-connect/events", {
       method: "POST",
       body: { summary, description, startISO, endISO, clientId, attendees },
     }),
   updateCalendarEvent: (eventId, patch) =>
-    request(`/api/calendar-connect/events/${encodeURIComponent(eventId)}`, {
-      method: "PATCH",
-      body: patch,
-    }),
+    request(`/api/calendar-connect/events/${encodeURIComponent(eventId)}`, { method: "PATCH", body: patch }),
   deleteCalendarEvent: (eventId) =>
-    request(`/api/calendar-connect/events/${encodeURIComponent(eventId)}`, {
-      method: "DELETE",
-    }),
+    request(`/api/calendar-connect/events/${encodeURIComponent(eventId)}`, { method: "DELETE" }),
   queryCalendarFreeBusy: (timeMin, timeMax) =>
-    request("/api/calendar-connect/freebusy", {
-      method: "POST",
-      body: { timeMin, timeMax },
-    }),
+    request("/api/calendar-connect/freebusy", { method: "POST", body: { timeMin, timeMax } }),
 
   // Server-side Zoom connection (see src.zoom_connect) — same shape as the
   // Calendar connection above; only needed when a booking link's location
   // is set to Zoom.
   getZoomConnectUrl: (nextPath) =>
-    request(
-      `/api/zoom-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`,
-    ),
+    request(`/api/zoom-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
   getZoomStatus: () => request("/api/zoom-connect/status"),
-  disconnectZoom: () =>
-    request("/api/zoom-connect/disconnect", { method: "POST" }),
+  disconnectZoom: () => request("/api/zoom-connect/disconnect", { method: "POST" }),
 
-  getPublicBookingInfo: (slug) =>
-    request(`/api/booking/public/${encodeURIComponent(slug)}`, { auth: false }),
+  getPublicBookingInfo: (slug) => request(`/api/booking/public/${encodeURIComponent(slug)}`, { auth: false }),
   getPublicBookingSlots: (slug, date, viewerTz) =>
     request(
       `/api/booking/public/${encodeURIComponent(slug)}/slots?date=${encodeURIComponent(date)}${
         viewerTz ? `&viewerTz=${encodeURIComponent(viewerTz)}` : ""
       }`,
-      { auth: false },
+      { auth: false }
     ),
   requestBooking: (slug, payload) =>
-    request(`/api/booking/public/${encodeURIComponent(slug)}/request`, {
-      method: "POST",
-      body: payload,
-    }),
+    request(`/api/booking/public/${encodeURIComponent(slug)}/request`, { method: "POST", body: payload }),
 };
 
 // The full shareable link for an advisor's booking page.

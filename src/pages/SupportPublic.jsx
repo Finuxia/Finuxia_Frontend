@@ -19,9 +19,8 @@ export default function SupportPublic() {
           </div>
           <h1 className="text-xl font-bold text-navy">Need help?</h1>
           <p className="mt-2 text-sm text-slate-500">
-            Email us any time and we'll get back to you — account questions,
-            integration issues (Google Calendar, Google Drive, Zoom), or
-            anything else.
+            Email us any time and we'll get back to you — account questions, integration issues (Google Calendar,
+            Google Drive, Zoom), or anything else.
           </p>
           <a
             href="mailto:info@finuxia.com"
@@ -32,10 +31,7 @@ export default function SupportPublic() {
           </a>
           <p className="mt-4 text-xs text-slate-400">
             Already signed in? Use the in-app{" "}
-            <a
-              href="/tickets"
-              className="font-medium text-gold-dark hover:underline"
-            >
+            <a href="/tickets" className="font-medium text-gold-dark hover:underline">
               Support
             </a>{" "}
             page to track a ticket.

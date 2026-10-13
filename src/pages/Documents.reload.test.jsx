@@ -25,18 +25,12 @@ describe("Documents after a submission", () => {
       http.get(`${API}/api/documents/mine`, () => {
         asked.mine += 1;
         return HttpResponse.json([]);
-      }),
+      })
     );
-    renderWithProviders(<Documents />, {
-      providers: ["router", "toast", "auth"],
-    });
+    renderWithProviders(<Documents />, { providers: ["router", "toast", "auth"] });
     await waitFor(() => expect(asked).toEqual({ library: 1, mine: 1 }));
-    await userEvent.click(
-      await screen.findByRole("button", { name: /Submit Document/ }),
-    );
-    await userEvent.click(
-      screen.getByRole("button", { name: "pretend submitted" }),
-    );
+    await userEvent.click(await screen.findByRole("button", { name: /Submit Document/ }));
+    await userEvent.click(screen.getByRole("button", { name: "pretend submitted" }));
     await waitFor(() => expect(asked).toEqual({ library: 2, mine: 2 }));
   });
 });

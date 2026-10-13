@@ -77,9 +77,7 @@ export default function NotesSection({ notes, onAdd, onEdit, onDelete }) {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm text-slate-600">{note.text}</p>
-                    <p className="mt-1 text-xs text-slate-400">
-                      {formatDate(note.date)}
-                    </p>
+                    <p className="mt-1 text-xs text-slate-400">{formatDate(note.date)}</p>
                   </div>
                   <div className="flex shrink-0 gap-1">
                     <button

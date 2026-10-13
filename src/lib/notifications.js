@@ -5,11 +5,7 @@ function daysSince(dateStr) {
   return Math.round((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export function buildNotifications(
-  clients,
-  reminders = [],
-  bookingRequests = [],
-) {
+export function buildNotifications(clients, reminders = [], bookingRequests = []) {
   const notifications = [];
 
   clients.forEach((c) => {
@@ -54,9 +50,7 @@ export function buildNotifications(
       id: `reminder-${r.id}`,
       type: overdue ? "reminder-overdue" : "reminder-due",
       dot: overdue ? "bg-av-red" : "bg-av-blue",
-      text: overdue
-        ? `Reminder overdue: ${r.title}`
-        : `Reminder due today: ${r.title}${r.dueTime ? ` at ${formatTime(r.dueTime)}` : ""}`,
+      text: overdue ? `Reminder overdue: ${r.title}` : `Reminder due today: ${r.title}${r.dueTime ? ` at ${formatTime(r.dueTime)}` : ""}`,
       href: "/my-day",
     });
   });

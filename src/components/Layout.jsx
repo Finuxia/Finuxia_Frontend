@@ -1,37 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  NavLink,
-  Outlet,
-  Navigate,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
-import {
-  Plus,
-  LayoutGrid,
-  CalendarDays,
-  Users,
-  Clock,
-  Upload,
-  BarChart3,
-  BookOpen,
-  Sparkles,
-  Target,
-  Presentation,
-  ChevronDown,
-  User as UserIcon,
-  LogOut,
-  LifeBuoy,
-  UsersRound,
-  FolderCog,
-  FileStack,
-  CalendarClock,
-  Link2,
-  Info,
-  Package,
-  CreditCard,
-} from "lucide-react";
+import { NavLink, Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Plus, LayoutGrid, CalendarDays, Users, Clock, Upload, BarChart3, BookOpen, Sparkles, Target, Presentation, ChevronDown, User as UserIcon, LogOut, LifeBuoy, UsersRound, FolderCog, FileStack, CalendarClock, Link2, Info, Package, CreditCard } from "lucide-react";
 import Logo from "./Logo";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
@@ -72,32 +42,16 @@ const NAV_MENUS = [
     items: [
       { to: "/meetings", label: "Calendar Meetings", icon: CalendarDays },
       { to: "/booking-links", label: "Booking Links", icon: Link2 },
-      {
-        to: "/booking-requests",
-        label: "Booking Requests",
-        icon: CalendarClock,
-      },
+      { to: "/booking-requests", label: "Booking Requests", icon: CalendarClock },
     ],
   },
   {
     label: "Advisor Assistant",
     icon: Sparkles,
     items: [
-      {
-        to: "/advisor-assistant/presentations",
-        label: "Presentations",
-        icon: Presentation,
-      },
-      {
-        to: "/advisor-assistant/sales-package",
-        label: "Sales Package Prep",
-        icon: Package,
-      },
-      {
-        to: "/advisor-assistant/strategy-prep",
-        label: "Strategy Prep",
-        icon: Target,
-      },
+      { to: "/advisor-assistant/presentations", label: "Presentations", icon: Presentation },
+      { to: "/advisor-assistant/sales-package", label: "Sales Package Prep", icon: Package },
+      { to: "/advisor-assistant/strategy-prep", label: "Strategy Prep", icon: Target },
     ],
   },
   {
@@ -159,9 +113,7 @@ export default function Layout() {
                 to={to}
                 className={({ isActive }) =>
                   `flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    isActive
-                      ? "bg-white/10 text-gold"
-                      : "text-slate-300 hover:text-white"
+                    isActive ? "bg-white/10 text-gold" : "text-slate-300 hover:text-white"
                   }`
                 }
               >
@@ -234,11 +186,7 @@ function NavDropdown({ menu }) {
 
   useEffect(() => {
     function onDocClick(e) {
-      if (
-        btnRef.current?.contains(e.target) ||
-        menuRef.current?.contains(e.target)
-      )
-        return;
+      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
       setOpen(false);
     }
     function onScrollOrResize() {
@@ -270,17 +218,12 @@ function NavDropdown({ menu }) {
         ref={btnRef}
         onClick={toggle}
         className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-          open || isActive
-            ? "bg-white/10 text-gold"
-            : "text-slate-300 hover:text-white"
+          open || isActive ? "bg-white/10 text-gold" : "text-slate-300 hover:text-white"
         }`}
       >
         <Icon size={14} />
         {label}
-        <ChevronDown
-          size={13}
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown size={13} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {/* Rendered in a portal so the nav's overflow-x-auto can't clip it. */}
       {open &&
@@ -298,9 +241,7 @@ function NavDropdown({ menu }) {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                    isActive
-                      ? "bg-gold/10 text-gold-dark"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-navy"
+                    isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
                   }`
                 }
               >
@@ -309,7 +250,7 @@ function NavDropdown({ menu }) {
               </NavLink>
             ))}
           </div>,
-          document.body,
+          document.body
         )}
     </>
   );
@@ -325,11 +266,7 @@ function UserMenu({ user }) {
 
   useEffect(() => {
     function onDocClick(e) {
-      if (
-        btnRef.current?.contains(e.target) ||
-        menuRef.current?.contains(e.target)
-      )
-        return;
+      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
       setOpen(false);
     }
     function onScrollOrResize() {
@@ -370,13 +307,9 @@ function UserMenu({ user }) {
         title={user?.name}
       >
         {user?.hasAvatar ? (
-          <img
-            src={api.avatarUrl(user.id)}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+          <img src={api.avatarUrl(user.id)} alt="" className="h-full w-full object-cover" />
         ) : (
-          (user?.name?.[0]?.toUpperCase() ?? "?")
+          user?.name?.[0]?.toUpperCase() ?? "?"
         )}
       </button>
       {open &&
@@ -388,9 +321,7 @@ function UserMenu({ user }) {
             className="z-[60] w-52 animate-fade-in rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
           >
             <div className="mb-1 border-b border-slate-100 px-3 py-2">
-              <p className="truncate text-sm font-semibold text-navy">
-                {user?.name}
-              </p>
+              <p className="truncate text-sm font-semibold text-navy">{user?.name}</p>
               <p className="truncate text-xs text-slate-400">{user?.email}</p>
             </div>
             <NavLink
@@ -398,9 +329,7 @@ function UserMenu({ user }) {
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  isActive
-                    ? "bg-gold/10 text-gold-dark"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-navy"
+                  isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
                 }`
               }
             >
@@ -412,9 +341,7 @@ function UserMenu({ user }) {
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  isActive
-                    ? "bg-gold/10 text-gold-dark"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-navy"
+                  isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
                 }`
               }
             >
@@ -429,7 +356,7 @@ function UserMenu({ user }) {
               Log Out
             </button>
           </div>,
-          document.body,
+          document.body
         )}
     </>
   );

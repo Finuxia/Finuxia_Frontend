@@ -40,8 +40,7 @@ export function normalizeCellValue(value) {
   if (typeof value === "number") return Number.isFinite(value) ? value : "";
   if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
   if (typeof value === "object") {
-    if (Array.isArray(value.richText))
-      return value.richText.map((part) => part.text ?? "").join("");
+    if (Array.isArray(value.richText)) return value.richText.map((part) => part.text ?? "").join("");
     if ("result" in value) return normalizeCellValue(value.result); // formula
     if ("text" in value) return normalizeCellValue(value.text); // hyperlink (e.g. a mailto: email)
     if ("error" in value) return "";
@@ -58,24 +57,16 @@ function isBlank(v) {
  * The first non-empty row is the header; blank rows are skipped.
  */
 export function rowsFromGrid(grid) {
-  const headerIdx = grid.findIndex((r) =>
-    r.some((v) => !isBlank(v) && String(v).trim() !== ""),
-  );
+  const headerIdx = grid.findIndex((r) => r.some((v) => !isBlank(v) && String(v).trim() !== ""));
   if (headerIdx === -1) return [];
 
-  const headers = grid[headerIdx].map((h) =>
-    isBlank(h) ? "" : String(h).trim(),
-  );
-  if (headers.length > MAX_COLUMNS)
-    throw new SpreadsheetError("This spreadsheet has too many columns.");
+  const headers = grid[headerIdx].map((h) => (isBlank(h) ? "" : String(h).trim()));
+  if (headers.length > MAX_COLUMNS) throw new SpreadsheetError("This spreadsheet has too many columns.");
 
   const rows = [];
   for (const cells of grid.slice(headerIdx + 1)) {
     if (cells.every(isBlank)) continue;
-    if (rows.length >= MAX_ROWS)
-      throw new SpreadsheetError(
-        `This spreadsheet has more than ${MAX_ROWS} rows.`,
-      );
+    if (rows.length >= MAX_ROWS) throw new SpreadsheetError(`This spreadsheet has more than ${MAX_ROWS} rows.`);
     const row = Object.create(null);
     headers.forEach((header, c) => {
       if (!header || UNSAFE_KEYS.has(header) || header in row) return;
@@ -96,13 +87,9 @@ async function readXlsx(buffer) {
   const grid = [];
   const columnCount = Math.min(sheet.columnCount, MAX_COLUMNS + 1);
   sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-    if (rowNumber > MAX_ROWS + 1000)
-      throw new SpreadsheetError(
-        `This spreadsheet has more than ${MAX_ROWS} rows.`,
-      );
+    if (rowNumber > MAX_ROWS + 1000) throw new SpreadsheetError(`This spreadsheet has more than ${MAX_ROWS} rows.`);
     const cells = [];
-    for (let c = 1; c <= columnCount; c++)
-      cells.push(normalizeCellValue(row.getCell(c).value));
+    for (let c = 1; c <= columnCount; c++) cells.push(normalizeCellValue(row.getCell(c).value));
     grid[rowNumber - 1] = cells;
   });
   // eachRow skips empty rows, leaving holes in the grid.
@@ -147,10 +134,7 @@ export function parseCsv(text, delimiter = ",") {
 /** Excel in many locales writes ";" (or tab) instead of ","; pick whichever the header line uses most. */
 function detectDelimiter(text) {
   const firstLine = text.split(/\r\n|\n|\r/, 1)[0].replace(/"[^"]*"/g, "");
-  const counts = [",", ";", "\t"].map((d) => [
-    d,
-    firstLine.split(d).length - 1,
-  ]);
+  const counts = [",", ";", "\t"].map((d) => [d, firstLine.split(d).length - 1]);
   counts.sort((a, b) => b[1] - a[1]);
   return counts[0][1] > 0 ? counts[0][0] : ",";
 }
@@ -168,13 +152,8 @@ function readCsv(buffer) {
   return rowsFromGrid(parseCsv(text, detectDelimiter(text)));
 }
 
-const isZip = (bytes) =>
-  bytes.length > 3 && bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK"
-const isLegacyXls = (bytes) =>
-  bytes.length > 3 &&
-  bytes[0] === 0xd0 &&
-  bytes[1] === 0xcf &&
-  bytes[2] === 0x11;
+const isZip = (bytes) => bytes.length > 3 && bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK"
+const isLegacyXls = (bytes) => bytes.length > 3 && bytes[0] === 0xd0 && bytes[1] === 0xcf && bytes[2] === 0x11;
 
 /**
  * Parses an .xlsx or .csv (the format is sniffed from the bytes, not trusted
@@ -183,23 +162,17 @@ const isLegacyXls = (bytes) =>
  */
 export async function parseSpreadsheet(buffer) {
   if (buffer.byteLength > MAX_FILE_BYTES) {
-    throw new SpreadsheetError(
-      `This file is larger than ${MAX_FILE_BYTES / 1024 / 1024} MB.`,
-    );
+    throw new SpreadsheetError(`This file is larger than ${MAX_FILE_BYTES / 1024 / 1024} MB.`);
   }
   const bytes = new Uint8Array(buffer);
   if (isLegacyXls(bytes)) {
-    throw new SpreadsheetError(
-      "Old .xls files aren't supported. Open it in Excel and save it as .xlsx or .csv.",
-    );
+    throw new SpreadsheetError("Old .xls files aren't supported. Open it in Excel and save it as .xlsx or .csv.");
   }
   try {
     return isZip(bytes) ? await readXlsx(buffer) : readCsv(buffer);
   } catch (err) {
     if (err instanceof SpreadsheetError) throw err;
-    throw new SpreadsheetError(
-      "Could not read this file. Make sure it's a valid .xlsx or .csv export.",
-    );
+    throw new SpreadsheetError("Could not read this file. Make sure it's a valid .xlsx or .csv export.");
   }
 }
 
@@ -209,11 +182,7 @@ export async function readSpreadsheetFile(file) {
 
 // ---- writing -------------------------------------------------------------
 
-const solid = (argb) => ({
-  type: "pattern",
-  pattern: "solid",
-  fgColor: { argb },
-});
+const solid = (argb) => ({ type: "pattern", pattern: "solid", fgColor: { argb } });
 
 /** The downloadable import template: bold header, sample row painted red. */
 export async function buildTemplateWorkbook(columns, sampleRow) {
@@ -234,12 +203,7 @@ export async function buildTemplateWorkbook(columns, sampleRow) {
 }
 
 /** The funnel checklist: merged navy banner, gold header, one row per client. */
-export async function buildFunnelWorkbook({
-  banner,
-  headerRow,
-  dataRows,
-  columnWidths,
-}) {
+export async function buildFunnelWorkbook({ banner, headerRow, dataRows, columnWidths }) {
   const ExcelJS = await loadExcelJS();
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Funnel");

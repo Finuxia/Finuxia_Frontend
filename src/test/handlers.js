@@ -26,78 +26,34 @@ export const defaultHandlers = [
   http.get(`${API}/api/auth/me`, () => HttpResponse.json({ user: testUser })),
   http.get(`${API}/api/billing/me`, () => HttpResponse.json(testBilling)),
   http.get(`${API}/api/clients`, () => HttpResponse.json([])),
-  http.get(`${API}/api/state`, () =>
-    HttpResponse.json({ doneTasks: {}, groups: [] }),
-  ),
+  http.get(`${API}/api/state`, () => HttpResponse.json({ doneTasks: {}, groups: [] })),
   // What the layout and the providers ask for on every page.
   http.get(`${API}/api/billing/ai-usage`, () =>
     HttpResponse.json({
       aiIncluded: true,
       mode: "unlimited",
       period: null,
-      credits: {
-        included: null,
-        extra: 0,
-        total: null,
-        used: 0,
-        inFlight: 0,
-        remaining: null,
-      },
+      credits: { included: null, extra: 0, total: null, used: 0, inFlight: 0, remaining: null },
       percentUsed: null,
       warning: null,
       blocked: null,
       byFeature: [],
       wallet: { balanceCents: 1000 },
       recentUsage: [],
-    }),
+    })
   ),
   http.get(`${API}/api/followups/rules/:ref`, ({ params }) =>
-    HttpResponse.json({
-      clientRef: params.ref,
-      enabled: false,
-      frequency: "monthly",
-      tone: "friendly",
-    }),
+    HttpResponse.json({ clientRef: params.ref, enabled: false, frequency: "monthly", tone: "friendly" })
   ),
   http.put(`${API}/api/state`, () => HttpResponse.json({})),
-  http.get(`${API}/api/billing/plans`, () =>
-    HttpResponse.json({
-      plans: [],
-      stripeConfigured: false,
-      purchasesOpen: true,
-    }),
-  ),
+  http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans: [], stripeConfigured: false, purchasesOpen: true })),
   http.get(`${API}/api/sales-packages/companies`, () => HttpResponse.json([])),
-  http.get(`${API}/api/sales-packages/companies/:id/products`, () =>
-    HttpResponse.json([]),
-  ),
+  http.get(`${API}/api/sales-packages/companies/:id/products`, () => HttpResponse.json([])),
   http.get(`${API}/api/tickets`, () => HttpResponse.json([])),
   http.get(`${API}/api/reminders`, () => HttpResponse.json([])),
   http.get(`${API}/api/booking/requests`, () => HttpResponse.json([])),
-  http.get(`${API}/api/calendar-connect/status`, () =>
-    HttpResponse.json({
-      configured: true,
-      connected: false,
-      status: "disconnected",
-      googleEmail: null,
-    }),
-  ),
-  http.get(`${API}/api/drive/status`, () =>
-    HttpResponse.json({
-      connected: false,
-      status: "disconnected",
-      googleEmail: null,
-    }),
-  ),
-  http.get(`${API}/api/zoom-connect/status`, () =>
-    HttpResponse.json({
-      connected: false,
-      status: "disconnected",
-      googleEmail: null,
-    }),
-  ),
-  http.post(
-    `${API}/api/auth/logout`,
-    () => new HttpResponse(null, { status: 204 }),
-  ),
+  http.get(`${API}/api/calendar-connect/status`, () => HttpResponse.json({ configured: true, connected: false, status: "disconnected", googleEmail: null })),
+  http.get(`${API}/api/drive/status`, () => HttpResponse.json({ connected: false, status: "disconnected", googleEmail: null })),
+  http.get(`${API}/api/zoom-connect/status`, () => HttpResponse.json({ connected: false, status: "disconnected", googleEmail: null })),
+  http.post(`${API}/api/auth/logout`, () => new HttpResponse(null, { status: 204 })),
 ];

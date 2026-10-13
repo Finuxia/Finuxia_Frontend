@@ -9,13 +9,8 @@ const catalog = { loadProductsFor: () => {}, loadFundsFor: () => {} };
 
 describe("saving a draft with no package yet", () => {
   it("asks the server for nothing and reports that nothing was saved", async () => {
-    const save = vi
-      .spyOn(api, "saveSalesPackageDraft")
-      .mockResolvedValue({ version: 2 });
-    const { result } = renderHook(
-      () => useSalesPackageDraft({ packageId: null, catalog }),
-      { wrapper },
-    );
+    const save = vi.spyOn(api, "saveSalesPackageDraft").mockResolvedValue({ version: 2 });
+    const { result } = renderHook(() => useSalesPackageDraft({ packageId: null, catalog }), { wrapper });
     let outcome;
     await act(async () => {
       outcome = await result.current.saveDraft();

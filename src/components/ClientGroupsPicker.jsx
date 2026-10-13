@@ -23,9 +23,7 @@ export default function ClientGroupsPicker({ clientId }) {
   const [creating, setCreating] = useState(false);
   const ref = useRef(null);
 
-  const mine = groups.filter((g) =>
-    g.memberIds.some((id) => String(id) === String(clientId)),
-  );
+  const mine = groups.filter((g) => g.memberIds.some((id) => String(id) === String(clientId)));
 
   useEffect(() => {
     function onDocClick(e) {
@@ -38,13 +36,8 @@ export default function ClientGroupsPicker({ clientId }) {
   return (
     <div className="relative flex flex-wrap items-center gap-1.5" ref={ref}>
       {mine.map((g) => (
-        <span
-          key={g.id}
-          className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy"
-        >
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${DOT_BG[g.color] ?? "bg-navy"}`}
-          />
+        <span key={g.id} className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy">
+          <span className={`h-1.5 w-1.5 rounded-full ${DOT_BG[g.color] ?? "bg-navy"}`} />
           {g.name}
         </span>
       ))}
@@ -63,9 +56,7 @@ export default function ClientGroupsPicker({ clientId }) {
               <p className="px-2 py-2 text-xs text-slate-400">No groups yet.</p>
             ) : (
               groups.map((g) => {
-                const checked = g.memberIds.some(
-                  (id) => String(id) === String(clientId),
-                );
+                const checked = g.memberIds.some((id) => String(id) === String(clientId));
                 return (
                   <button
                     key={g.id}
@@ -79,9 +70,7 @@ export default function ClientGroupsPicker({ clientId }) {
                     >
                       {checked && <Check size={11} className="text-white" />}
                     </span>
-                    <span
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_BG[g.color] ?? "bg-navy"}`}
-                    />
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_BG[g.color] ?? "bg-navy"}`} />
                     <span className="truncate">{g.name}</span>
                   </button>
                 );
@@ -103,12 +92,7 @@ export default function ClientGroupsPicker({ clientId }) {
         </div>
       )}
 
-      {creating && (
-        <GroupModal
-          initialMemberIds={[clientId]}
-          onClose={() => setCreating(false)}
-        />
-      )}
+      {creating && <GroupModal initialMemberIds={[clientId]} onClose={() => setCreating(false)} />}
     </div>
   );
 }

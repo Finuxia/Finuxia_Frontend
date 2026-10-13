@@ -8,16 +8,7 @@
 // `plain` there to render the mark with no chip at all.
 export default function Logo({ size = 18, className = "", plain = false }) {
   if (plain) {
-    return (
-      <img
-        src="/logo-icon.png"
-        alt="Finuxia"
-        width={size}
-        height={size}
-        className={`shrink-0 ${className}`}
-        style={{ display: "block" }}
-      />
-    );
+    return <img src="/logo-icon.png" alt="Finuxia" width={size} height={size} className={`shrink-0 ${className}`} style={{ display: "block" }} />;
   }
   const pad = Math.max(2, Math.round(size * 0.12));
   return (
@@ -25,13 +16,7 @@ export default function Logo({ size = 18, className = "", plain = false }) {
       className={`inline-flex shrink-0 items-center justify-center rounded-md bg-white ${className}`}
       style={{ width: size + pad * 2, height: size + pad * 2, padding: pad }}
     >
-      <img
-        src="/logo-icon.png"
-        alt="Finuxia"
-        width={size}
-        height={size}
-        style={{ display: "block" }}
-      />
+      <img src="/logo-icon.png" alt="Finuxia" width={size} height={size} style={{ display: "block" }} />
     </span>
   );
 }

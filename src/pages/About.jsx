@@ -36,17 +36,14 @@ export default function About() {
           </span>
         </div>
         <p className="mx-auto mt-4 max-w-xl text-sm text-slate-300 sm:text-base">
-          The day-to-day operating system for financial advisors — clients,
-          meetings, and follow-ups, all in one place.
+          The day-to-day operating system for financial advisors — clients, meetings, and follow-ups, all in one
+          place.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {POINTS.map(({ icon: Icon, title, body }) => (
-          <div
-            key={title}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-          >
+          <div key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10 text-gold-dark">
               <Icon size={18} />
             </div>
@@ -58,10 +55,7 @@ export default function About() {
 
       <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-6 text-center text-sm text-slate-500">
         Questions or feedback? Reach out any time from{" "}
-        <Link
-          to="/tickets"
-          className="font-semibold text-gold-dark hover:underline"
-        >
+        <Link to="/tickets" className="font-semibold text-gold-dark hover:underline">
           Support
         </Link>
         .

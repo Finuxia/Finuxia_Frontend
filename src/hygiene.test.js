@@ -10,13 +10,7 @@ describe("removed dead code stays removed", () => {
   });
 
   it("the unread VITE_GOOGLE_CLIENT_ID is in no config or documentation", () => {
-    for (const file of [
-      ".env.example",
-      ".env.production",
-      "README.md",
-      "Dockerfile",
-      ".github/workflows/ci.yml",
-    ]) {
+    for (const file of [".env.example", ".env.production", "README.md", "Dockerfile", ".github/workflows/ci.yml"]) {
       expect(read(file), file).not.toContain("VITE_GOOGLE_CLIENT_ID");
     }
   });
@@ -40,11 +34,7 @@ describe("removed dead code stays removed", () => {
       for (const name of readdirSync(dir)) {
         const path = `${dir}/${name}`;
         if (statSync(path).isDirectory()) walk(path);
-        else if (/\.(jsx?|mjs)$/.test(name) && !/\.test\./.test(name))
-          for (const m of read(path).matchAll(
-            /import\.meta\.env\.(VITE_[A-Z0-9_]+)/g,
-          ))
-            found.add(m[1]);
+        else if (/\.(jsx?|mjs)$/.test(name) && !/\.test\./.test(name)) for (const m of read(path).matchAll(/import\.meta\.env\.(VITE_[A-Z0-9_]+)/g)) found.add(m[1]);
       }
     };
     walk("src");
@@ -58,10 +48,7 @@ describe("removed dead code stays removed", () => {
   it("every environment variable the source reads is documented in .env.example", () => {
     const example = read(".env.example");
     for (const name of envVarsReadBySource()) {
-      expect(
-        example,
-        `${name} is read in src/ but missing from .env.example`,
-      ).toContain(name);
+      expect(example, `${name} is read in src/ but missing from .env.example`).toContain(name);
     }
   });
 

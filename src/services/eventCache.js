@@ -23,8 +23,7 @@ export function readCachedEvents(userEmail) {
     const raw = localStorage.getItem(keyFor(userEmail));
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed?.version !== VERSION || !Array.isArray(parsed.events))
-      return null;
+    if (parsed?.version !== VERSION || !Array.isArray(parsed.events)) return null;
     return { events: parsed.events, cachedAt: parsed.cachedAt };
   } catch {
     return null;
@@ -35,7 +34,7 @@ export function writeCachedEvents(userEmail, events) {
   try {
     localStorage.setItem(
       keyFor(userEmail),
-      JSON.stringify({ version: VERSION, cachedAt: Date.now(), events }),
+      JSON.stringify({ version: VERSION, cachedAt: Date.now(), events })
     );
   } catch {
     // Quota or serialization failure is non-fatal — the live list still works.

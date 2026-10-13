@@ -15,17 +15,11 @@ export default function AuthCard({ title, subtitle, children, footer }) {
 
           <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
             <h1 className="text-xl font-bold text-navy">{title}</h1>
-            {subtitle && (
-              <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
-            )}
+            {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
             <div className="mt-6">{children}</div>
           </div>
 
-          {footer && (
-            <div className="mt-5 text-center text-sm text-slate-500">
-              {footer}
-            </div>
-          )}
+          {footer && <div className="mt-5 text-center text-sm text-slate-500">{footer}</div>}
         </div>
       </div>
       <Footer minimal />
@@ -36,9 +30,7 @@ export default function AuthCard({ title, subtitle, children, footer }) {
 export function AuthField({ label, error, children }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {label}
-      </span>
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</span>
       {children}
       {error && <span className="text-xs text-av-red">{error}</span>}
     </label>

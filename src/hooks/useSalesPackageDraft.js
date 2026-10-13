@@ -1,14 +1,10 @@
 import { useRef, useState } from "react";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
-import {
-  UPLOADED_DOCUMENTS,
-  INVESTMENT_BEARING_TYPES,
-} from "../lib/salesPackageOptions";
+import { UPLOADED_DOCUMENTS, INVESTMENT_BEARING_TYPES } from "../lib/salesPackageOptions";
 import { emptyData, emptyProduct } from "../lib/salesPackage/wizard";
 
-const CHANGED_ELSEWHERE =
-  "This package was changed elsewhere — showing the latest version. Re-apply your edits if needed.";
+const CHANGED_ELSEWHERE = "This package was changed elsewhere — showing the latest version. Re-apply your edits if needed.";
 
 /**
  * The sales package draft: its form data, status and documents, and everything that keeps them in step with the server.
@@ -27,9 +23,7 @@ export default function useSalesPackageDraft({ packageId, catalog, onLoaded }) {
   const { addToast } = useToast();
   const [status, setStatus] = useState("draft");
   const [data, setData] = useState(emptyData());
-  const [documents, setDocuments] = useState(
-    UPLOADED_DOCUMENTS.map((d) => ({ ...d, uploaded: false })),
-  );
+  const [documents, setDocuments] = useState(UPLOADED_DOCUMENTS.map((d) => ({ ...d, uploaded: false })));
   // Bumping docVersion makes the Review step's inline previews refetch.
   const [docVersion, setDocVersion] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -52,9 +46,7 @@ export default function useSalesPackageDraft({ packageId, catalog, onLoaded }) {
 
   const loadPackageInto = (pkg) => {
     versionRef.current = pkg.version;
-    const products = pkg.data.products?.length
-      ? pkg.data.products
-      : [emptyProduct()];
+    const products = pkg.data.products?.length ? pkg.data.products : [emptyProduct()];
     setStatus(pkg.status);
     setData({ ...emptyData(), ...pkg.data, products });
     applyDocuments(pkg.documents);
@@ -65,8 +57,7 @@ export default function useSalesPackageDraft({ packageId, catalog, onLoaded }) {
     // normally only fetched on the change handler, not on load.
     for (const p of products) {
       if (p.companyId) catalog.loadProductsFor(p.companyId);
-      if (p.companyId && p.type && INVESTMENT_BEARING_TYPES.has(p.type))
-        catalog.loadFundsFor(p.companyId, p.type);
+      if (p.companyId && p.type && INVESTMENT_BEARING_TYPES.has(p.type)) catalog.loadFundsFor(p.companyId, p.type);
     }
   };
 
@@ -84,11 +75,7 @@ export default function useSalesPackageDraft({ packageId, catalog, onLoaded }) {
     if (!packageId) return;
     setSaving(true);
     try {
-      const saved = await api.saveSalesPackageDraft(
-        packageId,
-        data,
-        versionRef.current,
-      );
+      const saved = await api.saveSalesPackageDraft(packageId, data, versionRef.current);
       versionRef.current = saved.version;
       if (!silent) addToast("Draft saved");
       return true;

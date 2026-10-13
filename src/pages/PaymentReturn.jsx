@@ -2,11 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import {
-  forgetPlanBeforeCheckout,
-  planBeforeCheckout,
-  purchaseConfirmed,
-} from "../lib/checkout";
+import { forgetPlanBeforeCheckout, planBeforeCheckout, purchaseConfirmed } from "../lib/checkout";
 
 /**
  * Where the payment provider sends the customer back to: /billing/success and /billing/cancel.
@@ -17,11 +13,7 @@ import {
  * one the account had before checkout. If that does not happen in time it says so honestly and offers to check again.
  * The cancel page likewise only reports the plan the server says the account is on (loaded when the app started).
  */
-export default function PaymentReturn({
-  outcome,
-  intervalMs = 2000,
-  maxAttempts = 15,
-}) {
+export default function PaymentReturn({ outcome, intervalMs = 2000, maxAttempts = 15 }) {
   const { billing, refreshBilling } = useAuth();
   const [phase, setPhase] = useState("checking"); // checking | confirmed | pending | error
   const [round, setRound] = useState(0);
@@ -59,66 +51,40 @@ export default function PaymentReturn({
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div
-        role="status"
-        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"
-      >
+      <div role="status" className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
         {outcome === "cancel" ? (
           <>
             <XCircle className="mx-auto text-slate-400" size={36} />
-            <h1 className="mt-3 text-xl font-semibold text-navy">
-              Checkout cancelled
-            </h1>
+            <h1 className="mt-3 text-xl font-semibold text-navy">Checkout cancelled</h1>
             <p className="mt-2 text-sm text-slate-500">
-              {planName
-                ? `Your plan hasn't changed: you're on ${planName}.`
-                : "Your plan hasn't changed."}
+              {planName ? `Your plan hasn't changed: you're on ${planName}.` : "Your plan hasn't changed."}
             </p>
             <Actions primary={{ to: "/billing", label: "Back to plans" }} />
           </>
         ) : phase === "confirmed" ? (
           <>
             <CheckCircle2 className="mx-auto text-av-green" size={36} />
-            <h1 className="mt-3 text-xl font-semibold text-navy">
-              You're all set
-            </h1>
-            <p className="mt-2 text-sm text-slate-500">
-              Your payment is confirmed
-              {planName ? ` and you're now on ${planName}` : ""}.
-            </p>
-            <Actions
-              primary={{ to: "/dashboard", label: "Continue to the app" }}
-            />
+            <h1 className="mt-3 text-xl font-semibold text-navy">You're all set</h1>
+            <p className="mt-2 text-sm text-slate-500">Your payment is confirmed{planName ? ` and you're now on ${planName}` : ""}.</p>
+            <Actions primary={{ to: "/dashboard", label: "Continue to the app" }} />
           </>
         ) : phase === "checking" ? (
           <>
-            <Loader2
-              className="mx-auto animate-spin text-gold-dark"
-              size={36}
-            />
-            <h1 className="mt-3 text-xl font-semibold text-navy">
-              Confirming your payment…
-            </h1>
-            <p className="mt-2 text-sm text-slate-500">
-              This usually takes a few seconds. Please don't pay again.
-            </p>
+            <Loader2 className="mx-auto animate-spin text-gold-dark" size={36} />
+            <h1 className="mt-3 text-xl font-semibold text-navy">Confirming your payment…</h1>
+            <p className="mt-2 text-sm text-slate-500">This usually takes a few seconds. Please don't pay again.</p>
           </>
         ) : (
           <>
             <Loader2 className="mx-auto text-slate-400" size={36} />
-            <h1 className="mt-3 text-xl font-semibold text-navy">
-              We haven't received confirmation yet
-            </h1>
+            <h1 className="mt-3 text-xl font-semibold text-navy">We haven't received confirmation yet</h1>
             <p className="mt-2 text-sm text-slate-500">
               {phase === "error"
                 ? "We couldn't reach the server to check. "
                 : "If you completed the payment, it can take a few minutes to arrive; your plan updates by itself when it does. "}
               Please don't pay again.
             </p>
-            <Actions
-              primary={{ onClick: checkAgain, label: "Check again" }}
-              secondary={{ to: "/billing", label: "Back to plans" }}
-            />
+            <Actions primary={{ onClick: checkAgain, label: "Check again" }} secondary={{ to: "/billing", label: "Back to plans" }} />
           </>
         )}
       </div>
@@ -131,26 +97,16 @@ function Actions({ primary, secondary }) {
   return (
     <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
       {primary.to ? (
-        <Link
-          to={primary.to}
-          className={`${base} bg-navy text-white hover:bg-navy-light`}
-        >
+        <Link to={primary.to} className={`${base} bg-navy text-white hover:bg-navy-light`}>
           {primary.label}
         </Link>
       ) : (
-        <button
-          type="button"
-          onClick={primary.onClick}
-          className={`${base} bg-navy text-white hover:bg-navy-light`}
-        >
+        <button type="button" onClick={primary.onClick} className={`${base} bg-navy text-white hover:bg-navy-light`}>
           {primary.label}
         </button>
       )}
       {secondary && (
-        <Link
-          to={secondary.to}
-          className="text-sm font-semibold text-slate-700 underline"
-        >
+        <Link to={secondary.to} className="text-sm font-semibold text-slate-700 underline">
           {secondary.label}
         </Link>
       )}

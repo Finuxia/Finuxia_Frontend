@@ -39,11 +39,5 @@ export default function useSalesPackageCatalog() {
     }
   };
 
-  return {
-    companies,
-    productsByCompany,
-    fundsByKey,
-    loadProductsFor,
-    loadFundsFor,
-  };
+  return { companies, productsByCompany, fundsByKey, loadProductsFor, loadFundsFor };
 }

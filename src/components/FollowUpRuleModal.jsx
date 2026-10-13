@@ -31,11 +31,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
     api
       .getFollowUpRule(client.id)
       .then((r) => !cancelled && setRule(r))
-      .catch(
-        () =>
-          !cancelled &&
-          setRule({ enabled: false, frequency: "monthly", tone: "friendly" }),
-      );
+      .catch(() => !cancelled && setRule({ enabled: false, frequency: "monthly", tone: "friendly" }));
     return () => {
       cancelled = true;
     };
@@ -82,8 +78,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
           </button>
         </div>
         <p className="mb-4 text-sm text-slate-500">
-          AI drafts and sends {name} a check-in on its own, on this schedule —
-          no action needed from you once it's on.
+          AI drafts and sends {name} a check-in on its own, on this schedule — no action needed from you once it's on.
         </p>
 
         {!rule ? (
@@ -108,9 +103,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
             {rule.enabled && (
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                    Frequency
-                  </span>
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Frequency</span>
                   <select
                     value={rule.frequency}
                     disabled={saving}
@@ -125,9 +118,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
                   </select>
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                    Tone
-                  </span>
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Tone</span>
                   <select
                     value={rule.tone}
                     disabled={saving}
@@ -145,9 +136,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
             )}
 
             {rule.enabled && rule.lastSentAt && (
-              <p className="mt-3 text-xs text-slate-400">
-                Last sent {new Date(rule.lastSentAt).toLocaleDateString()}
-              </p>
+              <p className="mt-3 text-xs text-slate-400">Last sent {new Date(rule.lastSentAt).toLocaleDateString()}</p>
             )}
           </>
         )}

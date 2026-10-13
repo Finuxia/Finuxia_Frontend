@@ -31,24 +31,15 @@ export default function Timeline({ client, onEditStage }) {
               onClick={() => onEditStage?.(stage)}
               className="flex-1 rounded-xl px-3 py-1.5 text-left transition hover:bg-slate-50"
             >
-              <p
-                className={`text-sm font-semibold ${isCurrent ? "text-navy" : "text-slate-600"}`}
-              >
-                {stage.label}{" "}
-                <span className={`font-medium ${meta.text}`}>
-                  ({meta.label})
-                </span>
+              <p className={`text-sm font-semibold ${isCurrent ? "text-navy" : "text-slate-600"}`}>
+                {stage.label} <span className={`font-medium ${meta.text}`}>({meta.label})</span>
                 {isCurrent && (
                   <span className="ml-2 rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold-dark">
                     Current
                   </span>
                 )}
               </p>
-              {stageState?.date && (
-                <p className="text-xs text-slate-400">
-                  {formatDate(stageState.date)}
-                </p>
-              )}
+              {stageState?.date && <p className="text-xs text-slate-400">{formatDate(stageState.date)}</p>}
             </button>
           </li>
         );

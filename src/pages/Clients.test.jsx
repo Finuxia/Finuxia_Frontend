@@ -8,23 +8,8 @@ import Clients from "./Clients";
 
 const STAGE = PIPELINE_STAGES[1].id;
 const client = (n, over = {}) => ({
-  id: `c_${n}`,
-  first: `Client${n}`,
-  last: "Test",
-  phone: "",
-  email: "",
-  telegram: "",
-  color: "av-blue",
-  priority: "Medium",
-  currentStage: PIPELINE_STAGES[0].id,
-  nextFollowUp: "TBD",
-  version: 1,
-  stages: {},
-  notes: [],
-  files: [],
-  interests: [],
-  meeting: null,
-  ...over,
+  id: `c_${n}`, first: `Client${n}`, last: "Test", phone: "", email: "", telegram: "", color: "av-blue", priority: "Medium", currentStage: PIPELINE_STAGES[0].id,
+  nextFollowUp: "TBD", version: 1, stages: {}, notes: [], files: [], interests: [], meeting: null, ...over,
 });
 
 /**
@@ -38,41 +23,22 @@ function serve(all, { size = 2 } = {}) {
     http.get(`${API}/api/clients`, ({ request }) => {
       const params = Object.fromEntries(new URL(request.url).searchParams);
       asked.push(params);
-      if (asked.failCursor && params.cursor)
-        return HttpResponse.json({ error: "Page failed" }, { status: 500 });
+      if (asked.failCursor && params.cursor) return HttpResponse.json({ error: "Page failed" }, { status: 500 });
       let rows = all;
-      for (const word of (params.q || "")
-        .toLowerCase()
-        .split(" ")
-        .filter(Boolean))
-        rows = rows.filter((c) =>
-          `${c.first} ${c.last}`.toLowerCase().includes(word),
-        );
-      if (params.stage)
-        rows = rows.filter((c) => c.currentStage === params.stage);
-      if (params.priority)
-        rows = rows.filter((c) => c.priority === params.priority);
+      for (const word of (params.q || "").toLowerCase().split(" ").filter(Boolean)) rows = rows.filter((c) => `${c.first} ${c.last}`.toLowerCase().includes(word));
+      if (params.stage) rows = rows.filter((c) => c.currentStage === params.stage);
+      if (params.priority) rows = rows.filter((c) => c.priority === params.priority);
       const start = params.cursor ? Number(atob(params.cursor)) : 0;
       const end = Math.min(start + size, rows.length);
-      return HttpResponse.json({
-        results: rows.slice(start, end),
-        nextCursor: end < rows.length ? btoa(String(end)) : null,
-      });
-    }),
+      return HttpResponse.json({ results: rows.slice(start, end), nextCursor: end < rows.length ? btoa(String(end)) : null });
+    })
   );
   return asked;
 }
-const show = () =>
-  renderWithProviders(<Clients />, {
-    providers: ["router", "toast", "auth", "clients"],
-  });
-const rows = () =>
-  [...document.querySelectorAll("button p.font-semibold")].map(
-    (p) => p.textContent.split(" ")[0],
-  );
+const show = () => renderWithProviders(<Clients />, { providers: ["router", "toast", "auth", "clients"] });
+const rows = () => [...document.querySelectorAll("button p.font-semibold")].map((p) => p.textContent.split(" ")[0]);
 /** What the page itself asked for. The clients context also reads the whole list (unfiltered), so only requests carrying a filter are the page's. */
-const pageRequests = (asked) =>
-  asked.filter((p) => p.q || p.stage || p.priority);
+const pageRequests = (asked) => asked.filter((p) => p.q || p.stage || p.priority);
 
 describe("the clients list, asked of the server", () => {
   it("shows the first page, and Load more follows the cursor to the next, until there is none", async () => {
@@ -80,22 +46,14 @@ describe("the clients list, asked of the server", () => {
     show();
     await waitFor(() => expect(rows()).toEqual(["Client1", "Client2"]));
     await userEvent.click(screen.getByRole("button", { name: "Load more" }));
-    await waitFor(() =>
-      expect(rows()).toEqual(["Client1", "Client2", "Client3", "Client4"]),
-    );
+    await waitFor(() => expect(rows()).toEqual(["Client1", "Client2", "Client3", "Client4"]));
     await userEvent.click(screen.getByRole("button", { name: "Load more" }));
     await waitFor(() => expect(rows()).toHaveLength(5));
-    expect(
-      screen.queryByRole("button", { name: "Load more" }),
-    ).not.toBeInTheDocument(); // the last page ends it
+    expect(screen.queryByRole("button", { name: "Load more" })).not.toBeInTheDocument(); // the last page ends it
   });
 
   it("a search is sent to the server, once the typing pauses, and only what it returns is shown", async () => {
-    const asked = serve([
-      client(1, { first: "Alice" }),
-      client(2, { first: "Bob" }),
-      client(3, { first: "Alicia" }),
-    ]);
+    const asked = serve([client(1, { first: "Alice" }), client(2, { first: "Bob" }), client(3, { first: "Alicia" })]);
     show();
     await waitFor(() => expect(rows()).toHaveLength(2));
     await userEvent.type(screen.getByPlaceholderText(/Search name/), "ali");
@@ -117,23 +75,14 @@ describe("the clients list, asked of the server", () => {
     await waitFor(() => expect(rows()).toEqual(["Client2", "Client3"]));
     await userEvent.selectOptions(screen.getAllByRole("combobox")[1], "High");
     await waitFor(() => expect(rows()).toEqual(["Client2", "Client4"]));
-    expect(
-      pageRequests(asked).map((p) => [
-        p.stage ?? "",
-        p.priority ?? "",
-        p.cursor ?? "",
-      ]),
-    ).toEqual([
+    expect(pageRequests(asked).map((p) => [p.stage ?? "", p.priority ?? "", p.cursor ?? ""])).toEqual([
       [STAGE, "", ""],
       [STAGE, "High", ""], // each change starts from the first page, never from the old cursor
     ]);
   });
 
   it("filters work across pages: a match on a later page is found, not only within what was loaded", async () => {
-    serve([
-      ...[1, 2, 3, 4, 5, 6].map((n) => client(n)),
-      client(7, { first: "Needle" }),
-    ]);
+    serve([...[1, 2, 3, 4, 5, 6].map((n) => client(n)), client(7, { first: "Needle" })]);
     show();
     await waitFor(() => expect(rows()).toHaveLength(2));
     await userEvent.type(screen.getByPlaceholderText(/Search name/), "needle");
@@ -154,9 +103,7 @@ describe("the clients list, asked of the server", () => {
     show();
     await waitFor(() => expect(rows()).toEqual(["Client1"]));
     await userEvent.type(screen.getByPlaceholderText(/Search name/), "zzz");
-    expect(
-      await screen.findByText("No clients match your filters."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("No clients match your filters.")).toBeInTheDocument();
   });
 
   it("a page that fails leaves the clients already shown and offers a retry", async () => {
@@ -170,9 +117,7 @@ describe("the clients list, asked of the server", () => {
     expect(rows()).toEqual(["Client1", "Client2"]); // still there
     asked.failCursor = false;
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
-    await waitFor(() =>
-      expect(rows()).toEqual(["Client1", "Client2", "Client3", "Client4"]),
-    );
+    await waitFor(() => expect(rows()).toEqual(["Client1", "Client2", "Client3", "Client4"]));
   });
 
   it("a failure of the first page is explained, with a retry", async () => {
@@ -180,13 +125,9 @@ describe("the clients list, asked of the server", () => {
     server.use(
       http.get(`${API}/api/clients`, ({ request }) => {
         const params = new URL(request.url).searchParams;
-        if (fail && params.get("stage"))
-          return HttpResponse.json(
-            { error: "Could not search" },
-            { status: 500 },
-          );
+        if (fail && params.get("stage")) return HttpResponse.json({ error: "Could not search" }, { status: 500 });
         return HttpResponse.json({ results: [client(1)], nextCursor: null });
-      }),
+      })
     );
     show();
     await waitFor(() => expect(rows()).toEqual(["Client1"]));

@@ -22,8 +22,7 @@ export default function GlobalSearch() {
   const results = q
     ? clients
         .filter((c) => {
-          const haystack =
-            `${c.first} ${c.last} ${c.phone} ${c.email} ${c.telegram}`.toLowerCase();
+          const haystack = `${c.first} ${c.last} ${c.phone} ${c.email} ${c.telegram}`.toLowerCase();
           return haystack.includes(q);
         })
         .slice(0, 6)
@@ -54,9 +53,7 @@ export default function GlobalSearch() {
       {open && q && (
         <div className="absolute left-0 z-50 mt-2 w-full min-w-[280px] animate-fade-in rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
           {results.length === 0 ? (
-            <p className="px-2 py-3 text-center text-sm text-slate-400">
-              No matches for "{query}"
-            </p>
+            <p className="px-2 py-3 text-center text-sm text-slate-400">No matches for "{query}"</p>
           ) : (
             results.map((c) => (
               <button
@@ -67,9 +64,7 @@ export default function GlobalSearch() {
                 <span className="font-medium text-navy">
                   {c.first} {c.last}
                 </span>
-                <span className="text-xs text-slate-400">
-                  {c.phone || c.email || c.telegram}
-                </span>
+                <span className="text-xs text-slate-400">{c.phone || c.email || c.telegram}</span>
               </button>
             ))
           )}

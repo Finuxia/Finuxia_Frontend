@@ -23,12 +23,7 @@ export default function useDocumentUploads({ packageId, applyDocuments }) {
     }
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
-      const pkg = await api.uploadSalesPackageDocument(
-        packageId,
-        key,
-        file,
-        (pct) => setUploadProgress((p) => ({ ...p, [key]: pct })),
-      );
+      const pkg = await api.uploadSalesPackageDocument(packageId, key, file, (pct) => setUploadProgress((p) => ({ ...p, [key]: pct })));
       applyDocuments(pkg.documents);
       addToast(uploadedMessage(key, label, file));
     } catch (err) {

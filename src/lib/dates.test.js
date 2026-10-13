@@ -37,12 +37,8 @@ describe("birthDateError", () => {
       process.env.TZ = tz;
       expect(birthDateError("1980-05-05"), tz).toBe("");
       expect(birthDateError("2000-02-29"), tz).toBe("");
-      expect(birthDateError("1999-02-29"), tz).toBe(
-        "That isn't a real calendar date.",
-      );
-      expect(birthDateError("2999-01-01"), tz).toBe(
-        "Date of birth can't be in the future.",
-      );
+      expect(birthDateError("1999-02-29"), tz).toBe("That isn't a real calendar date.");
+      expect(birthDateError("2999-01-01"), tz).toBe("Date of birth can't be in the future.");
     }
   });
 
@@ -50,11 +46,7 @@ describe("birthDateError", () => {
     expect(birthDateError(todayISO())).toBe("");
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const [y, m, d] = [
-      tomorrow.getFullYear(),
-      tomorrow.getMonth() + 1,
-      tomorrow.getDate(),
-    ];
+    const [y, m, d] = [tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate()];
     const iso = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     expect(birthDateError(iso)).toBe("Date of birth can't be in the future.");
   });
@@ -69,15 +61,13 @@ describe("formatLongDate", () => {
   });
 
   it("is empty, not 'Invalid Date', for anything that is not a date", () => {
-    for (const junk of [null, undefined, "", "not a date", "2026-13-45"])
-      expect(formatLongDate(junk), String(junk)).toBe("");
+    for (const junk of [null, undefined, "", "not a date", "2026-13-45"]) expect(formatLongDate(junk), String(junk)).toBe("");
   });
 });
 
 describe("daysLeft", () => {
   const now = new Date(2026, 0, 10, 12, 0, 0);
-  const at = (days, hours = 0) =>
-    new Date(now.getTime() + days * 86400000 + hours * 3600000).toISOString();
+  const at = (days, hours = 0) => new Date(now.getTime() + days * 86400000 + hours * 3600000).toISOString();
 
   it("counts whole days, and a part day as a day", () => {
     expect(daysLeft(at(12), now)).toBe(12);
@@ -91,7 +81,6 @@ describe("daysLeft", () => {
   });
 
   it("is null for no date or a bad one, not NaN", () => {
-    for (const junk of [null, undefined, "", "soon"])
-      expect(daysLeft(junk, now), String(junk)).toBeNull();
+    for (const junk of [null, undefined, "", "soon"]) expect(daysLeft(junk, now), String(junk)).toBeNull();
   });
 });

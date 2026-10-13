@@ -37,9 +37,7 @@ export function useCalendarConnection() {
   }, [refreshStatus]);
 
   const connect = useCallback(async () => {
-    const { authUrl } = await api.getCalendarConnectUrl(
-      window.location.pathname,
-    );
+    const { authUrl } = await api.getCalendarConnectUrl(window.location.pathname);
     window.location.href = authUrl; // navigates away; nothing after this runs
   }, []);
 
@@ -49,13 +47,5 @@ export function useCalendarConnection() {
     setGoogleEmail(null);
   }, []);
 
-  return {
-    status,
-    googleEmail,
-    isConfigured,
-    loading,
-    connect,
-    disconnect,
-    refreshStatus,
-  };
+  return { status, googleEmail, isConfigured, loading, connect, disconnect, refreshStatus };
 }

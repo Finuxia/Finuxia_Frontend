@@ -25,8 +25,7 @@ export default class ErrorBoundary extends Component {
       errorId: this.state.errorId,
       componentStack: info?.componentStack,
       boundary: this.props.variant || "app",
-      route:
-        typeof window !== "undefined" ? window.location?.pathname : undefined,
+      route: typeof window !== "undefined" ? window.location?.pathname : undefined,
     });
   }
 
@@ -47,16 +46,10 @@ export default class ErrorBoundary extends Component {
     return (
       <div
         role="alert"
-        className={
-          route
-            ? "py-16"
-            : "flex min-h-screen items-center justify-center bg-slate-50 px-4"
-        }
+        className={route ? "py-16" : "flex min-h-screen items-center justify-center bg-slate-50 px-4"}
       >
         <div className="mx-auto max-w-lg rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-semibold text-slate-900">
-            Something went wrong
-          </h1>
+          <h1 className="text-xl font-semibold text-slate-900">Something went wrong</h1>
           <p className="mt-2 text-sm text-slate-600">
             {route
               ? "This page hit an unexpected problem. The rest of the app is still working."
@@ -79,10 +72,7 @@ export default class ErrorBoundary extends Component {
                 Try again
               </button>
             )}
-            <a
-              href="/dashboard"
-              className="text-sm font-semibold text-slate-700 underline"
-            >
+            <a href="/dashboard" className="text-sm font-semibold text-slate-700 underline">
               Back to the dashboard
             </a>
           </div>

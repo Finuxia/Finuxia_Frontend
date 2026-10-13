@@ -1,18 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  CalendarDays,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  AlertTriangle,
-  Video,
-  X,
-  Plus,
-  User,
-  Globe,
-} from "lucide-react";
+import { CalendarDays, Clock, ChevronLeft, ChevronRight, CheckCircle2, AlertTriangle, Video, X, Plus, User, Globe } from "lucide-react";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
 import { api, ApiError } from "../lib/api";
@@ -38,7 +26,7 @@ function linkifyText(text) {
       </a>
     ) : (
       part
-    ),
+    )
   );
 }
 
@@ -67,21 +55,14 @@ function addDays(iso, n) {
 
 function formatDateLabel(iso) {
   const d = new Date(`${iso}T00:00:00`);
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 
 // Formats a slot's viewer-local instant for display, in the viewer's own
 // timezone — this is what fixes "I'm in Turkey, the advisor's in Canada,
 // the times didn't line up": the backend converts, this just renders it.
 function formatSlotTime(slot) {
-  return new Date(slot.viewerIso).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return new Date(slot.viewerIso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
 // The *date* shown to the viewer also has to come from their own local
@@ -90,11 +71,7 @@ function formatSlotTime(slot) {
 // viewer here would silently reintroduce the same "times don't line up"
 // confusion for the date half of a slot instead of the time half.
 function formatSlotDateLabel(slot) {
-  return new Date(slot.viewerIso).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  return new Date(slot.viewerIso).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 
 const VIEWER_TZ = (() => {
@@ -118,12 +95,7 @@ export default function BookingPublic() {
   const [slots, setSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    note: "",
-  });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", note: "" });
   const [guestEmails, setGuestEmails] = useState([]);
   const [guestInput, setGuestInput] = useState("");
   const [locationNote, setLocationNote] = useState("");
@@ -162,10 +134,7 @@ export default function BookingPublic() {
     };
   }, [slug, selectedDate, info]);
 
-  const isPast = useMemo(
-    () => selectedDate < toISODate(new Date()),
-    [selectedDate],
-  );
+  const isPast = useMemo(() => selectedDate < toISODate(new Date()), [selectedDate]);
 
   const addGuest = () => {
     const value = guestInput.trim();
@@ -198,21 +167,15 @@ export default function BookingPublic() {
     const pendingGuest = guestInput.trim();
     if (pendingGuest) {
       if (!/^\S+@\S+\.\S+$/.test(pendingGuest)) {
-        setError(
-          "That guest email doesn't look right — fix it or remove it before booking.",
-        );
+        setError("That guest email doesn't look right — fix it or remove it before booking.");
         return;
       }
-      submittedGuestEmails = guestEmails.includes(pendingGuest)
-        ? guestEmails
-        : [...guestEmails, pendingGuest];
+      submittedGuestEmails = guestEmails.includes(pendingGuest) ? guestEmails : [...guestEmails, pendingGuest];
       setGuestEmails(submittedGuestEmails);
       setGuestInput("");
     }
 
-    const missingRequired = (info?.customQuestions || []).find(
-      (q) => q.required && !answers[q.id]?.trim(),
-    );
+    const missingRequired = (info?.customQuestions || []).find((q) => q.required && !answers[q.id]?.trim());
     if (missingRequired) {
       setError(`Please answer: ${missingRequired.label}`);
       return;
@@ -232,10 +195,7 @@ export default function BookingPublic() {
         note: form.note.trim(),
         answers: Object.entries(answers)
           .filter(([, v]) => v.trim())
-          .map(([questionId, answer]) => ({
-            questionId,
-            answer: answer.trim(),
-          })),
+          .map(([questionId, answer]) => ({ questionId, answer: answer.trim() })),
         date: selectedSlot.date,
         time: selectedSlot.time,
         locationNote: locationNote.trim(),
@@ -245,9 +205,7 @@ export default function BookingPublic() {
       setError(err.message || "Could not submit your request.");
       if (err instanceof ApiError && err.status === 409) {
         setSelectedSlot(null);
-        api
-          .getPublicBookingSlots(slug, selectedDate, VIEWER_TZ)
-          .then((data) => setSlots(data.slots || []));
+        api.getPublicBookingSlots(slug, selectedDate, VIEWER_TZ).then((data) => setSlots(data.slots || []));
       }
     } finally {
       setSubmitting(false);
@@ -259,12 +217,8 @@ export default function BookingPublic() {
       <PageShell>
         <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-16 text-center shadow-sm">
           <AlertTriangle size={28} className="text-slate-300" />
-          <p className="text-lg font-semibold text-navy">
-            This booking link doesn't exist
-          </p>
-          <p className="text-sm text-slate-500">
-            Double-check the link, or ask for a new one.
-          </p>
+          <p className="text-lg font-semibold text-navy">This booking link doesn't exist</p>
+          <p className="text-sm text-slate-500">Double-check the link, or ask for a new one.</p>
         </div>
       </PageShell>
     );
@@ -273,20 +227,9 @@ export default function BookingPublic() {
   if (confirmed) {
     const isConfirmed = confirmed.status === "confirmed";
     const start = new Date(confirmed.slot.viewerIso);
-    const end = new Date(
-      start.getTime() + (info?.durationMinutes || 30) * 60000,
-    );
-    const time = (d) =>
-      d
-        .toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
-        .replace(" ", "")
-        .toLowerCase();
-    const dateLabel = start.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+    const end = new Date(start.getTime() + (info?.durationMinutes || 30) * 60000);
+    const time = (d) => d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).replace(" ", "").toLowerCase();
+    const dateLabel = start.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
     const locationLabel = info?.locationType
       ? info.locationValue && info.locationType !== "google_meet"
         ? `${LOCATION_LABELS[info.locationType] || "Location"} — ${info.locationValue}`
@@ -298,9 +241,7 @@ export default function BookingPublic() {
           <div className="flex flex-col items-center gap-1.5 text-center">
             <div className="flex items-center gap-2">
               <CheckCircle2 size={20} className="text-av-green" />
-              <h1 className="text-2xl font-bold text-navy">
-                {isConfirmed ? "You are scheduled!" : "Request sent!"}
-              </h1>
+              <h1 className="text-2xl font-bold text-navy">{isConfirmed ? "You are scheduled!" : "Request sent!"}</h1>
             </div>
             <p className="text-sm text-slate-500">
               {info?.confirmationMessage
@@ -312,9 +253,7 @@ export default function BookingPublic() {
           </div>
 
           <div className="w-full max-w-md rounded-xl border border-slate-200 p-6">
-            <h2 className="mb-4 text-xl font-bold text-navy">
-              {info?.title || "Meeting"}
-            </h2>
+            <h2 className="mb-4 text-xl font-bold text-navy">{info?.title || "Meeting"}</h2>
             <ul className="flex flex-col gap-3 text-sm font-medium text-slate-600">
               {info?.advisorName && (
                 <li className="flex items-center gap-3">
@@ -345,16 +284,10 @@ export default function BookingPublic() {
     <PageShell>
       <div className="rounded-2xl bg-white shadow-sm">
         <div className="border-b border-slate-100 px-6 py-5">
-          <h1 className="text-lg font-bold text-navy">
-            {info ? info.title : "Book a meeting"}
-          </h1>
-          {info?.advisorName && (
-            <p className="text-sm text-slate-500">with {info.advisorName}</p>
-          )}
+          <h1 className="text-lg font-bold text-navy">{info ? info.title : "Book a meeting"}</h1>
+          {info?.advisorName && <p className="text-sm text-slate-500">with {info.advisorName}</p>}
           {info?.description && (
-            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">
-              {linkifyText(info.description)}
-            </p>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{linkifyText(info.description)}</p>
           )}
           <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
             <Clock size={12} />
@@ -396,13 +329,9 @@ export default function BookingPublic() {
             </div>
 
             {isPast ? (
-              <p className="py-8 text-center text-sm text-slate-400">
-                Pick a day from today onward.
-              </p>
+              <p className="py-8 text-center text-sm text-slate-400">Pick a day from today onward.</p>
             ) : slotsLoading ? (
-              <p className="py-8 text-center text-sm text-slate-400">
-                Loading times...
-              </p>
+              <p className="py-8 text-center text-sm text-slate-400">Loading times...</p>
             ) : slots.length === 0 ? null : (
               <div className="grid grid-cols-2 gap-2">
                 {slots.map((slot) => (
@@ -430,43 +359,28 @@ export default function BookingPublic() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-6">
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Your name
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Your name</span>
               <input
                 value={form.name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, name: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Email
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Email</span>
               <input
                 type="email"
                 value={form.email}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, email: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Phone (optional)
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Phone (optional)</span>
               <input
                 type="tel"
                 value={form.phone}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    phone: formatCanadianPhone(e.target.value),
-                  }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, phone: formatCanadianPhone(e.target.value) }))}
                 placeholder="(123) 456-7890"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
@@ -475,8 +389,7 @@ export default function BookingPublic() {
             {info?.locationType === "ask_invitee" && (
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Where would you like to meet?{" "}
-                  <span className="text-av-red">*</span>
+                  Where would you like to meet? <span className="text-av-red">*</span>
                 </span>
                 <input
                   value={locationNote}
@@ -489,24 +402,13 @@ export default function BookingPublic() {
 
             {info?.guestsAllowed && (
               <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Guests (optional)
-                </span>
+                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Guests (optional)</span>
                 {guestEmails.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {guestEmails.map((email) => (
-                      <span
-                        key={email}
-                        className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy"
-                      >
+                      <span key={email} className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy">
                         {email}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setGuestEmails((g) => g.filter((e) => e !== email))
-                          }
-                          className="text-slate-400 hover:text-av-red"
-                        >
+                        <button type="button" onClick={() => setGuestEmails((g) => g.filter((e) => e !== email))} className="text-slate-400 hover:text-av-red">
                           <X size={11} />
                         </button>
                       </span>
@@ -547,9 +449,7 @@ export default function BookingPublic() {
                 </span>
                 <textarea
                   value={answers[q.id] || ""}
-                  onChange={(e) =>
-                    setAnswers((a) => ({ ...a, [q.id]: e.target.value }))
-                  }
+                  onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
                   rows={2}
                   className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
                 />
@@ -557,14 +457,10 @@ export default function BookingPublic() {
             ))}
 
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Anything else? (optional)
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Anything else? (optional)</span>
               <textarea
                 value={form.note}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, note: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
                 rows={2}
                 className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />

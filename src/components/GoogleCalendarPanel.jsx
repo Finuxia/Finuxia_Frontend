@@ -1,15 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  CalendarDays,
-  Link2,
-  Unlink,
-  RefreshCcw,
-  Plus,
-  Pencil,
-  Trash2,
-  AlertTriangle,
-  ChevronDown,
-} from "lucide-react";
+import { CalendarDays, Link2, Unlink, RefreshCcw, Plus, Pencil, Trash2, AlertTriangle, ChevronDown } from "lucide-react";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import { useToast } from "../context/ToastContext";
 import { eventStart } from "../services/googleCalendarApi";
@@ -42,22 +32,14 @@ function formatGroupLabel(date) {
   tomorrow.setDate(today.getDate() + 1);
   if (date.toDateString() === today.toDateString()) return "Today";
   if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+  return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
 const STATUS_META = {
   connected: { label: "Connected", dot: "bg-av-green", text: "text-av-green" },
   expired: { label: "Expired", dot: "bg-av-red", text: "text-av-red" },
   revoked: { label: "Revoked", dot: "bg-av-red", text: "text-av-red" },
-  disconnected: {
-    label: "Disconnected",
-    dot: "bg-slate-300",
-    text: "text-slate-400",
-  },
+  disconnected: { label: "Disconnected", dot: "bg-slate-300", text: "text-slate-400" },
 };
 
 export default function GoogleCalendarPanel() {
@@ -89,9 +71,7 @@ export default function GoogleCalendarPanel() {
   // dates actually changes (not on every events refresh with the same days).
   const groupKeysSignature = eventGroups.map((g) => g.key).join("|");
   useEffect(() => {
-    setExpandedDates(
-      eventGroups.length ? new Set([eventGroups[0].key]) : new Set(),
-    );
+    setExpandedDates(eventGroups.length ? new Set([eventGroups[0].key]) : new Set());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupKeysSignature]);
 
@@ -113,15 +93,11 @@ export default function GoogleCalendarPanel() {
   if (!isConfigured) {
     return (
       <section className="rounded-2xl bg-white p-6 shadow-sm">
-        <h2 className="mb-1 text-sm font-semibold text-navy">
-          Google Calendar
-        </h2>
+        <h2 className="mb-1 text-sm font-semibold text-navy">Google Calendar</h2>
         <p className="text-sm text-slate-500">
           Not configured yet — add a Google OAuth client as{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">
-            GOOGLE_CALENDAR_CLIENT_ID
-          </code>{" "}
-          on the backend to enable this.
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_CALENDAR_CLIENT_ID</code> on
+          the backend to enable this.
         </p>
       </section>
     );
@@ -166,9 +142,7 @@ export default function GoogleCalendarPanel() {
       if (err.needsReconnect) {
         addToast("Google session expired — reconnect and try again.");
       } else if (err.accessDenied) {
-        addToast(
-          "Google doesn't allow this event to be deleted from this calendar.",
-        );
+        addToast("Google doesn't allow this event to be deleted from this calendar.");
       } else {
         addToast(err.message || "Could not delete this event");
       }
@@ -186,15 +160,12 @@ export default function GoogleCalendarPanel() {
           <span className={meta.text}>{meta.label}</span>
         </span>
       </div>
-      <p className="mb-4 text-xs text-slate-400">
-        {googleEmail || "Not connected to a Google account"}
-      </p>
+      <p className="mb-4 text-xs text-slate-400">{googleEmail || "Not connected to a Google account"}</p>
 
       {(status === "expired" || status === "revoked") && (
         <div className="mb-4 flex items-start gap-2 rounded-lg bg-av-red/10 px-3 py-2 text-xs text-av-red">
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-          Your Google access {status === "revoked" ? "was revoked" : "expired"}.
-          Reconnect to keep syncing meetings.
+          Your Google access {status === "revoked" ? "was revoked" : "expired"}. Reconnect to keep syncing meetings.
         </div>
       )}
 
@@ -222,9 +193,7 @@ export default function GoogleCalendarPanel() {
             className="flex items-center gap-1.5 rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-navy-light"
           >
             <Link2 size={13} />
-            {status === "expired" || status === "revoked"
-              ? "Reconnect Google Calendar"
-              : "Connect Google Calendar"}
+            {status === "expired" || status === "revoked" ? "Reconnect Google Calendar" : "Connect Google Calendar"}
           </button>
         )}
       </div>
@@ -244,59 +213,40 @@ export default function GoogleCalendarPanel() {
                   {events.length}
                 </span>
               )}
-              <ChevronDown
-                size={13}
-                className={`transition-transform ${panelOpen ? "rotate-180" : ""}`}
-              />
+              <ChevronDown size={13} className={`transition-transform ${panelOpen ? "rotate-180" : ""}`} />
             </button>
             <button
               onClick={() => refreshEvents().catch(() => {})}
               disabled={eventsLoading}
               className="flex items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-navy"
             >
-              <RefreshCcw
-                size={11}
-                className={eventsLoading ? "animate-spin" : ""}
-              />
+              <RefreshCcw size={11} className={eventsLoading ? "animate-spin" : ""} />
               Refresh
             </button>
           </div>
 
-          {eventsError && (
-            <p className="mb-2 text-xs text-av-red">{eventsError.message}</p>
-          )}
+          {eventsError && <p className="mb-2 text-xs text-av-red">{eventsError.message}</p>}
 
           {!panelOpen ? null : eventsLoading && events.length === 0 ? (
             <p className="text-sm text-slate-400">Loading...</p>
           ) : events.length === 0 ? (
-            <p className="text-sm text-slate-400">
-              No upcoming events on your calendar.
-            </p>
+            <p className="text-sm text-slate-400">No upcoming events on your calendar.</p>
           ) : (
             <div className="flex flex-col gap-1.5">
               {eventGroups.map((group) => {
                 const open = expandedDates.has(group.key);
                 return (
-                  <div
-                    key={group.key}
-                    className="overflow-hidden rounded-lg border border-slate-100"
-                  >
+                  <div key={group.key} className="overflow-hidden rounded-lg border border-slate-100">
                     <button
                       type="button"
                       onClick={() => toggleDate(group.key)}
                       aria-expanded={open}
                       className="flex w-full items-center justify-between gap-2 bg-slate-50 px-3 py-2 text-left transition hover:bg-slate-100"
                     >
-                      <span className="text-xs font-semibold text-navy">
-                        {formatGroupLabel(group.date)}
-                      </span>
+                      <span className="text-xs font-semibold text-navy">{formatGroupLabel(group.date)}</span>
                       <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                        {group.events.length}{" "}
-                        {group.events.length === 1 ? "event" : "events"}
-                        <ChevronDown
-                          size={13}
-                          className={`transition-transform ${open ? "rotate-180" : ""}`}
-                        />
+                        {group.events.length} {group.events.length === 1 ? "event" : "events"}
+                        <ChevronDown size={13} className={`transition-transform ${open ? "rotate-180" : ""}`} />
                       </span>
                     </button>
                     {open && (
@@ -304,21 +254,11 @@ export default function GoogleCalendarPanel() {
                         {group.events.map((event) => {
                           const editable = isAppEvent(event);
                           return (
-                            <li
-                              key={event.id}
-                              className="flex items-start gap-2.5 rounded-lg bg-slate-50 px-3 py-2"
-                            >
-                              <CalendarDays
-                                size={14}
-                                className="mt-0.5 shrink-0 text-gold-dark"
-                              />
+                            <li key={event.id} className="flex items-start gap-2.5 rounded-lg bg-slate-50 px-3 py-2">
+                              <CalendarDays size={14} className="mt-0.5 shrink-0 text-gold-dark" />
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium text-navy">
-                                  {event.summary || "(No title)"}
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                  {formatEventTime(event)}
-                                </p>
+                                <p className="truncate text-sm font-medium text-navy">{event.summary || "(No title)"}</p>
+                                <p className="text-xs text-slate-400">{formatEventTime(event)}</p>
                               </div>
                               <div className="flex shrink-0 gap-1">
                                 {editable && (
@@ -354,20 +294,12 @@ export default function GoogleCalendarPanel() {
       )}
 
       {formMode === "create" && (
-        <GoogleEventForm
-          title="New Calendar Event"
-          onSubmit={handleCreate}
-          onClose={() => setFormMode(null)}
-          submitLabel="Create"
-        />
+        <GoogleEventForm title="New Calendar Event" onSubmit={handleCreate} onClose={() => setFormMode(null)} submitLabel="Create" />
       )}
       {formMode && formMode !== "create" && (
         <GoogleEventForm
           title="Edit Event"
-          initial={{
-            summary: formMode.summary,
-            startISO: formMode.start?.dateTime,
-          }}
+          initial={{ summary: formMode.summary, startISO: formMode.start?.dateTime }}
           onSubmit={(payload) => handleUpdate(formMode.id, payload)}
           onClose={() => setFormMode(null)}
           submitLabel="Save"

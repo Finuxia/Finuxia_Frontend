@@ -76,21 +76,14 @@ export function GoogleCalendarProvider({ children }) {
       deleteEvent: cal.remove,
       isAppEvent: cal.isAppEvent,
     }),
-    [auth, cal],
+    [auth, cal]
   );
 
-  return (
-    <GoogleCalendarContext.Provider value={value}>
-      {children}
-    </GoogleCalendarContext.Provider>
-  );
+  return <GoogleCalendarContext.Provider value={value}>{children}</GoogleCalendarContext.Provider>;
 }
 
 export function useGoogleCalendar() {
   const ctx = useContext(GoogleCalendarContext);
-  if (!ctx)
-    throw new Error(
-      "useGoogleCalendar must be used within GoogleCalendarProvider",
-    );
+  if (!ctx) throw new Error("useGoogleCalendar must be used within GoogleCalendarProvider");
   return ctx;
 }

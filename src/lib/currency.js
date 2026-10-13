@@ -7,9 +7,7 @@ export function formatCurrencyInput(value) {
   let cleaned = String(value ?? "").replace(/[^\d.]/g, "");
   const firstDot = cleaned.indexOf(".");
   if (firstDot !== -1) {
-    cleaned =
-      cleaned.slice(0, firstDot + 1) +
-      cleaned.slice(firstDot + 1).replace(/\./g, "");
+    cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, "");
   }
   const [intPart, decPart] = cleaned.split(".");
   if (!intPart && decPart === undefined) return "";

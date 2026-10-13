@@ -29,19 +29,13 @@ export function currentMonthKey() {
 export function monthLabel(key) {
   if (!key) return "";
   const [y, m] = key.split("-").map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
+  return new Date(y, m - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
 export function monthShortLabel(key) {
   if (!key) return "";
   const [y, m] = key.split("-").map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString("en-US", {
-    month: "short",
-    year: "2-digit",
-  });
+  return new Date(y, m - 1, 1).toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 
 /** Recent months, newest first, as { key, label } — for filter dropdowns. */
@@ -68,8 +62,7 @@ export function monthRange(key) {
 
 // A client's "activity date" for monthly bucketing: its next follow-up if set,
 // otherwise when it joined.
-export const clientActivityDate = (client) =>
-  client.followUpDate || client.joined;
+export const clientActivityDate = (client) => client.followUpDate || client.joined;
 
 /* ------------------------------ strategies ------------------------------- */
 
@@ -111,9 +104,7 @@ export function countBy(keyFn) {
       if (key == null) return;
       map.set(key, (map.get(key) || 0) + 1);
     });
-    return [...map.entries()]
-      .map(([key, count]) => ({ key, count }))
-      .sort((a, b) => b.count - a.count);
+    return [...map.entries()].map(([key, count]) => ({ key, count })).sort((a, b) => b.count - a.count);
   };
 }
 

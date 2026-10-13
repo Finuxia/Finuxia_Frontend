@@ -1,19 +1,8 @@
 import { useState } from "react";
-import {
-  X,
-  Plus,
-  Trash2,
-  GripVertical,
-  CalendarClock,
-  Link2,
-} from "lucide-react";
+import { X, Plus, Trash2, GripVertical, CalendarClock, Link2 } from "lucide-react";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 
-const emptyQuestion = () => ({
-  id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-  label: "",
-  required: false,
-});
+const emptyQuestion = () => ({ id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, label: "", required: false });
 
 const LOCATION_OPTIONS = [
   { value: "google_meet", label: "Google Meet" },
@@ -44,22 +33,12 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
   const [connecting, setConnecting] = useState(false);
   const [title, setTitle] = useState(link?.title || "");
   const [description, setDescription] = useState(link?.description || "");
-  const [durationMinutes, setDurationMinutes] = useState(
-    link?.durationMinutes ?? 30,
-  );
+  const [durationMinutes, setDurationMinutes] = useState(link?.durationMinutes ?? 30);
   const [bufferMinutes, setBufferMinutes] = useState(link?.bufferMinutes ?? 0);
-  const [guestsAllowed, setGuestsAllowed] = useState(
-    link?.guestsAllowed ?? false,
-  );
-  const [questions, setQuestions] = useState(
-    link?.customQuestions?.length ? link.customQuestions : [],
-  );
-  const [confirmationMessage, setConfirmationMessage] = useState(
-    link?.confirmationMessage || "",
-  );
-  const [locationType, setLocationType] = useState(
-    link?.locationType || "google_meet",
-  );
+  const [guestsAllowed, setGuestsAllowed] = useState(link?.guestsAllowed ?? false);
+  const [questions, setQuestions] = useState(link?.customQuestions?.length ? link.customQuestions : []);
+  const [confirmationMessage, setConfirmationMessage] = useState(link?.confirmationMessage || "");
+  const [locationType, setLocationType] = useState(link?.locationType || "google_meet");
   const [locationValue, setLocationValue] = useState(link?.locationValue || "");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -69,10 +48,8 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
     if (questions.length >= 10) return;
     setQuestions((qs) => [...qs, emptyQuestion()]);
   };
-  const updateQuestion = (id, patch) =>
-    setQuestions((qs) => qs.map((q) => (q.id === id ? { ...q, ...patch } : q)));
-  const removeQuestion = (id) =>
-    setQuestions((qs) => qs.filter((q) => q.id !== id));
+  const updateQuestion = (id, patch) => setQuestions((qs) => qs.map((q) => (q.id === id ? { ...q, ...patch } : q)));
+  const removeQuestion = (id) => setQuestions((qs) => qs.filter((q) => q.id !== id));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,9 +69,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
         customQuestions: questions.filter((q) => q.label.trim()),
         confirmationMessage: confirmationMessage.trim(),
         locationType,
-        locationValue: LOCATION_VALUE_FIELD[locationType]
-          ? locationValue.trim()
-          : "",
+        locationValue: LOCATION_VALUE_FIELD[locationType] ? locationValue.trim() : "",
       });
       onClose();
     } catch (err) {
@@ -116,12 +91,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
   };
 
   const handleDelete = async () => {
-    if (
-      !window.confirm(
-        `Delete "${link.title}"? Existing bookings made through it are kept, but the link stops working.`,
-      )
-    )
-      return;
+    if (!window.confirm(`Delete "${link.title}"? Existing bookings made through it are kept, but the link stops working.`)) return;
     setDeleting(true);
     try {
       await onDelete();
@@ -142,32 +112,20 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-navy">
-            {isEdit ? "Edit Booking Link" : "New Booking Link"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
+          <h2 className="text-lg font-semibold text-navy">{isEdit ? "Edit Booking Link" : "New Booking Link"}</h2>
+          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 overflow-y-auto px-6 py-5"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 overflow-y-auto px-6 py-5">
           {isConfigured && calStatus !== "connected" && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-av-amber/40 bg-av-amber/5 px-3 py-2.5">
               <div className="flex items-start gap-2">
-                <CalendarClock
-                  size={15}
-                  className="mt-0.5 shrink-0 text-av-amber"
-                />
+                <CalendarClock size={15} className="mt-0.5 shrink-0 text-av-amber" />
                 <p className="text-xs text-slate-600">
-                  Connect Google Calendar so bookings through this link confirm
-                  instantly with a Google Meet link, no approval needed.
+                  Connect Google Calendar so bookings through this link confirm instantly with a Google Meet link,
+                  no approval needed.
                 </p>
               </div>
               <button
@@ -183,9 +141,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           )}
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Title
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
             <input
               autoFocus
               value={title}
@@ -196,9 +152,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Description
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Description</span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -210,9 +164,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
 
           <div className="grid grid-cols-2 gap-4">
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Duration
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Duration</span>
               <select
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(e.target.value)}
@@ -226,9 +178,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
               </select>
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Buffer between meetings
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Buffer between meetings</span>
               <select
                 value={bufferMinutes}
                 onChange={(e) => setBufferMinutes(e.target.value)}
@@ -244,9 +194,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Location
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Location</span>
             <select
               value={locationType}
               onChange={(e) => setLocationType(e.target.value)}
@@ -261,9 +209,8 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           </label>
           {locationType === "zoom" && (
             <p className="-mt-2 text-xs text-slate-400">
-              Needs a connected Zoom account (Profile → Zoom) — without one,
-              bookings still work but land pending for you to add the link
-              yourself.
+              Needs a connected Zoom account (Profile → Zoom) — without one, bookings still work but land pending
+              for you to add the link yourself.
             </p>
           )}
           {locationType === "ask_invitee" && (
@@ -300,16 +247,13 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           </div>
           {guestsAllowed && (
             <p className="-mt-2 text-xs text-slate-400">
-              Clients will see a field to add guest emails when booking through
-              this link.
+              Clients will see a field to add guest emails when booking through this link.
             </p>
           )}
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Intake questions (optional)
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Intake questions (optional)</span>
               <button
                 type="button"
                 onClick={addQuestion}
@@ -321,20 +265,12 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
               </button>
             </div>
             {questions.map((q) => (
-              <div
-                key={q.id}
-                className="flex items-start gap-2 rounded-lg border border-slate-200 p-2.5"
-              >
-                <GripVertical
-                  size={14}
-                  className="mt-2 shrink-0 text-slate-300"
-                />
+              <div key={q.id} className="flex items-start gap-2 rounded-lg border border-slate-200 p-2.5">
+                <GripVertical size={14} className="mt-2 shrink-0 text-slate-300" />
                 <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                   <input
                     value={q.label}
-                    onChange={(e) =>
-                      updateQuestion(q.id, { label: e.target.value })
-                    }
+                    onChange={(e) => updateQuestion(q.id, { label: e.target.value })}
                     placeholder="What would you like to discuss?"
                     className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-navy outline-none focus:border-gold"
                   />
@@ -342,9 +278,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
                     <input
                       type="checkbox"
                       checked={q.required}
-                      onChange={(e) =>
-                        updateQuestion(q.id, { required: e.target.checked })
-                      }
+                      onChange={(e) => updateQuestion(q.id, { required: e.target.checked })}
                       className="accent-gold"
                     />
                     Required
@@ -363,9 +297,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Confirmation message (optional)
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Confirmation message (optional)</span>
             <textarea
               value={confirmationMessage}
               onChange={(e) => setConfirmationMessage(e.target.value)}
@@ -392,11 +324,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
               <span />
             )}
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-              >
+              <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100">
                 Cancel
               </button>
               <button

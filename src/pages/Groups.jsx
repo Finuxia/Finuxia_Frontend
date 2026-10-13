@@ -31,10 +31,7 @@ export default function Groups() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-navy">Groups</h1>
-          <p className="text-sm text-slate-500">
-            Organize clients into your own groups — family, company, referral
-            circles, anything.
-          </p>
+          <p className="text-sm text-slate-500">Organize clients into your own groups — family, company, referral circles, anything.</p>
         </div>
         <button
           onClick={() => setModalGroup(null)}
@@ -52,8 +49,7 @@ export default function Groups() {
           </div>
           <p className="text-sm font-medium text-navy">No groups yet</p>
           <p className="mt-1 text-sm text-slate-500">
-            Create a group to organize related clients — e.g. a family, a
-            company's team, or a referral circle.
+            Create a group to organize related clients — e.g. a family, a company's team, or a referral circle.
           </p>
           <button
             onClick={() => setModalGroup(null)}
@@ -66,22 +62,13 @@ export default function Groups() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((g) => {
-            const members = g.memberIds
-              .map((id) => clientById.get(String(id)))
-              .filter(Boolean);
+            const members = g.memberIds.map((id) => clientById.get(String(id))).filter(Boolean);
             return (
-              <div
-                key={g.id}
-                className="rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md"
-              >
+              <div key={g.id} className="rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md">
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2.5">
-                    <span
-                      className={`h-3 w-3 shrink-0 rounded-full ${AVATAR_BG[g.color] ?? "bg-navy"}`}
-                    />
-                    <h2 className="truncate text-base font-semibold text-navy">
-                      {g.name}
-                    </h2>
+                    <span className={`h-3 w-3 shrink-0 rounded-full ${AVATAR_BG[g.color] ?? "bg-navy"}`} />
+                    <h2 className="truncate text-base font-semibold text-navy">{g.name}</h2>
                   </div>
                   <button
                     onClick={() => setModalGroup(g)}
@@ -97,9 +84,7 @@ export default function Groups() {
                 </p>
 
                 {members.length === 0 ? (
-                  <p className="text-sm text-slate-400">
-                    No clients added yet.
-                  </p>
+                  <p className="text-sm text-slate-400">No clients added yet.</p>
                 ) : (
                   <div className="flex flex-col gap-1.5">
                     {members.slice(0, 5).map((c) => (
@@ -108,9 +93,7 @@ export default function Groups() {
                         onClick={() => navigate(`/clients/${c.id}`)}
                         className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-navy transition hover:bg-slate-50"
                       >
-                        <span
-                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${AVATAR_BG[c.color] ?? "bg-navy"}`}
-                        >
+                        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${AVATAR_BG[c.color] ?? "bg-navy"}`}>
                           {c.first[0]}
                           {c.last[0]}
                         </span>
@@ -136,11 +119,7 @@ export default function Groups() {
       )}
 
       {modalGroup !== undefined && (
-        <GroupModal
-          group={modalGroup}
-          onClose={() => setModalGroup(undefined)}
-          onDelete={deleteGroup}
-        />
+        <GroupModal group={modalGroup} onClose={() => setModalGroup(undefined)} onDelete={deleteGroup} />
       )}
     </div>
   );

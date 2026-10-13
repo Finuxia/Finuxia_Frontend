@@ -59,10 +59,7 @@ export default function Subscribe() {
     inFlight.current = true;
     setPurchasingId(plan.id);
     try {
-      const result = await api.purchasePlan(
-        plan.id,
-        attemptKeys.current.keyFor(plan.id),
-      );
+      const result = await api.purchasePlan(plan.id, attemptKeys.current.keyFor(plan.id));
       attemptKeys.current.settle(plan.id);
       if (result.checkoutUrl) {
         rememberPlanBeforeCheckout(billing?.plan?.key);
@@ -71,9 +68,7 @@ export default function Subscribe() {
       }
       if (result.mock) {
         await Promise.all([refreshBilling(), refreshUser()]);
-        addToast(
-          `You're now on the ${plan.name} plan (test purchase: no real charge, Stripe isn't connected yet).`,
-        );
+        addToast(`You're now on the ${plan.name} plan (test purchase: no real charge, Stripe isn't connected yet).`);
         navigate("/dashboard", { replace: true });
         return;
       }
@@ -116,21 +111,17 @@ export default function Subscribe() {
 
           {active ? (
             <>
-              <h1 className="text-xl font-bold text-navy">
-                You're on the free trial
-              </h1>
+              <h1 className="text-xl font-bold text-navy">You're on the free trial</h1>
               <p className="mt-1 text-sm text-slate-500">
                 {endsOn ? (
                   <>
-                    Your free access runs until{" "}
-                    <span className="font-semibold text-navy">{endsOn}</span>
+                    Your free access runs until <span className="font-semibold text-navy">{endsOn}</span>
                     <> ({left === 1 ? "1 day" : `${left} days`} left)</>.
                   </>
                 ) : (
                   <>Your free access has no end date yet.</>
                 )}{" "}
-                Subscribe any time to keep everything after that, with nothing
-                lost.
+                Subscribe any time to keep everything after that, with nothing lost.
               </p>
               <button
                 type="button"
@@ -142,32 +133,20 @@ export default function Subscribe() {
             </>
           ) : (
             <>
-              <h1 className="text-xl font-bold text-navy">
-                Your free trial has ended
-              </h1>
+              <h1 className="text-xl font-bold text-navy">Your free trial has ended</h1>
               <p className="mt-1 text-sm text-slate-500">
                 {endsOn ? <>It ended on {endsOn}. </> : null}
-                Access to your clients, meetings, follow-ups and the rest of the
-                app is paused. Nothing you added has been deleted.
+                Access to your clients, meetings, follow-ups and the rest of the app is paused. Nothing you added has been deleted.
               </p>
-              <p className="mt-2 text-sm text-slate-500">
-                Choose a plan below and everything switches back on right away.
-              </p>
+              <p className="mt-2 text-sm text-slate-500">Choose a plan below and everything switches back on right away.</p>
             </>
           )}
         </div>
 
         <div className="mt-8">
-          {loading && !data && (
-            <p className="text-center text-sm text-slate-400">
-              Loading plans...
-            </p>
-          )}
+          {loading && !data && <p className="text-center text-sm text-slate-400">Loading plans...</p>}
           {error && (
-            <div
-              role="alert"
-              className="mx-auto flex max-w-xl flex-col items-center gap-3 rounded-xl border border-dashed border-av-red/30 bg-white px-6 py-6 text-center text-sm text-av-red"
-            >
+            <div role="alert" className="mx-auto flex max-w-xl flex-col items-center gap-3 rounded-xl border border-dashed border-av-red/30 bg-white px-6 py-6 text-center text-sm text-av-red">
               <span>{error.message}</span>
               <button
                 type="button"
@@ -202,10 +181,7 @@ export default function Subscribe() {
               ) : (
                 <span>
                   To {active ? "subscribe" : "get back in"}, please{" "}
-                  <Link
-                    to="/support"
-                    className="font-semibold text-navy underline"
-                  >
+                  <Link to="/support" className="font-semibold text-navy underline">
                     contact support
                   </Link>
                   .
@@ -215,13 +191,7 @@ export default function Subscribe() {
           )}
 
           {data && plans.length > 0 && (
-            <PlanCards
-              plans={plans}
-              currentPlanKey={
-                billing?.status === "active" ? billing?.plan?.key : undefined
-              }
-              actionFor={actionFor}
-            />
+            <PlanCards plans={plans} currentPlanKey={billing?.status === "active" ? billing?.plan?.key : undefined} actionFor={actionFor} />
           )}
         </div>
 

@@ -4,13 +4,7 @@
  *
  *   <LoadMore hasMore={hasMore} loadingMore={loadingMore} error={items.length > 0 ? error : null} onLoadMore={loadMore} />
  */
-export default function LoadMore({
-  hasMore,
-  loadingMore,
-  error,
-  onLoadMore,
-  label = "Load more",
-}) {
+export default function LoadMore({ hasMore, loadingMore, error, onLoadMore, label = "Load more" }) {
   if (!hasMore && !error) return null;
   return (
     <div className="flex flex-col items-center gap-2 py-2">

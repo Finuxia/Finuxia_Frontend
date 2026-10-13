@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  FolderOpen,
-  ExternalLink,
-  HardDrive,
-  X,
-  Link2,
-  AlertTriangle,
-} from "lucide-react";
+import { FolderOpen, ExternalLink, HardDrive, X, Link2, AlertTriangle } from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 
@@ -32,10 +25,7 @@ export default function OpenDriveFolderButton({ clientId, clientName }) {
     setLoading(true);
     setBlockedUrl(null);
     try {
-      const { url } = await api.openClientDriveFolder(
-        String(clientId),
-        clientName,
-      );
+      const { url } = await api.openClientDriveFolder(String(clientId), clientName);
       const win = window.open(url, "_blank", "noopener,noreferrer");
       if (!win) setBlockedUrl(url);
     } catch (err) {
@@ -54,9 +44,7 @@ export default function OpenDriveFolderButton({ clientId, clientName }) {
   const handleConnect = async () => {
     setConnecting(true);
     try {
-      const { authUrl } = await api.getDriveConnectUrl(
-        window.location.pathname,
-      );
+      const { authUrl } = await api.getDriveConnectUrl(window.location.pathname);
       window.location.href = authUrl;
     } catch (err) {
       addToast(err.message || "Could not start Google Drive connection");
@@ -114,13 +102,10 @@ export default function OpenDriveFolderButton({ clientId, clientName }) {
 
             {prompt === "connect" ? (
               <>
-                <h2 className="text-base font-semibold text-navy">
-                  Connect Google Drive
-                </h2>
+                <h2 className="text-base font-semibold text-navy">Connect Google Drive</h2>
                 <p className="mt-1.5 text-sm text-slate-500">
-                  Connect your Google Drive to store and open {clientName}'s
-                  files folder. You'll be sent to Google and brought right back
-                  here.
+                  Connect your Google Drive to store and open {clientName}'s files folder. You'll be sent to Google
+                  and brought right back here.
                 </p>
                 <div className="mt-5 flex justify-end gap-3">
                   <button
@@ -146,8 +131,8 @@ export default function OpenDriveFolderButton({ clientId, clientName }) {
                   Google Drive isn't set up yet
                 </h2>
                 <p className="mt-1.5 text-sm text-slate-500">
-                  This app's Google Drive integration hasn't been configured on
-                  the server. Ask an admin to set it up, then try again.
+                  This app's Google Drive integration hasn't been configured on the server. Ask an admin to set it
+                  up, then try again.
                 </p>
                 <div className="mt-5 flex justify-end">
                   <button

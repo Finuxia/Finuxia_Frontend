@@ -10,18 +10,12 @@ export const MIN_BIRTH_DATE = "1900-01-01";
 // the value itself has to be checked, not just the input's min/max.
 export function birthDateError(value) {
   if (!value) return "";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value))
-    return "Enter a valid date with a 4-digit year.";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "Enter a valid date with a 4-digit year.";
   // Compare the calendar fields in LOCAL time: toISOString() is UTC, so for anyone east of UTC local midnight is still the
   // previous day there and every valid date would have been rejected.
   const parsed = new Date(`${value}T00:00:00`);
   const [y, m, d] = value.split("-").map(Number);
-  if (
-    Number.isNaN(parsed.getTime()) ||
-    parsed.getFullYear() !== y ||
-    parsed.getMonth() + 1 !== m ||
-    parsed.getDate() !== d
-  ) {
+  if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() !== y || parsed.getMonth() + 1 !== m || parsed.getDate() !== d) {
     return "That isn't a real calendar date.";
   }
   if (value < MIN_BIRTH_DATE) return "Date of birth can't be before 1900.";
@@ -37,11 +31,7 @@ export function birthDateError(value) {
 export function formatLongDate(iso) {
   const date = iso ? new Date(iso) : null;
   if (!date || Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
 /**

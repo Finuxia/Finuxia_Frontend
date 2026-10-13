@@ -34,5 +34,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </ToastProvider>
       </BrowserRouter>
     </ErrorBoundary>
-  </React.StrictMode>,
+  </React.StrictMode>
 );

@@ -10,11 +10,7 @@ export function openGmailCompose({ to, subject, body }) {
     su: subject || "",
     body: body || "",
   });
-  window.open(
-    `https://mail.google.com/mail/?${params.toString()}`,
-    "_blank",
-    "noopener,noreferrer",
-  );
+  window.open(`https://mail.google.com/mail/?${params.toString()}`, "_blank", "noopener,noreferrer");
 }
 
 export function feedbackEmailDraft(client, { meetingLabel } = {}) {

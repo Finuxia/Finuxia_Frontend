@@ -6,11 +6,7 @@ import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import Documents from "./Documents";
 import Tickets from "./Tickets";
 
-const render = (ui) =>
-  renderWithProviders(ui, {
-    route: "/",
-    providers: ["router", "toast", "auth"],
-  });
+const render = (ui) => renderWithProviders(ui, { route: "/", providers: ["router", "toast", "auth"] });
 const ticket = (id) => ({
   id,
   type: "bug",
@@ -46,18 +42,12 @@ function paged(path, all, { size = 3, failing = 0 } = {}) {
       asked.push(cursor);
       if (failing && asked.length === failing && !failed) {
         failed = true;
-        return HttpResponse.json(
-          { error: "Page unavailable" },
-          { status: 503 },
-        );
+        return HttpResponse.json({ error: "Page unavailable" }, { status: 503 });
       }
       const start = cursor ? Number(atob(cursor)) : 0;
       const end = Math.min(start + size, all.length);
-      return HttpResponse.json({
-        results: all.slice(start, end),
-        nextCursor: end < all.length ? btoa(String(end)) : null,
-      });
-    }),
+      return HttpResponse.json({ results: all.slice(start, end), nextCursor: end < all.length ? btoa(String(end)) : null });
+    })
   );
   return asked;
 }
@@ -73,9 +63,7 @@ describe("Tickets, a page at a time", () => {
     await waitFor(() => expect(rows(/^Ticket \d$/)).toBe(6));
     await userEvent.click(screen.getByRole("button", { name: "Load more" }));
     await waitFor(() => expect(rows(/^Ticket \d$/)).toBe(7));
-    expect(
-      screen.queryByRole("button", { name: "Load more" }),
-    ).not.toBeInTheDocument(); // the last page: nothing more
+    expect(screen.queryByRole("button", { name: "Load more" })).not.toBeInTheDocument(); // the last page: nothing more
     expect(asked).toEqual([null, btoa("3"), btoa("6")]);
   });
 
@@ -83,9 +71,7 @@ describe("Tickets, a page at a time", () => {
     paged("/api/tickets", [1, 2].map(ticket));
     render(<Tickets />);
     await screen.findByText("Ticket 1");
-    expect(
-      screen.queryByRole("button", { name: "Load more" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Load more" })).not.toBeInTheDocument();
   });
 
   it("a page that fails to load keeps the tickets already shown and offers to try again", async () => {
@@ -93,9 +79,7 @@ describe("Tickets, a page at a time", () => {
     render(<Tickets />);
     await screen.findByText("Ticket 1");
     await userEvent.click(screen.getByRole("button", { name: "Load more" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Page unavailable",
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Page unavailable");
     expect(rows(/^Ticket \d$/)).toBe(3);
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     await waitFor(() => expect(rows(/^Ticket \d$/)).toBe(5));
@@ -110,16 +94,10 @@ describe("Tickets, a page at a time", () => {
   });
 
   it("still works against a server that returns the whole list", async () => {
-    server.use(
-      http.get(`${API}/api/tickets`, () =>
-        HttpResponse.json([ticket(1), ticket(2)]),
-      ),
-    );
+    server.use(http.get(`${API}/api/tickets`, () => HttpResponse.json([ticket(1), ticket(2)])));
     render(<Tickets />);
     expect(await screen.findByText("Ticket 2")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Load more" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Load more" })).not.toBeInTheDocument();
   });
 });
 
@@ -127,13 +105,9 @@ describe("Documents, a page at a time", () => {
   it("the library loads a page at a time and my submissions still load whole", async () => {
     const asked = paged(
       "/api/documents",
-      [1, 2, 3, 4, 5].map((i) => doc(i)),
+      [1, 2, 3, 4, 5].map((i) => doc(i))
     );
-    server.use(
-      http.get(`${API}/api/documents/mine`, () =>
-        HttpResponse.json([doc(50, { title: "My draft", status: "pending" })]),
-      ),
-    );
+    server.use(http.get(`${API}/api/documents/mine`, () => HttpResponse.json([doc(50, { title: "My draft", status: "pending" })])));
     render(<Documents />);
     expect(await screen.findByText("Doc 1")).toBeInTheDocument();
     expect(screen.getByText("My draft")).toBeInTheDocument();
@@ -144,17 +118,11 @@ describe("Documents, a page at a time", () => {
   });
 
   it("my own submissions are read across all their pages, so none is missed", async () => {
-    server.use(
-      http.get(`${API}/api/documents`, () =>
-        HttpResponse.json({ results: [doc(1)], nextCursor: null }),
-      ),
-    );
+    server.use(http.get(`${API}/api/documents`, () => HttpResponse.json({ results: [doc(1)], nextCursor: null })));
     paged(
       "/api/documents/mine",
-      [10, 11, 12, 13].map((i) =>
-        doc(i, { title: `Mine ${i}`, status: "pending" }),
-      ),
-      { size: 2 },
+      [10, 11, 12, 13].map((i) => doc(i, { title: `Mine ${i}`, status: "pending" })),
+      { size: 2 }
     );
     render(<Documents />);
     expect(await screen.findByText("Mine 13")).toBeInTheDocument();
@@ -165,17 +133,13 @@ describe("Documents, a page at a time", () => {
     paged(
       "/api/documents",
       [1, 2, 3, 4].map((i) => doc(i)),
-      { failing: 2 },
+      { failing: 2 }
     );
-    server.use(
-      http.get(`${API}/api/documents/mine`, () => HttpResponse.json([])),
-    );
+    server.use(http.get(`${API}/api/documents/mine`, () => HttpResponse.json([])));
     render(<Documents />);
     await screen.findByText("Doc 1");
     await userEvent.click(screen.getByRole("button", { name: "Load more" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Page unavailable",
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Page unavailable");
     expect(rows(/^Doc \d$/)).toBe(3);
   });
 });

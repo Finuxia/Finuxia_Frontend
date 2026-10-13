@@ -1,10 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import {
-  api,
-  clearLegacyToken,
-  clearLocalData,
-  setSessionExpiredHandler,
-} from "../lib/api";
+import { api, clearLegacyToken, clearLocalData, setSessionExpiredHandler } from "../lib/api";
 
 const AuthContext = createContext(null);
 
@@ -135,8 +130,7 @@ export function AuthProvider({ children }) {
     return () => setSessionExpiredHandler(null);
   }, []);
 
-  const hasModule = (moduleKey) =>
-    (billing?.moduleKeys || []).includes(moduleKey);
+  const hasModule = (moduleKey) => (billing?.moduleKeys || []).includes(moduleKey);
 
   const value = useMemo(
     () => ({
@@ -158,7 +152,7 @@ export function AuthProvider({ children }) {
       uploadAvatar,
       removeAvatar,
     }),
-    [user, initializing, billing, billingStatus],
+    [user, initializing, billing, billingStatus]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

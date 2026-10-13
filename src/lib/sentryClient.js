@@ -28,14 +28,7 @@ import {
   withScope,
 } from "@sentry/react";
 
-export function startSentry({
-  dsn,
-  environment,
-  release,
-  tracesSampleRate,
-  beforeSend,
-  beforeBreadcrumb,
-}) {
+export function startSentry({ dsn, environment, release, tracesSampleRate, beforeSend, beforeBreadcrumb }) {
   init({
     dsn,
     environment: environment || undefined,
@@ -82,8 +75,7 @@ export function startSentry({
 export function reportToSentry(error, { tags = {}, contexts = {} } = {}) {
   withScope((scope) => {
     for (const [key, value] of Object.entries(tags)) scope.setTag(key, value);
-    for (const [key, value] of Object.entries(contexts))
-      scope.setContext(key, value);
+    for (const [key, value] of Object.entries(contexts)) scope.setContext(key, value);
     captureException(error);
   });
 }

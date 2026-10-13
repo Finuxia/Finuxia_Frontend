@@ -2,12 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { todayISO } from "../lib/followUp";
 
-export default function RescheduleModal({
-  title,
-  currentDate,
-  onSave,
-  onClose,
-}) {
+export default function RescheduleModal({ title, currentDate, onSave, onClose }) {
   const [date, setDate] = useState(currentDate || "");
 
   const handleSubmit = (e) => {
@@ -38,9 +33,7 @@ export default function RescheduleModal({
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              New Date
-            </span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">New Date</span>
             <input
               type="date"
               autoFocus

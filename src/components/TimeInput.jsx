@@ -9,13 +9,8 @@ import { parseTimeInput } from "../lib/timeInput";
 // the actual complaint, not wanting fewer options.
 const START_HOUR = 8;
 const ALL_TIMES = generateSlotTimes({ stepMinutes: 5 });
-const ROTATE_AT = ALL_TIMES.findIndex(
-  (t) => t === `${String(START_HOUR).padStart(2, "0")}:00`,
-);
-const OPTIONS = [
-  ...ALL_TIMES.slice(ROTATE_AT),
-  ...ALL_TIMES.slice(0, ROTATE_AT),
-];
+const ROTATE_AT = ALL_TIMES.findIndex((t) => t === `${String(START_HOUR).padStart(2, "0")}:00`);
+const OPTIONS = [...ALL_TIMES.slice(ROTATE_AT), ...ALL_TIMES.slice(0, ROTATE_AT)];
 
 /**
  * A time field that's both typeable and pickable — replaces the native
@@ -54,9 +49,7 @@ export default function TimeInput({
 
   const scrollToCurrent = () => {
     requestAnimationFrame(() => {
-      listRef.current
-        ?.querySelector('[data-current="true"]')
-        ?.scrollIntoView({ block: "center" });
+      listRef.current?.querySelector('[data-current="true"]')?.scrollIntoView({ block: "center" });
     });
   };
 
@@ -91,11 +84,7 @@ export default function TimeInput({
 
   return (
     <div className={`relative flex flex-col gap-1.5 ${className}`} ref={ref}>
-      {label && (
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-          {label}
-        </span>
-      )}
+      {label && <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</span>}
 
       <div
         className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition ${
@@ -146,10 +135,7 @@ export default function TimeInput({
           aria-label="Open time list"
           className="shrink-0 text-slate-400 disabled:cursor-not-allowed"
         >
-          <ChevronDown
-            size={15}
-            className={`transition-transform ${open ? "rotate-180" : ""}`}
-          />
+          <ChevronDown size={15} className={`transition-transform ${open ? "rotate-180" : ""}`} />
         </button>
       </div>
 
@@ -172,9 +158,7 @@ export default function TimeInput({
                 onMouseDown={(e) => e.preventDefault()} // keep focus in the text input so blur-commit doesn't race the click
                 onClick={() => handlePick(time)}
                 className={`flex w-full items-center rounded-md px-3 py-1.5 text-left text-sm transition ${
-                  selected
-                    ? "bg-gold/10 font-semibold text-gold-dark"
-                    : "text-navy hover:bg-slate-50"
+                  selected ? "bg-gold/10 font-semibold text-gold-dark" : "text-navy hover:bg-slate-50"
                 }`}
               >
                 {formatSlotLabel(time)}
