@@ -1,8 +1,9 @@
 import { http, HttpResponse } from "msw";
+import { act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API } from "../../test/handlers";
 import { server } from "../../test/server";
-import { renderWithProviders, screen, userEvent, waitFor } from "../../test/utils";
+import { fireEvent, renderWithProviders, screen, userEvent, waitFor } from "../../test/utils";
 import PlanChangeDialog from "./PlanChangeDialog";
 
 const plan = (over = {}) => ({ id: 2, key: "elite", name: "Elite", priceCents: 49900, currency: "usd", ...over });
@@ -167,6 +168,54 @@ describe("confirming", () => {
     await waitFor(() => expect(posts.length).toBeGreaterThan(0));
     await new Promise((r) => setTimeout(r, 120));
     expect(posts).toHaveLength(1);
+  });
+
+  it("two clicks in the same instant, before the screen has updated, make one request", async () => {
+    preview(quote());
+    change(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+      return HttpResponse.json({ kind: "upgrade", changed: true, mock: true });
+    });
+    show();
+    const button = await confirmButton("Pay $499.00 and upgrade");
+    act(() => {
+      fireEvent.click(button);
+      fireEvent.click(button);
+    });
+    await waitFor(() => expect(posts.length).toBeGreaterThan(0));
+    await new Promise((r) => setTimeout(r, 120));
+    expect(posts).toHaveLength(1);
+  });
+
+  it("after a change the account's billing is read again, so the page shows the new plan", async () => {
+    let reads = 0;
+    server.use(
+      http.get(`${API}/api/billing/me`, () => {
+        reads += 1;
+        return HttpResponse.json({
+          plan: { key: "elite", name: "Elite" },
+          status: "active",
+          moduleKeys: [],
+          access: { status: "valid", warning: "none", endsAt: null, daysLeft: null, valid: true, warnDays: 14 },
+        });
+      })
+    );
+    preview(downgrade());
+    change(() => HttpResponse.json({ kind: "downgrade", changed: true }));
+    const onClose = show(plan({ id: 3, key: "starter", name: "Starter", priceCents: 0 }));
+    await waitFor(() => expect(reads).toBeGreaterThan(0));
+    const before = reads;
+    await userEvent.click(await confirmButton("Switch to Starter now"));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(reads).toBeGreaterThan(before);
+  });
+
+  it("an upgrade with nothing to pay does not say Pay", async () => {
+    preview(quote({ amountDueCents: 0 }));
+    show();
+    expect(await confirmButton("Switch to Elite")).toBeEnabled();
+    expect(screen.getByText("Nothing to pay")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Pay/ })).not.toBeInTheDocument();
   });
 
   it("a price that moved is shown again to confirm, and nothing is charged until they do", async () => {

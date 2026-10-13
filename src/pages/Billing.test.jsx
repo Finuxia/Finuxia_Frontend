@@ -211,6 +211,20 @@ describe("the plans", () => {
     expect(await screen.findByRole("button", { name: "Switch plan" })).toBeEnabled();
   });
 
+  it("the grandfathered plan never gets change buttons, even if it is in the catalogue", async () => {
+    const withLegacy = [
+      ...plans,
+      { id: 8, key: "legacy", name: "Legacy", description: "", priceCents: 0, currency: "usd", interval: "", modules: [], includes: [] },
+    ];
+    server.use(
+      http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans: withLegacy, stripeConfigured: true, purchasesOpen: true })),
+      me({ plan: { key: "legacy", name: "Legacy", priceCents: 0 } })
+    );
+    show();
+    await screen.findByText(/You joined before plans existed/);
+    expect(screen.queryByRole("button", { name: /Upgrade|Downgrade|Switch plan/ })).not.toBeInTheDocument();
+  });
+
   it("when paid purchases are not open, the change buttons say so instead of offering a paid plan", async () => {
     server.use(catalogue({ purchasesOpen: false }), me());
     show();
