@@ -15,6 +15,7 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const SupportPublic = lazy(() => import("./pages/SupportPublic"));
+const Home = lazy(() => import("./pages/Home"));
 const ZoomIntegrationDocs = lazy(() => import("./pages/ZoomIntegrationDocs"));
 
 // The signed-in application (layout, route table, every page) loads only for an address that is not a public page.
@@ -24,6 +25,7 @@ export default function App() {
   return (
     <Suspense fallback={<PageSpinner />}>
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/book/:slug" element={<BookingPublic />} />
         <Route path="/register" element={<Register />} />
