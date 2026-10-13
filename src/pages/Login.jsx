@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthCard, { AuthField, authInputClass } from "../components/AuthCard";
 import { useAuth } from "../context/AuthContext";
+import ErrorNotice from "../components/ErrorNotice";
+import useCountdown from "../hooks/useCountdown";
+import { describeError } from "../lib/apiErrors";
 import { destinationAfterLogin } from "../lib/redirects";
 
 export default function Login() {
@@ -10,19 +13,22 @@ export default function Login() {
   const location = useLocation();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
+  const lockout = error && describeError(error).kind === "login_locked" ? describeError(error) : null;
+  const waitLeft = useCountdown(lockout?.retryAfter || 0);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    if (lockout && waitLeft > 0) return;
+    setError(null);
     setSubmitting(true);
     try {
       await login(identifier, password);
       const redirectTo = destinationAfterLogin(location);
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(err.message);
+      setError(err);
     } finally {
       setSubmitting(false);
     }
@@ -62,7 +68,11 @@ export default function Login() {
           />
         </AuthField>
 
-        {error && <p className="text-xs text-av-red">{error}</p>}
+        {lockout ? (
+          <ErrorNotice error={error} />
+        ) : (
+          error && <p className="text-xs text-av-red">{error.message}</p>
+        )}
 
         <div className="flex items-center justify-end">
           <Link to="/forgot-password" className="text-xs font-medium text-slate-500 hover:text-navy">
@@ -72,7 +82,7 @@ export default function Login() {
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || (lockout && waitLeft > 0)}
           className="mt-1 w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
         >
           {submitting ? "Signing in..." : "Log In"}

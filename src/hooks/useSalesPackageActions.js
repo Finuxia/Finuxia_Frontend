@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
+import { isAiBlocked } from "../lib/aiUsage";
 
 /**
  * The things the wizard asks the server to do with the package's documents: draft and save the Reason Why Letter, generate
  * the Agent Disclosure and Supervision forms, download a document, and generate the final package. Each reports its own
- * progress and outcome (a toast).
+ * progress and outcome (a toast). A letter draft the account cannot pay for is not a toast: `letterBlocked` holds the refusal (which limit, and the way out)
+ * for the page to show, and `onAiUsed` is called after every draft so the usage warning stays current.
  */
-export default function useSalesPackageActions({ packageId, draft }) {
+export default function useSalesPackageActions({ packageId, draft, onAiUsed }) {
   const { addToast } = useToast();
   const [letterDrafting, setLetterDrafting] = useState(false);
+  const [letterBlocked, setLetterBlocked] = useState(null);
   const [disclosureGenerating, setDisclosureGenerating] = useState(false);
   const [supervisionGenerating, setSupervisionGenerating] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -17,13 +20,16 @@ export default function useSalesPackageActions({ packageId, draft }) {
 
   const draftLetter = async () => {
     setLetterDrafting(true);
+    setLetterBlocked(null);
     try {
       const { text } = await api.draftReasonWhyLetter(packageId);
       draft.patch({ reasonWhyLetterText: text });
     } catch (err) {
-      addToast(err.message || "Could not draft the Reason Why Letter");
+      if (isAiBlocked(err)) setLetterBlocked(err);
+      else addToast(err.message || "Could not draft the Reason Why Letter");
     } finally {
       setLetterDrafting(false);
+      onAiUsed?.();
     }
   };
 
@@ -100,6 +106,8 @@ export default function useSalesPackageActions({ packageId, draft }) {
 
   return {
     letterDrafting,
+    letterBlocked,
+    dismissLetterBlocked: () => setLetterBlocked(null),
     disclosureGenerating,
     supervisionGenerating,
     generating,

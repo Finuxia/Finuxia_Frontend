@@ -53,10 +53,10 @@ describe("the API client", () => {
       expect(err.data.client.version).toBe(5);
     });
 
-    it("falls back to a generic message for a body that is not JSON", async () => {
+    it("falls back to a friendly message for a body that is not JSON, not 'Request failed (500)'", async () => {
       server.use(http.get(`${API}/api/clients`, () => new HttpResponse("<html>boom</html>", { status: 500 })));
       const err = await api.getClients().catch((e) => e);
-      expect(err.message).toBe("Request failed (500)");
+      expect(err.message).toBe("Something went wrong on our side. Please try again in a moment.");
     });
 
     it("says the server cannot be reached when the network fails", async () => {
@@ -133,6 +133,51 @@ describe("the API client", () => {
       const err = await api.login("a@b.c", "wrong").catch((e) => e);
       expect([err.message, refreshes]).toEqual(["Invalid credentials", 0]);
     });
+  });
+});
+
+describe("refusals the API layer now keeps intact", () => {
+  it("a 429 carries the Retry-After wait and says how long to wait", async () => {
+    server.use(
+      http.get(`${API}/api/clients`, () =>
+        HttpResponse.json({ detail: "Request was throttled. Expected available in 25 seconds." }, { status: 429, headers: { "Retry-After": "25" } })
+      )
+    );
+    const err = await api.getClients().catch((e) => e);
+    expect([err.status, err.retryAfter, err.message]).toEqual([429, 25, "Too many requests. Try again in 25 seconds."]);
+  });
+
+  it("a login 429 reads as a lockout", async () => {
+    server.use(http.post(`${API}/api/auth/login`, () => HttpResponse.json({ detail: "Request was throttled." }, { status: 429, headers: { "Retry-After": "900" } })));
+    const err = await api.login("a@b.c", "x").catch((e) => e);
+    expect([err.retryAfter, err.message, err.path]).toEqual([900, "Too many attempts. Try again in 15 minutes.", "/api/auth/login"]);
+  });
+
+  it("a 429 without Retry-After still has a sentence", async () => {
+    server.use(http.get(`${API}/api/clients`, () => new HttpResponse(null, { status: 429 })));
+    const err = await api.getClients().catch((e) => e);
+    expect([err.retryAfter, err.message]).toEqual([null, "Too many requests. Please wait a moment and try again."]);
+  });
+
+  it("keeps the server's sentence and its code for a quota refusal", async () => {
+    server.use(
+      http.post(`${API}/api/sales-packages/packages/1/reason-why-letter`, () =>
+        HttpResponse.json({ error: "Your AI wallet balance is too low for this. Top up in Profile.", code: "ai_credit_exhausted", actions: ["top_up"] }, { status: 402 })
+      )
+    );
+    const err = await api.draftReasonWhyLetter(1).catch((e) => e);
+    expect([err.status, err.code, err.message, err.data.actions]).toEqual([402, "ai_credit_exhausted", "Your AI wallet balance is too low for this. Top up in Profile.", ["top_up"]]);
+  });
+
+  it("uses a friendly fallback, not 'Request failed (N)', when the server sent no message", async () => {
+    server.use(http.get(`${API}/api/clients`, () => new HttpResponse("", { status: 502 })));
+    expect((await api.getClients().catch((e) => e)).message).toMatch(/our side/);
+  });
+
+  it("file uploads report refusals the same way", async () => {
+    server.use(http.post(`${API}/api/auth/me/avatar`, () => new HttpResponse(null, { status: 429, headers: { "Retry-After": "10" } })));
+    const err = await api.uploadAvatar(new File(["x"], "a.png", { type: "image/png" })).catch((e) => e);
+    expect([err.status, err.retryAfter, err.message]).toEqual([429, 10, "Too many requests. Try again in 10 seconds."]);
   });
 });
 

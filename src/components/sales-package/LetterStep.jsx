@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Download, Save, Sparkles } from "lucide-react";
 import { StepCard } from "./shared";
+import AiBlockedNotice from "../AiBlockedNotice";
+import AiUsageInline from "../AiUsageInline";
 
 function LetterPreview({ text }) {
   const rawLines = (text || "")
@@ -77,6 +79,9 @@ export default function LetterStep({
   onDownloadLetterPdf,
   onDraftLetter,
   letterDrafting,
+  aiUsage,
+  letterBlocked,
+  onDismissBlocked,
   onSaveLetter,
 }) {
   const [editing, setEditing] = useState(false);
@@ -106,6 +111,11 @@ export default function LetterStep({
             </button>
           )}
         </div>
+
+        <AiUsageInline usage={aiUsage} className="mb-3" />
+        {letterBlocked && (
+          <AiBlockedNotice className="mb-3" message={letterBlocked.message} actions={letterBlocked.data?.actions} onDismiss={onDismissBlocked} />
+        )}
 
         {editing ? (
           <textarea

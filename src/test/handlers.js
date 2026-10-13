@@ -30,13 +30,13 @@ export const defaultHandlers = [
   // What the layout and the providers ask for on every page.
   http.get(`${API}/api/billing/ai-usage`, () =>
     HttpResponse.json({
-      plan: "Professional",
       aiIncluded: true,
-      unlimited: true,
-      period: {},
-      credits: null,
+      mode: "unlimited",
+      period: null,
+      credits: { included: null, extra: 0, total: null, used: 0, inFlight: 0, remaining: null },
       percentUsed: null,
       warning: null,
+      blocked: null,
       byFeature: [],
       wallet: { balanceCents: 1000 },
       recentUsage: [],

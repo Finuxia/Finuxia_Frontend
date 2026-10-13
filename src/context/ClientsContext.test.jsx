@@ -269,3 +269,24 @@ describe("client sync", () => {
     });
   });
 });
+
+describe("a conflict message", () => {
+  it("offers Refresh, which takes the server's latest copy of everything", async () => {
+    let loads = 0;
+    server.use(
+      http.get(`${API}/api/clients`, () => {
+        loads += 1;
+        return HttpResponse.json([serverClient(loads === 1 ? {} : { first: "Ada (latest)", version: 6, phone: "123" })]);
+      }),
+      http.patch(`${API}/api/clients/c_1`, () => HttpResponse.json({ error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", version: 3 }) }, { status: 409 }))
+    );
+    render();
+    await screen.findByText("Ada|");
+    act(() => api.updateClient("c_1", { phone: "555" }));
+    expect(await screen.findByText(/was changed elsewhere/, {}, slow)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    expect(await screen.findByText("Ada (latest)|123", {}, slow)).toBeInTheDocument();
+    expect(loads).toBe(2);
+    expect(screen.queryByRole("button", { name: "Refresh" })).not.toBeInTheDocument(); // the toast closes
+  });
+});
