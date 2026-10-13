@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { LICENSED_PROVINCE_CODES, QUEBEC_SECTORS, COMPANIES_REPRESENTED_OPTIONS } from "../lib/salesPackageOptions";
-import Switch from "../Switch";
+import Switch from "./Switch";
 
 const OWNERSHIP_OPTIONS = [
   "No ownership relationship",

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
-import Switch from "../Switch";
+import Switch from "./Switch";
 
 const FREQUENCIES = [
   { id: "weekly", label: "Every week" },

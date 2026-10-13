@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Plus, Trash2, GripVertical, CalendarClock, Link2 } from "lucide-react";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
-import Switch from "../Switch";
+import Switch from "./Switch";
 
 const emptyQuestion = () => ({ id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, label: "", required: false });
 
