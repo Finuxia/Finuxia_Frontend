@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { CalendarClock, Check, X, RefreshCcw, Clock, Mail, Phone, AlertTriangle } from "lucide-react";
-import { api } from "../lib/api";
+import { api, isIncompleteList } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import TimeInput from "../components/TimeInput";
+import IncompleteListNotice from "../components/IncompleteListNotice";
 
 const STATUS_META = {
   pending: { label: "Pending", badge: "bg-av-amber/10 text-av-amber" },
@@ -33,13 +34,17 @@ export default function BookingRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [incomplete, setIncomplete] = useState(false);
   const [rescheduling, setRescheduling] = useState(null); // request being rescheduled, or null
 
   const load = () => {
     setLoading(true);
     api
       .getBookingRequests()
-      .then(setRequests)
+      .then((list) => {
+        setIncomplete(isIncompleteList(list));
+        setRequests(list);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -120,6 +125,7 @@ export default function BookingRequests() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      {incomplete && <IncompleteListNotice what="booking requests" />}
       <div className="flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy text-gold">
           <CalendarClock size={22} />

@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { api } from "../lib/api";
+import { api, isIncompleteList } from "../lib/api";
 import { INVESTMENT_BEARING_TYPES } from "../lib/salesPackageOptions";
 import { STEPS, advanceBlocker, computeStepStates } from "../lib/salesPackage/wizard";
 import useSalesPackageCatalog from "../hooks/useSalesPackageCatalog";
@@ -36,6 +36,7 @@ export default function SalesPackagePrep() {
 
   const [mode, setMode] = useState("loading"); // loading | picker | wizard
   const [myPackages, setMyPackages] = useState([]);
+  const [packagesIncomplete, setPackagesIncomplete] = useState(false);
   const [step, setStep] = useState(0);
   const [visited, setVisited] = useState(() => new Set([0]));
   const [confirmChecked, setConfirmChecked] = useState(false);
@@ -76,6 +77,7 @@ export default function SalesPackagePrep() {
       try {
         const list = await api.getSalesPackages();
         if (cancelled) return;
+        setPackagesIncomplete(isIncompleteList(list));
         if (list.length > 0) {
           setMyPackages(list);
           setMode("picker");
@@ -135,7 +137,7 @@ export default function SalesPackagePrep() {
   }
 
   if (mode === "picker") {
-    return <PackagePicker packages={myPackages} onResume={openPackage} onDelete={deleteDraft} onStartNew={startNewDraft} />;
+    return <PackagePicker packages={myPackages} incomplete={packagesIncomplete} onResume={openPackage} onDelete={deleteDraft} onStartNew={startNewDraft} />;
   }
 
   const stepStatuses = computeStepStates({ data, documents, status: draft.status }).map((st, i) => {

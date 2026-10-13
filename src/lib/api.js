@@ -6,6 +6,7 @@
  * readable CSRF cookie in `X-CSRF-Token`.
  */
 import { messageForStatus, parseRetryAfter } from "./apiErrors";
+import { reportError } from "./errorReporting";
 
 const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:4000").replace(/\/$/, "");
 const CSRF_COOKIE = "fx_csrf";
@@ -385,6 +386,13 @@ export function toPage(body) {
   return { results: Array.isArray(page?.results) ? page.results : [], nextCursor: page?.nextCursor || null };
 }
 
+// Lists `getAllPages` gave up on at its cap, so a screen can tell a partial list from a complete one. A WeakSet: the marker goes away with the list.
+const incompleteLists = new WeakSet();
+const markIncomplete = (list) => incompleteLists.add(list);
+/** True for a list `getAllPages` returned only part of (it hit its page cap while the server still had more). */
+export const isIncompleteList = (list) => Array.isArray(list) && incompleteLists.has(list);
+const MAX_PAGES = 200;
+
 export const api = {
   /**
    * One page of a collection (clients, tickets, ...): `getPage("/api/tickets", { cursor })`. Filters and sorting go in `params`.
@@ -397,14 +405,16 @@ export const api = {
   /**
    * Every page of a collection, one request at a time, for the places that need the whole set. `onPage(items, all)` is called after each page, so a
    * caller can show the first page while the rest arrive. Stops with what it has if `isCancelled()` turns true. A server that returns the whole list
-   * at once is one page. The cap (`maxPages`) is a guard against a cursor that never ends, not a limit anyone is expected to meet.
+   * at once is one page. The cap (`maxPages`, 200 pages = 10,000 items) is a guard against a cursor that never ends, not a limit anyone is expected to meet,
+   * and meeting it is NOT silent: the list comes back marked (`isIncompleteList(list)`), the console gets an error and the error tracker an event. A
+   * screen that genuinely needs more than that should page on demand with `usePagedList` and a Load more button instead.
    * @template T
    * @param {string} path
    * @param {{ [filter: string]: unknown }} [params]
    * @param {{ onPage?: (items: T[], all: T[]) => void, isCancelled?: () => boolean, maxPages?: number }} [options]
    * @returns {Promise<T[]>}
    */
-  getAllPages: async (path, params = {}, { onPage, isCancelled = () => false, maxPages = 200 } = {}) => {
+  getAllPages: async (path, params = {}, { onPage, isCancelled = () => false, maxPages = MAX_PAGES } = {}) => {
     const all = [];
     let cursor = null;
     for (let page = 0; page < maxPages; page += 1) {
@@ -415,6 +425,12 @@ export const api = {
       if (!nextCursor) return all;
       cursor = nextCursor;
     }
+    // The cap was reached and the server still had more: this list is NOT everything. It is returned (a partial list is more useful than none) but
+    // marked, so a screen can say so (`isIncompleteList`), and it is reported where someone will see it.
+    markIncomplete(all);
+    const error = new Error(`${path}: stopped after ${maxPages} pages (${all.length} items) and the server still had more. The list is incomplete.`);
+    console.error(error.message);
+    reportError(error, { errorId: "list-incomplete" });
     return all;
   },
 
