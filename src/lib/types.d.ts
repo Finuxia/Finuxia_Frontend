@@ -103,6 +103,128 @@ export interface Ticket {
   comments?: TicketComment[];
 }
 
+export interface PlanModule {
+  key: string;
+  name: string;
+  description: string;
+}
+
+export interface Plan {
+  id: number;
+  key: string;
+  name: string;
+  /** One plain line. */
+  description: string;
+  /** The formatted description, already cleaned by the server to a fixed set of tags. The only HTML the app renders as HTML. */
+  descriptionHtml?: string;
+  /** Address of the plan's picture (served by the API); null when it has none. */
+  logoUrl?: string | null;
+  priceCents: number;
+  currency: string;
+  /** The older, coarse term label ("month", "year", "one_time", or ""). New code reads `accessDuration`. */
+  interval: string;
+  accessDuration?: AccessDuration;
+  isDefault: boolean;
+  modules: PlanModule[];
+  includes?: PlanInclude[];
+}
+
+export interface PlansResponse {
+  plans: Plan[];
+  stripeConfigured: boolean;
+  purchasesOpen: boolean;
+}
+
+/** How long one purchase of a plan grants access for. Exactly one of the numbers (or `until`) is set, matching `kind`. */
+export interface AccessDuration {
+  kind: "never" | "days" | "months" | "years" | "until_date";
+  days: number | null;
+  months: number | null;
+  years: number | null;
+  /** The last day of access, as a calendar date (YYYY-MM-DD), for `until_date`. */
+  until: string | null;
+}
+
+/** What a plan includes beyond its modules, already in words. */
+export interface PlanInclude {
+  key: string;
+  label: string;
+  summary: string;
+}
+
+/** The state of the account's access, worked out by the server from its own records. */
+export interface AccessSummary {
+  status: "unlimited" | "valid" | "lapsing" | "lapsed";
+  /** How loudly to warn: nothing, "soon", "urgent", or "ended". */
+  warning: "none" | "soon" | "urgent" | "ended";
+  endsAt: ISODateTime | null;
+  /** Whole days left (0 on the last day); null when access has no end. */
+  daysLeft: number | null;
+  /** Whether access works right now (staff are never cut off, whatever the state says). */
+  valid: boolean;
+  warnDays: number;
+}
+
+/** GET /api/billing/me: which plan the account is on, which modules it unlocks, and exactly when its access ends. */
+export interface BillingStatus {
+  plan: Plan | null;
+  status: "active" | "trialing" | "past_due" | "canceled" | string;
+  moduleKeys: string[];
+  /** When access ends (null: never). `currentPeriodEnd` is the same value under its older name. */
+  accessEndsAt?: ISODateTime | null;
+  currentPeriodEnd: ISODateTime | null;
+  access?: AccessSummary | null;
+}
+
+/** One row of GET /api/billing/payments: a payment as our own ledger holds it. */
+export interface Payment {
+  id: number;
+  date: ISODateTime;
+  planName: string | null;
+  /** The exact whole number of the currency's smallest unit (cents). */
+  amountCents: number;
+  currency: string;
+  amountDisplay: string;
+  status: "succeeded" | "pending" | "failed" | "refunded" | "expired" | string;
+  /** A demo purchase made before payments were connected: no money moved, no receipt. */
+  isMock: boolean;
+  /** The access this payment bought (end null: it does not end); null when nothing was granted. */
+  accessWindow: { start: ISODateTime; end: ISODateTime | null } | null;
+  receiptNumber: string | null;
+  receiptAvailable: boolean;
+}
+
+/** GET /api/billing/plans. */
+export interface BillingPlans {
+  plans: Plan[];
+  stripeConfigured: boolean;
+  /** False until payments are connected (and no demo mode): plans cannot be bought online yet. */
+  purchasesOpen: boolean;
+  /** The support contact for a customer who cannot buy online. From server configuration; empty if none is set. */
+  supportEmail: string;
+}
+
+export interface PurchaseResponse {
+  mock?: boolean;
+  checkoutUrl?: string;
+  subscription?: BillingStatus;
+}
+
+/** GET /api/billing/ai-usage: this billing period's AI allowance, in credits (never tokens). */
+export interface AiUsage {
+  plan: string | null;
+  aiIncluded: boolean;
+  unlimited: boolean;
+  period: { start: ISODateTime; end: ISODateTime; resetsAt: ISODateTime };
+  credits: { included: number; extra: number; total: number; used: number; inFlight: number; remaining: number } | null;
+  percentUsed: number | null;
+  warning: "exhausted" | "critical" | "high" | null;
+  byFeature: { feature: string; label: string; calls: number; credits: number }[];
+  wallet: { balanceCents: number };
+  recentUsage: { feature: string; label: string; costCents: number; credits: number; createdAt: ISODateTime }[];
+  restriction: { switchedOff: boolean; switchedOffMessage: string; disabled: boolean; disabledFeatures: string[] };
+}
+
 export interface FollowUpRule {
   clientRef: string;
   enabled: boolean;

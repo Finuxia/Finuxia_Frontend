@@ -57,7 +57,57 @@ describe("removed dead code stays removed", () => {
     expect(read("src/components/layout/Layout.jsx")).not.toContain("scrollbar-none");
   });
 
-  it("the cancel-subscription API helper with no caller is gone", () => {
-    expect(read("src/lib/api.js")).not.toContain("cancelSubscription");
+  it("nothing in the web app still talks to a provider-held subscription (BIL-09: plans are one-time purchases we record ourselves)", () => {
+    const gone = [
+      "openBillingPortal",
+      "getInvoices",
+      "previewPlanChange",
+      "changePlan",
+      "cancelScheduledPlanChange",
+      "cancelSubscription",
+      "reactivateSubscription",
+    ];
+    const found = [];
+    const walk = (dir) => {
+      for (const name of readdirSync(dir)) {
+        const path = `${dir}/${name}`;
+        if (statSync(path).isDirectory()) walk(path);
+        else if (/\.(jsx?|ts)$/.test(name) && !/\.test\./.test(name)) {
+          const text = read(path);
+          for (const word of [
+            ...gone,
+            "/api/billing/portal",
+            "/api/billing/invoices",
+            "/api/billing/plan-change",
+            "/api/billing/reactivate",
+          ])
+            if (text.includes(word)) found.push(`${path}: ${word}`);
+        }
+      }
+    };
+    walk("src");
+    expect(found).toEqual([]);
+  });
+
+  it("a purchase sends the plan and nothing else: no amount, and no address to come back to", () => {
+    const api = read("src/lib/api.js");
+    const call = api.slice(api.indexOf("purchasePlan:"), api.indexOf("downloadReceipt:"));
+    expect(call).toContain("body: { planId }");
+    // The server builds the return pages from its own configuration and charges the plan's own price.
+    // An Idempotency-Key header is fine: it says which attempt this is, not what to charge or where to go.
+    expect(call).not.toMatch(/successUrl|cancelUrl|amountCents|priceCents/);
+  });
+
+  it("plan descriptions are never put into the page as an HTML string", () => {
+    const found = [];
+    const walk = (dir) => {
+      for (const name of readdirSync(dir)) {
+        const path = `${dir}/${name}`;
+        if (statSync(path).isDirectory()) walk(path);
+        else if (/\.jsx?$/.test(name) && !/\.test\./.test(name) && read(path).includes("dangerouslySetInnerHTML")) found.push(path);
+      }
+    };
+    walk("src");
+    expect(found).toEqual([]);
   });
 });

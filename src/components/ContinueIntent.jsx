@@ -42,12 +42,9 @@ export default function ContinueIntent() {
   };
 
   return (
-    <section aria-label="Your access" className="rounded-2xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Your access</p>
-      <p className="mt-1 font-semibold text-navy">
-        {billing.plan.name}: access until {endsAt}
-      </p>
-
+    // Only the statement about continuing. The plan and the access end are AccessCard's job: both used to
+    // render a region named "Your access", which said the same thing twice and left two regions with one name.
+    <section aria-label="Continuing" className="rounded-2xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
       {billing.notContinuingSince ? (
         <div data-testid="not-continuing" className="mt-3 flex flex-col gap-2 rounded-lg bg-slate-50 px-3 py-2 text-slate-600">
           <p>

@@ -1,7 +1,10 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   BOOKING_REQUEST_STATUS,
   DOCUMENT_STATUS,
+  PAYMENT_STATUS,
+  paymentStatusMeta,
   TICKET_STATUS,
   TICKET_TYPE,
   getBookingRequestStatusMeta,
@@ -45,5 +48,28 @@ describe("statusMeta", () => {
     expect(toneClasses(getTicketStatusMeta("in_progress").tone).badge).toBe("bg-av-amber/10 text-av-amber");
     expect(toneClasses(getTicketStatusMeta("closed").tone).badge).toBe("bg-slate-100 text-slate-500");
     expect(toneClasses(getTicketStatusMeta("open").tone).dot).toBe("bg-av-blue");
+  });
+
+  it("no page defines its own status-style map any more", () => {
+    for (const file of readdirSync("src/pages").filter((f) => f.endsWith(".jsx"))) {
+      const code = readFileSync(`src/pages/${file}`, "utf8");
+      expect(code, file).not.toMatch(/const STATUS_META\s*=/);
+      expect(code, file).not.toMatch(/bg-av-\w+\/10 text-av-\w+.*Pending/);
+    }
+  });
+});
+
+describe("payment statuses", () => {
+  it("each known status has a label and a tone", () => {
+    expect(Object.keys(PAYMENT_STATUS).sort()).toEqual(["expired", "failed", "pending", "refunded", "succeeded"]);
+    expect(paymentStatusMeta("succeeded")).toMatchObject({ label: "Paid", tone: "green" });
+    expect(paymentStatusMeta("pending")).toMatchObject({ label: "Waiting for payment", tone: "amber" });
+    expect(paymentStatusMeta("failed")).toMatchObject({ label: "Failed", tone: "red" });
+  });
+
+  it("a status added later shows its own word, neutral", () => {
+    expect(paymentStatusMeta("scheduled")).toMatchObject({ label: "Scheduled", tone: "slate" });
+    expect(paymentStatusMeta("")).toMatchObject({ label: "Unknown", tone: "slate" });
+    expect(paymentStatusMeta(undefined)).toMatchObject({ label: "Unknown", tone: "slate" });
   });
 });

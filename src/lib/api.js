@@ -601,6 +601,7 @@ export const api = {
 
   // Billing / subscription plans — modules, plans, purchase (real Stripe
   // Checkout once configured, an instant "mock" purchase until then).
+  /** @returns {Promise<import("./types").BillingPlans>} */
   getBillingPlans: () => request("/api/billing/plans"),
   getMyBillingStatus: () => request("/api/billing/me"),
   // The advisor's AI use this billing period, in credits: used / remaining, when they start again, what each feature used, the wallet and the
@@ -617,20 +618,23 @@ export const api = {
       },
       headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
     }),
-  // Two separate concerns, both required:
-  //   - the idempotency key (SEC-08) makes a double click or a retry after a slow response act
-  //     once: the server replays the first response instead of creating a second pending payment
-  //   - successUrl / cancelUrl are where the provider returns the customer, to pages that confirm
-  //     the payment with the server rather than trusting the URL (see PaymentReturn)
   // "I do not intend to continue" (true takes it back). Only a statement: it changes no access, plan or feature, charges nothing, and
   // can be reversed until access ends; the answer is the billing status.
   setContinueIntent: (willContinue) => request("/api/billing/intent", { method: "PUT", body: { willContinue } }),
+  // Nothing about where to return, and nothing about the amount, is sent from here: the server builds the return pages from its own
+  // configuration and always charges the plan's own price. It still accepts a successUrl from an older bundle and ignores it for a
+  // purchase, so sending one was only dead weight. The idempotency key (SEC-08) stays: it makes a double click, or a retry after a slow
+  // reply, act once instead of leaving a second pending payment behind.
+  /** @param {number} planId @param {string} [idempotencyKey] @returns {Promise<import("./types").PurchaseResponse>} */
   purchasePlan: (planId, idempotencyKey) =>
     request("/api/billing/purchase", {
       method: "POST",
-      body: { planId, successUrl: `${window.location.origin}/billing/success`, cancelUrl: `${window.location.origin}/billing/cancel` },
+      body: { planId },
       headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
     }),
+  // The receipt (a PDF made by the server) of one of the customer's own payments that succeeded; saved through the browser's download.
+  /** @param {number} paymentId @param {string} [fallbackName] */
+  downloadReceipt: (paymentId, fallbackName) => downloadFile(`/api/billing/payments/${paymentId}/receipt`, fallbackName || "receipt.pdf"),
 
   // Booking (Calendly-style) — an advisor's shared availability, their
   // (possibly several) named booking links, and the request queue are all

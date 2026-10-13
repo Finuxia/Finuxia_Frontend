@@ -102,9 +102,9 @@ describe("the confirmation", () => {
     expect(statement).toHaveTextContent(/Your access still runs until December 15, 2026 at 3:30\s*PM/);
     expect(statement).toHaveTextContent("nothing more will be charged");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Your access" })).toHaveTextContent(
-      /Professional: access until December 15, 2026 at 3:30\s*PM/
-    );
+    // The plan and the access end are AccessCard's to state; this component is only the statement, so its
+    // region says just that. Two regions both named "Your access" is what made this split necessary.
+    expect(screen.getByRole("region", { name: "Continuing" })).toContainElement(statement);
     expect(screen.queryByRole("button", { name: "I don't plan to continue" })).not.toBeInTheDocument();
   });
 

@@ -43,3 +43,17 @@ export const getTicketStatusMeta = make(TICKET_STATUS, "open");
 export const getTicketTypeMeta = make(TICKET_TYPE, "bug");
 export const getDocumentStatusMeta = make(DOCUMENT_STATUS, "pending");
 export const getBookingRequestStatusMeta = make(BOOKING_REQUEST_STATUS, "pending");
+/** A payment as our own ledger records it. */
+export const PAYMENT_STATUS = {
+  succeeded: { label: "Paid", tone: "green" },
+  pending: { label: "Waiting for payment", tone: "amber" },
+  failed: { label: "Failed", tone: "red" },
+  expired: { label: "Not completed", tone: "slate" },
+  refunded: { label: "Refunded", tone: "slate" },
+};
+/**
+ * Not built with `make`, because the fallback is different in kind: a status our ledger adds later should show its own word in a neutral colour
+ * rather than being reported as some known status it is not.
+ */
+export const paymentStatusMeta = (status) =>
+  PAYMENT_STATUS[status] ?? { label: status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown", tone: "slate" };
