@@ -74,13 +74,23 @@ export default function ContinueIntent() {
       )}
 
       {confirming && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !busy && setConfirming(false)}>
+        <div
+          // The backdrop dismisses on a click, a mouse affordance only: the keyboard path is the
+          // Escape handler in the effect above, and focus moves into the dialog when it opens.
+          // `role="presentation"` states what this element is — a visual overlay, not a control.
+          // Without it jsx-a11y reports the click handler as an interactive element with no
+          // keyboard support, which is a fair complaint about the markup even though the behaviour
+          // is covered (FE-12). The dismiss checks the event target rather than relying on the
+          // dialog to stop propagation, so a click inside is ignored here instead of cancelled there.
+          role="presentation"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => e.target === e.currentTarget && !busy && setConfirming(false)}
+        >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="continue-intent-title"
             className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
           >
             <h2 id="continue-intent-title" className="text-lg font-bold text-navy">
               You don't plan to continue?
