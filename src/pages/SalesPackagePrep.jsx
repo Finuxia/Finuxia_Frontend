@@ -9,6 +9,7 @@ import { STEPS, advanceBlocker, computeStepStates } from "../lib/salesPackage/wi
 import useSalesPackageCatalog from "../hooks/useSalesPackageCatalog";
 import useSalesPackageDraft from "../hooks/useSalesPackageDraft";
 import useSalesPackageActions from "../hooks/useSalesPackageActions";
+import useAiUsage from "../hooks/useAiUsage";
 import useDocumentUploads from "../hooks/useDocumentUploads";
 import useProductRows from "../hooks/useProductRows";
 import Stepper from "../components/sales-package/Stepper";
@@ -52,7 +53,8 @@ export default function SalesPackagePrep() {
   const { data, patch, documents } = draft;
   const rows = useProductRows({ draft, catalog });
   const uploads = useDocumentUploads({ packageId, applyDocuments: draft.applyDocuments });
-  const actions = useSalesPackageActions({ packageId, draft });
+  const { usage: aiUsage, refresh: refreshAiUsage } = useAiUsage(); // for the 80% / 95% warning next to the draft button
+  const actions = useSalesPackageActions({ packageId, draft, onAiUsed: refreshAiUsage });
 
   // --- bootstrap ---
   useEffect(() => {
@@ -196,6 +198,9 @@ export default function SalesPackagePrep() {
           onDownloadLetterPdf={actions.downloadLetterPdf}
           onDraftLetter={actions.draftLetter}
           letterDrafting={actions.letterDrafting}
+          aiUsage={aiUsage}
+          letterBlocked={actions.letterBlocked}
+          onDismissBlocked={actions.dismissLetterBlocked}
           onSaveLetter={actions.saveLetter}
         />
       )}

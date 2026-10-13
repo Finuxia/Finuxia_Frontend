@@ -238,7 +238,7 @@ async function requestMultipart(path, formData) {
       data?.error ||
       firstErrorMessage(data) ||
       `Request failed (${res.status})`;
-    throw new ApiError(String(message), { status: res.status });
+    throw new ApiError(String(message), { status: res.status, data });
   }
   return data;
 }
@@ -591,6 +591,20 @@ export const api = {
   // Checkout once configured, an instant "mock" purchase until then).
   getBillingPlans: () => request("/api/billing/plans"),
   getMyBillingStatus: () => request("/api/billing/me"),
+  // The advisor's AI use this billing period, in credits: used / remaining, when they start again, what each feature used, the wallet and the
+  // recent calls, a warning level and, when the account cannot pay for the next AI action, the blocked state with the ways out.
+  getAiUsage: () => request("/api/billing/ai-usage"),
+  // Adds credit to the AI wallet. The key makes a double click or a retry after a slow reply act once (SEC-08); the return pages are ours.
+  topUpWallet: (amountCents, idempotencyKey) =>
+    request("/api/billing/wallet/topup", {
+      method: "POST",
+      body: {
+        amountCents,
+        successUrl: `${window.location.origin}/profile?tab=ai-usage&topup=success`,
+        cancelUrl: `${window.location.origin}/profile?tab=ai-usage&topup=canceled`,
+      },
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    }),
   // Two separate concerns, both required:
   //   - the idempotency key (SEC-08) makes a double click or a retry after a slow response act
   //     once: the server replays the first response instead of creating a second pending payment

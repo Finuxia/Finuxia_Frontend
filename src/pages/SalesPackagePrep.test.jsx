@@ -386,6 +386,86 @@ describe("the Reason Why Letter", () => {
     await userEvent.click(await screen.findByRole("button", { name: /regenerate draft|generate draft/i }));
     await waitToast(/Provider error/);
   });
+
+  const aiUsage = (over = {}) => ({
+    aiIncluded: true,
+    mode: "allowance",
+    period: { start: "2026-10-01T12:00:00Z", end: "2026-11-04T12:00:00Z" },
+    credits: { included: 100, extra: 0, total: 100, used: 85, inFlight: 0, remaining: 15 },
+    percentUsed: 85,
+    warning: "warning",
+    blocked: null,
+    byFeature: [],
+    wallet: { balanceCents: 300 },
+    recentUsage: [],
+    ...over,
+  });
+  const openLetterStep = async () => {
+    renderWizard();
+    await screen.findByText("Client Information");
+    await userEvent.click(stepper("reason why letter"));
+    return screen.findByRole("button", { name: /regenerate draft|generate draft/i });
+  };
+
+  it("an AI draft the account cannot pay for names the limit and offers the way out, not a toast", async () => {
+    const message = "You've used all of the 100 AI credits included in your plan for this period, and your wallet balance ($0.00) is too low.";
+    server.use(http.post(`${P}/packages/:id/reason-why-letter`, () => HttpResponse.json({ error: message, code: "ai_credit_exhausted", actions: ["top_up", "upgrade"] }, { status: 402 })));
+    await userEvent.click(await openLetterStep());
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(message);
+    expect(within(alert).getByRole("link", { name: /add credit/i })).toHaveAttribute("href", "/profile?tab=ai-usage");
+    expect(within(alert).getByRole("link", { name: /see plans/i })).toHaveAttribute("href", "/billing");
+    expect(toastText()).not.toMatch(/used all/);
+    await userEvent.click(within(alert).getByRole("button", { name: /dismiss/i }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("a new draft clears the earlier blocked notice", async () => {
+    let allowed = false;
+    server.use(
+      http.post(`${P}/packages/:id/reason-why-letter`, () =>
+        allowed ? HttpResponse.json({ text: "Now it works" }) : HttpResponse.json({ error: "Out of credit.", actions: ["top_up"] }, { status: 402 })
+      )
+    );
+    const button = await openLetterStep();
+    await userEvent.click(button);
+    await screen.findByRole("alert");
+    allowed = true;
+    await userEvent.click(screen.getByRole("button", { name: /generate draft/i }));
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+  });
+
+  it("shows the 80% warning beside the draft button, and asks for the usage again after a draft", async () => {
+    let asked = 0;
+    server.use(
+      http.get(`${API}/api/billing/ai-usage`, () => {
+        asked += 1;
+        return HttpResponse.json(aiUsage());
+      }),
+      http.post(`${P}/packages/:id/reason-why-letter`, () => HttpResponse.json({ text: "Drafted" }))
+    );
+    const button = await openLetterStep();
+    expect(await screen.findByRole("status")).toHaveTextContent(/85%.*15 credits left/);
+    const before = asked;
+    await userEvent.click(button);
+    await waitFor(() => expect(asked).toBeGreaterThan(before));
+  });
+
+  it("shows no warning when the account has plenty left", async () => {
+    server.use(http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json(aiUsage({ warning: null, percentUsed: 10 }))));
+    await openLetterStep();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("works as before when the usage cannot be loaded", async () => {
+    server.use(
+      http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json({ error: "down" }, { status: 500 })),
+      http.post(`${P}/packages/:id/reason-why-letter`, () => HttpResponse.json({ text: "Drafted anyway" }))
+    );
+    await userEvent.click(await openLetterStep());
+    await userEvent.click(await screen.findByRole("button", { name: /edit text/i }));
+    expect(screen.getByDisplayValue("Drafted anyway")).toBeInTheDocument();
+  });
 });
 
 describe("documents", () => {

@@ -2,6 +2,10 @@ import { useRef, useState } from "react";
 import { X, UploadCloud, Sparkles, FileText, XCircle } from "lucide-react";
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
+import useAiUsage from "../hooks/useAiUsage";
+import AiUsageInline from "./AiUsageInline";
+import AiBlockedNotice from "./AiBlockedNotice";
+import { isAiBlocked } from "../lib/aiUsage";
 
 /**
  * Submit a client document for the shared Documents page. The advisor picks
@@ -18,6 +22,8 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
   const [keywords, setKeywords] = useState([]);
   const [keywordInput, setKeywordInput] = useState("");
   const [suggesting, setSuggesting] = useState(false);
+  const { usage: aiUsage, refresh: refreshAiUsage } = useAiUsage();
+  const [blocked, setBlocked] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,6 +41,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
     if (!file) return;
     setSuggesting(true);
     setError("");
+    setBlocked(null);
     try {
       const suggestion = await api.suggestDocument(file);
       setTitle(suggestion.topic || "");
@@ -42,9 +49,12 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
       setKeywords(suggestion.keywords || []);
       addToast("AI suggestion applied — review and edit before submitting.");
     } catch (err) {
-      addToast(err.message || "Could not generate an AI suggestion. You can still fill this in yourself.");
+      // Out of credit: say which limit was hit and offer the way out, rather than flashing a toast.
+      if (isAiBlocked(err)) setBlocked(err);
+      else addToast(err.message || "Could not generate an AI suggestion. You can still fill this in yourself.");
     } finally {
       setSuggesting(false);
+      refreshAiUsage();
     }
   };
 
@@ -144,6 +154,9 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
             )}
             <input ref={fileRef} type="file" accept="application/pdf" onChange={handlePickFile} className="hidden" />
           </div>
+
+          <AiUsageInline usage={aiUsage} />
+          {blocked && <AiBlockedNotice message={blocked.message} actions={blocked.data?.actions} onDismiss={() => setBlocked(null)} />}
 
           <button
             type="button"
