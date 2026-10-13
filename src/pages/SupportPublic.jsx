@@ -1,6 +1,6 @@
 import { Mail } from "lucide-react";
-import Logo from "../components/Logo";
-import Footer from "../components/Footer";
+import Logo from "../components/layout/Logo";
+import Footer from "../components/layout/Footer";
 
 export default function SupportPublic() {
   return (
@@ -19,8 +19,8 @@ export default function SupportPublic() {
           </div>
           <h1 className="text-xl font-bold text-navy">Need help?</h1>
           <p className="mt-2 text-sm text-slate-500">
-            Email us any time and we'll get back to you — account questions, integration issues (Google Calendar,
-            Google Drive, Zoom), or anything else.
+            Email us any time and we'll get back to you — account questions, integration issues (Google Calendar, Google Drive, Zoom), or
+            anything else.
           </p>
           <a
             href="mailto:info@finuxia.com"

@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CalendarRange, Link2, RefreshCcw, AlertTriangle, Users, CalendarCheck, Presentation, Download, FileText, Table2, CheckCircle2 } from "lucide-react";
+import {
+  CalendarRange,
+  Link2,
+  RefreshCcw,
+  AlertTriangle,
+  Users,
+  CalendarCheck,
+  Presentation,
+  Download,
+  FileText,
+  Table2,
+  CheckCircle2,
+} from "lucide-react";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
@@ -81,7 +93,7 @@ export default function Reports() {
 
   useEffect(() => {
     loadEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reloads when the connection or the dates change; loadEvents is rebuilt every render
   }, [status, startDate, endDate]);
 
   /* -------- client-based metrics (always available, local data) -------- */
@@ -102,9 +114,7 @@ export default function Reports() {
     () => businessMeetingClients.filter((c) => (STAGE_INDEX[c.currentStage] ?? 0) >= STAGE_INDEX.closing),
     [businessMeetingClients]
   );
-  const closingRate = businessMeetingClients.length
-    ? Math.round((closedClients.length / businessMeetingClients.length) * 100)
-    : 0;
+  const closingRate = businessMeetingClients.length ? Math.round((closedClients.length / businessMeetingClients.length) * 100) : 0;
 
   /* --------- calendar-based metrics (need a live connection) ----------- */
   const meetingsByType = useMemo(() => runPipeline(events, [countBy(classifyEventType)]), [events]);
@@ -146,10 +156,7 @@ export default function Reports() {
     rows.push(["Meetings held", totalMeetings]);
     rows.push(["CP meetings", cpMeetings]);
     rows.push(["Clients active", rangeClients.length]);
-    rows.push([
-      "Business meeting -> Closing rate",
-      `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})`,
-    ]);
+    rows.push(["Business meeting -> Closing rate", `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})`]);
     rows.push([]);
     rows.push(["Meetings by type", "Count"]);
     meetingsByType.forEach((t) => rows.push([t.key, t.count]));
@@ -214,12 +221,7 @@ export default function Reports() {
       const headerRow = ["#", "Name", "Priority", ...PIPELINE_STAGES.map((s) => s.short)];
       const dataRows = rangeClients.map((c, i) => {
         const currentIdx = STAGE_INDEX[c.currentStage] ?? 0;
-        return [
-          i + 1,
-          `${c.first} ${c.last}`.trim(),
-          c.priority || "",
-          ...PIPELINE_STAGES.map((s, idx) => idx <= currentIdx),
-        ];
+        return [i + 1, `${c.first} ${c.last}`.trim(), c.priority || "", ...PIPELINE_STAGES.map((s, idx) => idx <= currentIdx)];
       });
 
       const workbook = await buildFunnelWorkbook({
@@ -324,10 +326,20 @@ export default function Reports() {
 
       {/* Summary tiles */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile icon={CalendarCheck} label="Meetings held" value={totalMeetings} hint={status !== "connected" ? "Connect Google" : undefined} />
+        <StatTile
+          icon={CalendarCheck}
+          label="Meetings held"
+          value={totalMeetings}
+          hint={status !== "connected" ? "Connect Google" : undefined}
+        />
         <StatTile icon={Presentation} label="CP meetings" value={cpMeetings} hint={status !== "connected" ? "Connect Google" : undefined} />
         <StatTile icon={Users} label="Clients active" value={rangeClients.length} />
-        <StatTile icon={CalendarRange} label="Types" value={meetingsByType.length} hint={status !== "connected" ? "Connect Google" : undefined} />
+        <StatTile
+          icon={CalendarRange}
+          label="Types"
+          value={meetingsByType.length}
+          hint={status !== "connected" ? "Connect Google" : undefined}
+        />
         <StatTile
           icon={CheckCircle2}
           label="Business meeting → Closing"

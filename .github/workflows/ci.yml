@@ -11,7 +11,7 @@ name: CI
 # forgotten; a process step can, and forgetting it is exactly what happened.
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
 
 # A branch in this repository with an open pull request matches both triggers above. Grouping a push
@@ -38,6 +38,24 @@ jobs:
       - run: npm ci
       - name: Test (with the coverage floor)
         run: npm run test:coverage
+
+  # Static checks (FE-09). Lint runs with zero warnings and every suppression needs a written reason (see eslint.config.js); the formatter and the
+  # type check (JSDoc types over src/lib, src/hooks and src/services, see tsconfig.json) must pass too. Run all four locally with `npm run check`.
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Lint (zero warnings; every suppression needs a written reason)
+        run: npm run lint
+      - name: Formatting
+        run: npm run format:check
+      - name: Type check (shared library modules, JSDoc types)
+        run: npm run typecheck
 
   build:
     runs-on: ubuntu-latest

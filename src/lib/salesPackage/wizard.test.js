@@ -1,7 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { advanceBlocker, computeStepStates, emptyData, emptyProduct, productsNeedingAllocation, requiredSupervisionQuestions } from "./wizard";
+import {
+  advanceBlocker,
+  computeStepStates,
+  emptyData,
+  emptyProduct,
+  productsNeedingAllocation,
+  requiredSupervisionQuestions,
+} from "./wizard";
 
-const TERM = { ...emptyProduct(), companyId: "1", productId: "10", type: "term", coverageAmount: "$1", frequency: "Monthly", premium: "$1" };
+const TERM = {
+  ...emptyProduct(),
+  companyId: "1",
+  productId: "10",
+  type: "term",
+  coverageAmount: "$1",
+  frequency: "Monthly",
+  premium: "$1",
+};
 const fund = (pct, over = {}) => ({
   ...TERM,
   type: "segregated_fund",
@@ -37,7 +52,13 @@ const STEP = { client: 0, needs: 1, products: 2, details: 3, letter: 4, complian
 
 describe("which compliance questions must be answered", () => {
   it("five always, and the follow-up of each Yes", () => {
-    const base = ["applicationReviewed", "needsAnalysisReviewed", "policyIllustrationsReviewed", "lifeInsuranceReplacement", "segFundsLeveraging"];
+    const base = [
+      "applicationReviewed",
+      "needsAnalysisReviewed",
+      "policyIllustrationsReviewed",
+      "lifeInsuranceReplacement",
+      "segFundsLeveraging",
+    ];
     expect(requiredSupervisionQuestions(answered())).toEqual(base);
     expect(requiredSupervisionQuestions(answered({ lifeInsuranceReplacement: true }))).toEqual([...base, "lirdReviewed"]);
     expect(requiredSupervisionQuestions(answered({ segFundsLeveraging: true }))).toEqual([...base, "disclosureDocReviewed"]);
@@ -94,8 +115,12 @@ describe("what blocks moving forward", () => {
     expect(advanceBlocker(5, dataWith({ supervisionConfirmations: answered({ segFundsLeveraging: null }) }))).toBe(blocked);
     expect(advanceBlocker(5, dataWith({ supervisionConfirmations: answered({ lifeInsuranceReplacement: true }) }))).toBe(blocked);
     expect(advanceBlocker(5, dataWith({ supervisionConfirmations: answered({ segFundsLeveraging: true }) }))).toBe(blocked);
-    expect(advanceBlocker(5, dataWith({ supervisionConfirmations: answered({ segFundsLeveraging: true, disclosureDocReviewed: false }) }))).toBeNull();
-    expect(advanceBlocker(5, dataWith({ supervisionConfirmations: answered({ lifeInsuranceReplacement: true, lirdReviewed: true }) }))).toBeNull();
+    expect(
+      advanceBlocker(5, dataWith({ supervisionConfirmations: answered({ segFundsLeveraging: true, disclosureDocReviewed: false }) }))
+    ).toBeNull();
+    expect(
+      advanceBlocker(5, dataWith({ supervisionConfirmations: answered({ lifeInsuranceReplacement: true, lirdReviewed: true }) }))
+    ).toBeNull();
   });
 });
 

@@ -13,6 +13,7 @@ export function openGmailCompose({ to, subject, body }) {
   window.open(`https://mail.google.com/mail/?${params.toString()}`, "_blank", "noopener,noreferrer");
 }
 
+/** @param {{ first?: string, email?: string }} client @param {{ meetingLabel?: string }} [options] */
 export function feedbackEmailDraft(client, { meetingLabel } = {}) {
   const name = client.first || "there";
   const subject = `Quick feedback on our meeting${meetingLabel ? ` — ${meetingLabel}` : ""}`;

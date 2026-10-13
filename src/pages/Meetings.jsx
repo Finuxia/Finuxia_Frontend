@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import { todayLong, todayISO, addDays } from "../lib/followUp";
-import GoogleMeetingsSection from "../components/GoogleMeetingsSection";
+import GoogleMeetingsSection from "../components/integrations/GoogleMeetingsSection";
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 

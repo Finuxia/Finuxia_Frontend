@@ -8,8 +8,23 @@ import Clients from "./Clients";
 
 const STAGE = PIPELINE_STAGES[1].id;
 const client = (n, over = {}) => ({
-  id: `c_${n}`, first: `Client${n}`, last: "Test", phone: "", email: "", telegram: "", color: "av-blue", priority: "Medium", currentStage: PIPELINE_STAGES[0].id,
-  nextFollowUp: "TBD", version: 1, stages: {}, notes: [], files: [], interests: [], meeting: null, ...over,
+  id: `c_${n}`,
+  first: `Client${n}`,
+  last: "Test",
+  phone: "",
+  email: "",
+  telegram: "",
+  color: "av-blue",
+  priority: "Medium",
+  currentStage: PIPELINE_STAGES[0].id,
+  nextFollowUp: "TBD",
+  version: 1,
+  stages: {},
+  notes: [],
+  files: [],
+  interests: [],
+  meeting: null,
+  ...over,
 });
 
 /**
@@ -25,7 +40,8 @@ function serve(all, { size = 2 } = {}) {
       asked.push(params);
       if (asked.failCursor && params.cursor) return HttpResponse.json({ error: "Page failed" }, { status: 500 });
       let rows = all;
-      for (const word of (params.q || "").toLowerCase().split(" ").filter(Boolean)) rows = rows.filter((c) => `${c.first} ${c.last}`.toLowerCase().includes(word));
+      for (const word of (params.q || "").toLowerCase().split(" ").filter(Boolean))
+        rows = rows.filter((c) => `${c.first} ${c.last}`.toLowerCase().includes(word));
       if (params.stage) rows = rows.filter((c) => c.currentStage === params.stage);
       if (params.priority) rows = rows.filter((c) => c.priority === params.priority);
       const start = params.cursor ? Number(atob(params.cursor)) : 0;

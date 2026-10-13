@@ -6,7 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import { createAttemptKeys, isRetryable } from "../lib/idempotency";
 import ContinueIntent from "../components/ContinueIntent";
-import PlanCards from "../components/PlanCards";
+import PlanCards from "../components/billing/PlanCards";
 
 export default function Billing() {
   const { billing, refreshBilling } = useAuth();
@@ -26,7 +26,7 @@ export default function Billing() {
         setPurchasesOpen(res.purchasesOpen !== false);
       })
       .catch(() => addToast("Could not load plans"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one read of the plans when the page opens; addToast is not stable and must not re-fetch
   }, []);
 
   const currentPlanKey = billing?.plan?.key;
@@ -82,7 +82,9 @@ export default function Billing() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">Plans &amp; Billing</h1>
-        <p className="text-sm text-slate-500">Pick a plan to unlock its modules. Each plan below only affects what your own account can use.</p>
+        <p className="text-sm text-slate-500">
+          Pick a plan to unlock its modules. Each plan below only affects what your own account can use.
+        </p>
       </div>
 
       <ContinueIntent />

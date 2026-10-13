@@ -34,7 +34,8 @@ describe("removed dead code stays removed", () => {
       for (const name of readdirSync(dir)) {
         const path = `${dir}/${name}`;
         if (statSync(path).isDirectory()) walk(path);
-        else if (/\.(jsx?|mjs)$/.test(name) && !/\.test\./.test(name)) for (const m of read(path).matchAll(/import\.meta\.env\.(VITE_[A-Z0-9_]+)/g)) found.add(m[1]);
+        else if (/\.(jsx?|mjs)$/.test(name) && !/\.test\./.test(name))
+          for (const m of read(path).matchAll(/import\.meta\.env\.(VITE_[A-Z0-9_]+)/g)) found.add(m[1]);
       }
     };
     walk("src");
@@ -53,7 +54,7 @@ describe("removed dead code stays removed", () => {
   });
 
   it("the layout uses no utility class that Tailwind has no definition for (scrollbar-none)", () => {
-    expect(read("src/components/Layout.jsx")).not.toContain("scrollbar-none");
+    expect(read("src/components/layout/Layout.jsx")).not.toContain("scrollbar-none");
   });
 
   it("the cancel-subscription API helper with no caller is gone", () => {

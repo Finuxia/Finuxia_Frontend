@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { describe, expect, it } from "vitest";
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "../components/layout/ProtectedRoute";
 import { destinationAfterLogin } from "../lib/redirects";
 import { API, testUser } from "../test/handlers";
 import { server } from "../test/server";

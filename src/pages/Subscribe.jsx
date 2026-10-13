@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { CalendarClock, Lock, LogOut, LifeBuoy } from "lucide-react";
-import Logo from "../components/Logo";
-import PlanCards from "../components/PlanCards";
+import Logo from "../components/layout/Logo";
+import PlanCards from "../components/billing/PlanCards";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
@@ -146,7 +146,10 @@ export default function Subscribe() {
         <div className="mt-8">
           {loading && !data && <p className="text-center text-sm text-slate-400">Loading plans...</p>}
           {error && (
-            <div role="alert" className="mx-auto flex max-w-xl flex-col items-center gap-3 rounded-xl border border-dashed border-av-red/30 bg-white px-6 py-6 text-center text-sm text-av-red">
+            <div
+              role="alert"
+              className="mx-auto flex max-w-xl flex-col items-center gap-3 rounded-xl border border-dashed border-av-red/30 bg-white px-6 py-6 text-center text-sm text-av-red"
+            >
               <span>{error.message}</span>
               <button
                 type="button"

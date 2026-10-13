@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AuthCard, { AuthField, authInputClass } from "../components/AuthCard";
+import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCard";
 import { useAuth } from "../context/AuthContext";
 import ErrorNotice from "../components/ErrorNotice";
 import useCountdown from "../hooks/useCountdown";

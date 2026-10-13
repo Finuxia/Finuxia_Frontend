@@ -152,6 +152,7 @@ export function AuthProvider({ children }) {
       uploadAvatar,
       removeAvatar,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the value changes with the data (user, billing); the functions in it are rebuilt every render and listing them would defeat the memo
     [user, initializing, billing, billingStatus]
   );
 

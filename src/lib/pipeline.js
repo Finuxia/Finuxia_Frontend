@@ -1,13 +1,4 @@
-import {
-  ClipboardList,
-  MessageCircle,
-  MessagesSquare,
-  Target,
-  RefreshCcw,
-  CheckCircle2,
-  ShieldCheck,
-  Star,
-} from "lucide-react";
+import { ClipboardList, MessageCircle, MessagesSquare, Target, RefreshCcw, CheckCircle2, ShieldCheck, Star } from "lucide-react";
 
 export const PIPELINE_STAGES = [
   { id: "cp", short: "CP", label: "CP", icon: ClipboardList },
@@ -21,9 +12,7 @@ export const PIPELINE_STAGES = [
   { id: "client", short: "Client", label: "Client", icon: Star },
 ];
 
-export const STAGE_INDEX = Object.fromEntries(
-  PIPELINE_STAGES.map((s, i) => [s.id, i])
-);
+export const STAGE_INDEX = Object.fromEntries(PIPELINE_STAGES.map((s, i) => [s.id, i]));
 
 export function getStage(stageId) {
   return PIPELINE_STAGES.find((s) => s.id === stageId);

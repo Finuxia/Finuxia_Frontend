@@ -1,16 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CalendarClock, Check, X, RefreshCcw, Clock, Mail, Phone, AlertTriangle } from "lucide-react";
 import { api, isIncompleteList } from "../lib/api";
+import { getBookingRequestStatusMeta } from "../lib/statusMeta";
+import { Badge } from "../components/ui";
+import useAsync from "../hooks/useAsync";
 import { useToast } from "../context/ToastContext";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
-import TimeInput from "../components/TimeInput";
+import TimeInput from "../components/ui/TimeInput";
 import IncompleteListNotice from "../components/IncompleteListNotice";
-
-const STATUS_META = {
-  pending: { label: "Pending", badge: "bg-av-amber/10 text-av-amber" },
-  confirmed: { label: "Confirmed", badge: "bg-av-green/10 text-av-green" },
-  cancelled: { label: "Cancelled", badge: "bg-slate-100 text-slate-500" },
-};
 
 function formatTimeLabel(time) {
   const [h, m] = time.split(":").map(Number);
@@ -31,27 +28,15 @@ function toISO(date, time) {
 export default function BookingRequests() {
   const { addToast } = useToast();
   const { status: calStatus, createEvent } = useGoogleCalendar();
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // A failed read leaves the list empty, as it always did (the page has no error state); `load` re-reads after every action.
+  const { data: requests, loading, reload: load } = useAsync(() => api.getBookingRequests(), [], { initial: [] });
+  // DATA-11: a list that hit the page cap comes back marked, and the user is told rather than
+  // shown a partial list as if it were whole. DERIVED from the data, not held in its own
+  // state: FE-06 swapped the hand-written load for `useAsync`, and a separate flag would have
+  // to be kept in step with every reload by hand. This cannot drift out of step.
+  const incomplete = isIncompleteList(requests);
   const [busyId, setBusyId] = useState(null);
-  const [incomplete, setIncomplete] = useState(false);
   const [rescheduling, setRescheduling] = useState(null); // request being rescheduled, or null
-
-  const load = () => {
-    setLoading(true);
-    api
-      .getBookingRequests()
-      .then((list) => {
-        setIncomplete(isIncompleteList(list));
-        setRequests(list);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
 
   const handleApprove = async (req) => {
     setBusyId(req.id);
@@ -74,7 +59,7 @@ export default function BookingRequests() {
             attendees: attendees.length ? attendees : undefined,
           });
           await api.setBookingRequestGoogleEvent(req.id, created.id);
-        } catch (err) {
+        } catch {
           addToast("Confirmed, but couldn't add it to Google Calendar — add it manually.");
         }
       } else if (calStatus !== "connected") {
@@ -144,8 +129,7 @@ export default function BookingRequests() {
       ) : (
         <div className="flex items-start gap-2 rounded-xl border border-dashed border-av-amber/40 bg-av-amber/5 px-4 py-3 text-sm text-av-amber">
           <AlertTriangle size={15} className="mt-0.5 shrink-0" />
-          Connect Google Calendar on your Profile page to skip the approval step entirely and add meetings
-          automatically.
+          Connect Google Calendar on your Profile page to skip the approval step entirely and add meetings automatically.
         </div>
       )}
 
@@ -210,14 +194,14 @@ export default function BookingRequests() {
 }
 
 function RequestCard({ req, busy, onApprove, onCancel, onReschedule }) {
-  const meta = STATUS_META[req.status] ?? STATUS_META.pending;
+  const meta = getBookingRequestStatusMeta(req.status);
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-navy">{req.clientName}</p>
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${meta.badge}`}>{meta.label}</span>
+            <Badge meta={meta} size="sm" />
           </div>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
             <Clock size={12} />
@@ -233,9 +217,7 @@ function RequestCard({ req, busy, onApprove, onCancel, onReschedule }) {
               </>
             )}
           </p>
-          {req.guestEmails?.length > 0 && (
-            <p className="mt-1 text-xs text-slate-400">Guests: {req.guestEmails.join(", ")}</p>
-          )}
+          {req.guestEmails?.length > 0 && <p className="mt-1 text-xs text-slate-400">Guests: {req.guestEmails.join(", ")}</p>}
           {req.answers?.length > 0 && (
             <div className="mt-1.5 flex flex-col gap-0.5">
               {req.answers.map((a) => (
@@ -290,8 +272,16 @@ function RescheduleModal({ req, onClose, onConfirm }) {
   const [time, setTime] = useState(req.time);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        role="presentation"
+        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="mb-4 text-lg font-semibold text-navy">Reschedule {req.clientName}</h2>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
 import { renderWithProviders, screen } from "../test/utils";
-import NotificationsDropdown from "../components/NotificationsDropdown";
+import NotificationsDropdown from "../components/layout/NotificationsDropdown";
 import BookingRequests from "./BookingRequests";
 import Documents from "./Documents";
 import FollowUps from "./FollowUps";

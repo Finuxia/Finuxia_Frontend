@@ -41,7 +41,10 @@ export function guessClientNameFromEvent(event) {
   const summary = (event?.summary || "").trim();
   if (!summary) return null;
   // Common patterns: "FC1 — Jane Doe", "Meeting with Jane Doe", "Jane Doe call".
-  const dash = summary.split(/[—-]/).map((s) => s.trim()).filter(Boolean);
+  const dash = summary
+    .split(/[—-]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
   const candidate = dash.length > 1 ? dash[dash.length - 1] : summary;
   const cleaned = candidate.replace(/\b(meeting|call|with|fc\d|cp|strategy|closing)\b/gi, "").trim();
   const parts = cleaned.split(/\s+/).filter(Boolean);

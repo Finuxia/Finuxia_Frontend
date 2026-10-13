@@ -6,7 +6,7 @@ import { ClientsProvider } from "./context/ClientsContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AuthProvider } from "./context/AuthContext";
 import { GoogleCalendarProvider } from "./context/GoogleCalendarContext";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundary from "./components/layout/ErrorBoundary";
 import { initErrorTracking } from "./lib/errorTracking";
 import "./index.css";
 

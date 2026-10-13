@@ -44,7 +44,7 @@ export function GoogleCalendarProvider({ children }) {
     const next = new URLSearchParams(searchParams);
     next.delete("gcalConnect");
     setSearchParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reacts to the OAuth return in the address bar; addToast, auth and setSearchParams are not stable and must not re-run it
   }, [searchParams]);
 
   const value = useMemo(

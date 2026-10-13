@@ -136,6 +136,10 @@ export function throttledMessage(retryAfterHeader) {
 }
 
 export class ApiError extends Error {
+  /**
+   * @param {string} message
+   * @param {{ status?: number, data?: any, retryAfter?: number | null, path?: string }} [options]
+   */
   constructor(message, { status, data, retryAfter = null, path = "" } = {}) {
     super(message);
     this.name = "ApiError";
@@ -146,6 +150,8 @@ export class ApiError extends Error {
     this.path = path;
     // The parsed error body — e.g. a 409 on a client edit carries `client`, the server's latest copy.
     this.data = data;
+    /** Set by the Google Calendar reads on a 409: the connection needs to be made again. @type {boolean | undefined} */
+    this.needsReconnect = undefined;
   }
 }
 
@@ -193,6 +199,15 @@ async function apiErrorFromResponse(res, path) {
   return apiErrorFrom(res.status, data, path, res.headers.get("Retry-After"));
 }
 
+/**
+ * @param {string} path
+ * @param {{ method?: string, body?: unknown, headers?: Record<string, string>, auth?: boolean }} [options]
+ *   `auth` is ACCEPTED AND IGNORED. Several call sites pass `{ auth: false }` meaning "do not
+ *   send credentials", and this function has never honoured it — every request sends
+ *   `credentials: "include"` regardless. It is in this type only so those existing call sites
+ *   type-check while the real question is settled on SCRUM-115: either make it work, or take it
+ *   off the call sites. Do not add new uses of it.
+ */
 async function request(path, { method = "GET", body, headers: extraHeaders } = {}) {
   const headers = { "Content-Type": "application/json", ...extraHeaders };
 
