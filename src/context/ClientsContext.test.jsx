@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
-import { act, renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
+import { act, renderWithProviders, screen, waitFor } from "../test/utils";
 import { useAuth } from "./AuthContext";
 import { useClients } from "./ClientsContext";
 

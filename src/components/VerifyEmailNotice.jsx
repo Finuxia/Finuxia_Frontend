@@ -17,7 +17,7 @@ export default function VerifyEmailNotice() {
     const onFocus = () => refreshUser().catch(() => {});
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the focus listener is installed once; refreshUser changes identity each render and re-installing it would add nothing
   }, []);
 
   const resend = async () => {

@@ -25,7 +25,7 @@ export default function Billing() {
         setPurchasesOpen(res.purchasesOpen !== false);
       })
       .catch(() => addToast("Could not load plans"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one read of the plans when the page opens; addToast is not stable and must not re-fetch
   }, []);
 
   const currentPlanKey = billing?.plan?.key;

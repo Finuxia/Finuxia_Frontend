@@ -13,11 +13,11 @@ export default function RescheduleModal({ title, currentDate, onSave, onClose })
   };
 
   return (
-    <div
+    <div role="presentation"
       className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
-      <div
+      <div role="presentation"
         className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >

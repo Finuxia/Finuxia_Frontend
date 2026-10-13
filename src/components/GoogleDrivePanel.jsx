@@ -63,7 +63,7 @@ export default function GoogleDrivePanel() {
     const next = new URLSearchParams(searchParams);
     next.delete("drive");
     setSearchParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per page load: it handles the OAuth return in the address bar, then removes it, so it must not run again when load/addToast change
   }, []);
 
   const handleConnect = async () => {

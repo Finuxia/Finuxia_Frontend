@@ -33,7 +33,7 @@ export default function VerifyEmail() {
       // Signed in here? Pick up the new status so the app unlocks without a re-login.
       if (user) refreshUser().catch(() => {});
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the link is verified once per visit (guarded by the sent ref); user and refreshUser changing must not send it again
   }, []);
 
   // A used link fails by design; if this browser's account is already verified, that's fine.

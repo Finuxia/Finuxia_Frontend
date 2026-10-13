@@ -133,6 +133,10 @@ export function throttledMessage(retryAfterHeader) {
 }
 
 export class ApiError extends Error {
+  /**
+   * @param {string} message
+   * @param {{ status?: number, data?: any, retryAfter?: number }} [options]
+   */
   constructor(message, { status, data, retryAfter } = {}) {
     super(message);
     this.name = "ApiError";
@@ -141,6 +145,8 @@ export class ApiError extends Error {
     this.retryAfter = retryAfter;
     // The parsed error body — e.g. a 409 on a client edit carries `client`, the server's latest copy.
     this.data = data;
+    /** Set by the Google Calendar reads on a 409: the connection needs to be made again. @type {boolean | undefined} */
+    this.needsReconnect = undefined;
   }
 }
 
@@ -169,6 +175,10 @@ function firstErrorMessage(data) {
   return null;
 }
 
+/**
+ * @param {string} path
+ * @param {{ method?: string, body?: unknown, headers?: Record<string, string>, auth?: boolean }} [options]
+ */
 async function request(path, { method = "GET", body, headers: extraHeaders } = {}) {
   const headers = { "Content-Type": "application/json", ...extraHeaders };
 
@@ -198,7 +208,7 @@ async function request(path, { method = "GET", body, headers: extraHeaders } = {
   if (!res.ok) {
     if (res.status === 429) {
       const header = res.headers.get("Retry-After");
-      throw new ApiError(throttledMessage(header), { status: 429, data, retryAfter: parseInt(header, 10) || undefined });
+      throw new ApiError(throttledMessage(header), { status: 429, data, retryAfter: parseInt(header ?? "", 10) || undefined });
     }
     const message =
       data?.error ||
@@ -232,7 +242,7 @@ async function requestMultipart(path, formData) {
   if (!res.ok) {
     if (res.status === 429) {
       const header = res.headers.get("Retry-After");
-      throw new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header, 10) || undefined });
+      throw new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header ?? "", 10) || undefined });
     }
     const message =
       data?.error ||
@@ -330,7 +340,7 @@ function sendMultipartXHR(path, formData, onProgress) {
         resolve(data);
       } else if (xhr.status === 429) {
         const header = xhr.getResponseHeader("Retry-After");
-        reject(new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header, 10) || undefined }));
+        reject(new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header ?? "", 10) || undefined }));
       } else {
         const message = data?.error || firstErrorMessage(data) || `Request failed (${xhr.status})`;
         reject(new ApiError(String(message), { status: xhr.status }));
@@ -435,10 +445,13 @@ export const api = {
   },
 
   // auth
+  /** @returns {Promise<import("./types").SessionResponse>} */
   register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
+  /** @returns {Promise<import("./types").SessionResponse>} */
   login: (identifier, password) =>
     request("/api/auth/login", { method: "POST", body: { identifier, password } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
+  /** @returns {Promise<import("./types").SessionResponse>} */
   me: () => request("/api/auth/me"),
   updateMe: (patch) => request("/api/auth/me", { method: "PATCH", body: patch }),
   updateComplianceProfile: (patch) => request("/api/auth/me/compliance-profile", { method: "PATCH", body: patch }),
@@ -486,23 +499,32 @@ export const api = {
   // support tickets (bug reports / feature requests) — own tickets only;
   // status changes and admin replies happen in the Django admin panel.
   getTickets: () => request("/api/tickets"),
+  /** @returns {Promise<import("./types").Ticket>} */
   getTicket: (id) => request(`/api/tickets/${id}`),
+  /** @returns {Promise<import("./types").Ticket>} */
   createTicket: (payload) => request("/api/tickets", { method: "POST", body: payload }),
+  /** @returns {Promise<import("./types").Ticket>} the ticket with its comments, the new one included */
   addTicketComment: (id, message) => request(`/api/tickets/${id}/comments`, { method: "POST", body: { message } }),
 
   // reminders / to-do list (owner-scoped, never touches meetings/analytics)
   /** Every reminder (read a page at a time; the server never has to build the whole list in one response). */
+  /** @returns {Promise<import("./types").Reminder[]>} */
   getReminders: () => api.getAllPages("/api/reminders"),
+  /** @returns {Promise<import("./types").Reminder>} */
   createReminder: (payload) => request("/api/reminders", { method: "POST", body: payload }),
+  /** @returns {Promise<import("./types").Reminder>} */
   updateReminder: (id, patch) => request(`/api/reminders/${id}`, { method: "PATCH", body: patch }),
   deleteReminder: (id) => request(`/api/reminders/${id}`, { method: "DELETE" }),
   deleteReminderSeries: (seriesId) => request(`/api/reminders/series/${encodeURIComponent(seriesId)}`, { method: "DELETE" }),
+  /** @returns {Promise<import("./types").Reminder>} */
   setReminderStatus: (id, status) => request(`/api/reminders/${id}/status`, { method: "POST", body: { status } }),
 
   // Automated follow-ups — a per-client rule ("keep emailing them every N
   // days, AI-drafted, until I turn it off"). Sending itself stays a no-op
   // server-side until real SMTP credentials are configured.
+  /** @returns {Promise<import("./types").FollowUpRule>} */
   getFollowUpRule: (clientRef) => request(`/api/followups/rules/${encodeURIComponent(clientRef)}`),
+  /** @returns {Promise<import("./types").FollowUpRule>} */
   setFollowUpRule: (clientRef, payload) =>
     request(`/api/followups/rules/${encodeURIComponent(clientRef)}`, { method: "PUT", body: payload }),
 
@@ -633,6 +655,7 @@ export const api = {
 
   // Calendar event data — proxied through the server-side connection above,
   // so the browser never needs its own Google token/login at all.
+  /** @param {{ timeMin?: string, timeMax?: string, maxResults?: number }} [range] */
   getCalendarEvents: ({ timeMin, timeMax, maxResults } = {}) => {
     const params = new URLSearchParams();
     if (timeMin) params.set("timeMin", timeMin);

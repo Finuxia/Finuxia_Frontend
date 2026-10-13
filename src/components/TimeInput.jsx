@@ -44,7 +44,7 @@ export default function TimeInput({
     }
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- closeAndRevert reads the latest state each time it runs and is rebuilt every render; the listener only needs re-installing when the value changes
   }, [value]);
 
   const scrollToCurrent = () => {

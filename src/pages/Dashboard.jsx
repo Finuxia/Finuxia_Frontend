@@ -43,11 +43,10 @@ export default function Dashboard() {
     [clients]
   );
   const meetingsToday = useMemo(() => clients.filter((c) => c.meeting?.date === today), [clients, today]);
-  const meetingIds = new Set(meetingsToday.map((c) => c.id));
-  const calls = useMemo(
-    () => clients.filter((c) => c.nextFollowUp === "Today" && !meetingIds.has(c.id)),
-    [clients, today]
-  );
+  const calls = useMemo(() => {
+    const meetingIds = new Set(meetingsToday.map((c) => c.id));
+    return clients.filter((c) => c.nextFollowUp === "Today" && !meetingIds.has(c.id));
+  }, [clients, meetingsToday]);
   const pendingFiles = useMemo(() => {
     const items = [];
     clients.forEach((c) => (c.files || []).filter((f) => f.status === "pending").forEach((f) => items.push({ client: c, file: f })));

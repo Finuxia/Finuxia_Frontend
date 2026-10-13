@@ -185,11 +185,11 @@ export default function ClientDetail() {
       <AddClientModal open={editOpen} onClose={() => setEditOpen(false)} client={client} />
 
       {confirmDelete && (
-        <div
+        <div role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
           onClick={() => setConfirmDelete(false)}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div role="presentation" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-av-red/10 text-av-red">
               <Trash2 size={20} />
             </div>
@@ -232,6 +232,7 @@ function AIMessagePanel({ client, onClose }) {
   useEffect(() => {
     setMessage(generateFollowUpMessage(client, tone));
     setCopied(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- redrafts when the tone or the client (by id) changes, not on every edit of the same client, which would overwrite what was typed
   }, [tone, client.id]);
 
   const handleCopy = async () => {
@@ -246,8 +247,8 @@ function AIMessagePanel({ client, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div
+    <div role="presentation" className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div role="presentation"
         className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >

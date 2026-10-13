@@ -122,11 +122,11 @@ export default function MeetingModal({ client, stage, onClose }) {
           : "Connect Google Calendar";
 
   return (
-    <div
+    <div role="presentation"
       className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
-      <div
+      <div role="presentation"
         className="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-md sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >

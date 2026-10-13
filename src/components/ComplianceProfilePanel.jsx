@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { LICENSED_PROVINCE_CODES, QUEBEC_SECTORS, COMPANIES_REPRESENTED_OPTIONS } from "../lib/salesPackageOptions";
+import Switch from "../Switch";
 
 const OWNERSHIP_OPTIONS = [
   "No ownership relationship",
@@ -225,11 +226,7 @@ export default function ComplianceProfilePanel() {
         <h2 className="mb-4 text-sm font-semibold text-navy">Supervisor</h2>
         <div className="mb-4 flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
           <span className="text-sm text-navy">Supervisor required?</span>
-          <label className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center">
-            <input type="checkbox" checked={supervisorRequired} onChange={(e) => setSupervisorRequired(e.target.checked)} className="peer sr-only" />
-            <span className="absolute inset-0 rounded-full bg-slate-200 transition-colors peer-checked:bg-gold" />
-            <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-          </label>
+          <Switch label="Supervisor required?" checked={supervisorRequired} onChange={(e) => setSupervisorRequired(e.target.checked)} />
         </div>
         {supervisorRequired && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -276,11 +273,7 @@ export default function ComplianceProfilePanel() {
           </label>
           <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
             <span className="text-sm text-navy">Additional compensation eligible?</span>
-            <label className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center">
-              <input type="checkbox" checked={additionalCompensationEligible} onChange={(e) => setAdditionalCompensationEligible(e.target.checked)} className="peer sr-only" />
-              <span className="absolute inset-0 rounded-full bg-slate-200 transition-colors peer-checked:bg-gold" />
-              <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-            </label>
+            <Switch label="Additional compensation eligible?" checked={additionalCompensationEligible} onChange={(e) => setAdditionalCompensationEligible(e.target.checked)} />
           </div>
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Known Standing Conflict / Additional Disclosure (optional)</span>

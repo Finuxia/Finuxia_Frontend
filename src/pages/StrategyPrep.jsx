@@ -82,8 +82,9 @@ export default function StrategyPrep() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</label>
+        <label htmlFor="strategy-client" className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</label>
         <select
+          id="strategy-client"
           value={selectedId}
           onChange={(e) => setSelected(e.target.value)}
           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 sm:max-w-sm"

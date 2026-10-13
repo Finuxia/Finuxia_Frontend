@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, X } from "lucide-react";
 
 /**
@@ -68,6 +68,7 @@ export default function SearchableSelect({
     }
   };
 
+  const listId = useId();
   const clearable = !disabled && (freeText ? Boolean(value) : Boolean(selected));
 
   return (
@@ -85,6 +86,9 @@ export default function SearchableSelect({
         onKeyDown={onKeyDown}
         role="combobox"
         aria-expanded={open}
+        aria-controls={listId}
+        aria-haspopup="listbox"
+        aria-autocomplete="list"
         className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-2.5 pr-14 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 disabled:bg-slate-50 disabled:text-slate-400"
       />
       <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1 text-slate-400">
@@ -105,14 +109,16 @@ export default function SearchableSelect({
         <ChevronDown size={14} className="pointer-events-none" />
       </div>
       {open && !disabled && (
-        <ul className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+        <ul id={listId} role="listbox" className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
           {filtered.length === 0 ? (
-            <li className="px-3 py-2 text-xs text-slate-400">{freeText ? "No saved match — keep typing to use this name." : emptyText}</li>
+            <li role="presentation" className="px-3 py-2 text-xs text-slate-400">{freeText ? "No saved match — keep typing to use this name." : emptyText}</li>
           ) : (
             filtered.map((o, i) => (
-              <li key={o.value}>
+              <li key={o.value} role="presentation">
                 <button
                   type="button"
+                  role="option"
+                  aria-selected={String(o.value) === String(value)}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => pick(o)}
                   onMouseEnter={() => setHighlight(i)}

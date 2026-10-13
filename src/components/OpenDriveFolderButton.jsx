@@ -79,11 +79,11 @@ export default function OpenDriveFolderButton({ clientId, clientName }) {
       </button>
 
       {prompt && (
-        <div
+        <div role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
           onClick={() => setPrompt(null)}
         >
-          <div
+          <div role="presentation"
             className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >

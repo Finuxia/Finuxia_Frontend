@@ -69,7 +69,7 @@ export default function BookingRequests() {
             attendees: attendees.length ? attendees : undefined,
           });
           await api.setBookingRequestGoogleEvent(req.id, created.id);
-        } catch (err) {
+        } catch {
           addToast("Confirmed, but couldn't add it to Google Calendar — add it manually.");
         }
       } else if (calStatus !== "connected") {
@@ -284,8 +284,8 @@ function RescheduleModal({ req, onClose, onConfirm }) {
   const [time, setTime] = useState(req.time);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+    <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div role="presentation" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
         <h2 className="mb-4 text-lg font-semibold text-navy">Reschedule {req.clientName}</h2>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">

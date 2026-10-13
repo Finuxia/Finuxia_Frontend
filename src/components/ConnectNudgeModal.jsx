@@ -30,7 +30,6 @@ export default function ConnectNudgeModal() {
         setDriveConfigured(data.isConfigured !== false);
       })
       .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justRegistered]);
 
   const driveNeeded = driveConfigured && driveStatus !== null && driveStatus !== "connected";

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, Plus, Trash2, GripVertical, CalendarClock, Link2 } from "lucide-react";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
+import Switch from "../Switch";
 
 const emptyQuestion = () => ({ id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, label: "", required: false });
 
@@ -103,11 +104,11 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
   };
 
   return (
-    <div
+    <div role="presentation"
       className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
-      <div
+      <div role="presentation"
         className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-lg sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -234,16 +235,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
 
           <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
             <span className="text-sm text-navy">Allow guests</span>
-            <label className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center">
-              <input
-                type="checkbox"
-                checked={guestsAllowed}
-                onChange={(e) => setGuestsAllowed(e.target.checked)}
-                className="peer sr-only"
-              />
-              <span className="absolute inset-0 rounded-full bg-slate-200 transition-colors peer-checked:bg-gold" />
-              <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-            </label>
+            <Switch label="Allow guests" checked={guestsAllowed} onChange={(e) => setGuestsAllowed(e.target.checked)} />
           </div>
           {guestsAllowed && (
             <p className="-mt-2 text-xs text-slate-400">

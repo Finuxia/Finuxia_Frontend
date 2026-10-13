@@ -42,7 +42,7 @@ function cacheKeys(email) {
 // What the server last confirmed for a client, minus its `version` — used to
 // tell which clients actually changed locally and need a PATCH.
 function contentJson(client) {
-  const { version, ...rest } = client; // eslint-disable-line no-unused-vars
+  const { version: _version, ...rest } = client;
   return JSON.stringify(rest);
 }
 
@@ -178,7 +178,7 @@ export function ClientsProvider({ children }) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a login/logout effect: it must run once per account, not whenever loadFromServer (rebuilt every render) or the cache keys change
   }, [user?.email]);
 
   // ---- sync: clients (per-client PATCH / DELETE, optimistic concurrency) ----
@@ -218,7 +218,7 @@ export function ClientsProvider({ children }) {
       if (!entry) continue; // not confirmed by the server (e.g. the first load failed) — never PATCH blindly
       const json = contentJson(c);
       if (json === entry.json) continue;
-      const { id: _id, version: _version, ...body } = c; // eslint-disable-line no-unused-vars
+      const { id: _id, version: _version, ...body } = c;
       try {
         const saved = await api.patchClient(id, { ...body, version: entry.version });
         snap.set(id, { version: saved.version, json });
@@ -267,7 +267,7 @@ export function ClientsProvider({ children }) {
     writeCache(keys.clients, clients);
     if (clientTimer.current) clearTimeout(clientTimer.current);
     clientTimer.current = setTimeout(runSync, SYNC_DEBOUNCE_MS);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fires when the clients change; runSync and keys are rebuilt every render and read through refs, so listing them would restart the debounce on every render
   }, [clients]);
 
   // ---- debounced sync: daily tasks -----------------------------------
@@ -278,7 +278,7 @@ export function ClientsProvider({ children }) {
     stateTimer.current = setTimeout(() => {
       api.putState(doneTasks).catch((err) => setSyncError(err));
     }, SYNC_DEBOUNCE_MS);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fires when the done-tasks change; keys and addToast are rebuilt every render and listing them would restart the debounce each time
   }, [doneTasks]);
 
   // ---- debounced sync: client groups ----------------------------------
@@ -295,7 +295,7 @@ export function ClientsProvider({ children }) {
           addToast(err.message || "Couldn't save group changes to the server");
         });
     }, SYNC_DEBOUNCE_MS);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fires when the groups change; keys and addToast are rebuilt every render and listing them would restart the debounce each time
   }, [groups]);
 
   const nextColor = () => AV_COLORS[clients.length % AV_COLORS.length];
@@ -638,6 +638,7 @@ export function ClientsProvider({ children }) {
       toggleClientInGroup,
       getGroupsForClient,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the value changes with the data; the functions in it are rebuilt every render and listing them would defeat the memo
     [clients, doneTasks, groups, loading, loadingMore, syncError]
   );
 

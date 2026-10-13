@@ -13,7 +13,7 @@ import { formatSlotLabel } from "../lib/timeSlots";
  * same "can't select this" behavior for free.
  */
 export default function TimeSlotSelect({ date, durationMinutes = 30, value, onChange, label = "Time", disabled = false }) {
-  const { status, slots, error, retry } = useAvailability(date, durationMinutes);
+  const { status, slots, retry } = useAvailability(date, durationMinutes);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 

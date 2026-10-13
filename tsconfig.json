@@ -1,0 +1,21 @@
+{
+  // Type checking for JavaScript, adopted module by module. Everything listed in "include" is checked (JSDoc types plus
+  // inference); everything else is left alone. Add a file or folder here once it passes, never remove one.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "skipLibCheck": true
+  },
+  "include": ["src/lib/**/*.js", "src/lib/**/*.d.ts", "src/hooks/**/*.js", "src/services/**/*.js"],
+  "exclude": ["src/**/*.test.js", "src/**/*.test.jsx"]
+}

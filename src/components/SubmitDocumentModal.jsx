@@ -94,11 +94,11 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
   };
 
   return (
-    <div
+    <div role="presentation"
       className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
-      <div
+      <div role="presentation"
         className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-lg sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >

@@ -81,7 +81,7 @@ export default function Reports() {
 
   useEffect(() => {
     loadEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reloads when the connection or the dates change; loadEvents is rebuilt every render
   }, [status, startDate, endDate]);
 
   /* -------- client-based metrics (always available, local data) -------- */
