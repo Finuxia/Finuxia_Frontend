@@ -9,6 +9,7 @@ export default function AiUsageInline({ usage, className = "" }) {
   const urgent = usage.warning === "critical" || usage.warning === "exhausted";
   return (
     <div
+      data-testid="ai-usage-warning"
       role="status"
       className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-xs ${
         urgent ? "border-av-red/40 bg-av-red/10 text-av-red" : "border-gold/40 bg-gold/10 text-gold-dark"

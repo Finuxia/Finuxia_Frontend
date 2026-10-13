@@ -46,7 +46,7 @@ describe("the meetings page", () => {
     renderWithProviders(<App />, { route: "/meetings" });
     const nav = await screen.findByRole("navigation");
     await userEvent.click(within(nav).getByRole("button", { name: /meetings/i }));
-    expect(await screen.findByRole("link", { name: "Calendar Meetings" })).toHaveAttribute("href", "/meetings"); // the menu is portaled to the body
+    expect(await screen.findByRole("menuitem", { name: "Calendar Meetings" })).toHaveAttribute("href", "/meetings"); // the menu is portaled to the body
   });
 });
 

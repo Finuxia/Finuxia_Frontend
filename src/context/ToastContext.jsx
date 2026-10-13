@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useState } from "react";
+import { createPortal } from "react-dom";
 
 const ToastContext = createContext(null);
 
@@ -30,25 +31,37 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2">
-        {toasts.map((t) => (
-          <div key={t.id} className="animate-slide-up rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white shadow-lg">
-            {t.message}
-            {t.action && (
-              <button
-                type="button"
-                onClick={() => {
-                  t.action.onClick();
-                  dismiss(t.id);
-                }}
-                className="ml-3 font-semibold text-gold underline"
-              >
-                {t.action.label}
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+      {/* A live region, so screen readers announce a message without it taking focus. It sits outside the app's root
+          (portal) and is marked data-keep-visible, so an open dialog does not hide it from assistive technology. */}
+      {createPortal(
+        <div
+          data-keep-visible
+          role="status"
+          aria-label="Notifications"
+          aria-live="polite"
+          aria-atomic="false"
+          className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2"
+        >
+          {toasts.map((t) => (
+            <div key={t.id} className="animate-slide-up rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white shadow-lg">
+              {t.message}
+              {t.action && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    t.action.onClick();
+                    dismiss(t.id);
+                  }}
+                  className="ml-3 font-semibold text-gold underline"
+                >
+                  {t.action.label}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>,
+        document.body
+      )}
     </ToastContext.Provider>
   );
 }

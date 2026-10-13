@@ -28,7 +28,8 @@ export default defineConfig({
       exclude: ["src/main.jsx", "src/test/**", "src/**/*.test.{js,jsx}", "src/data/**"],
       // A floor, not a goal: set just under what the first real tests cover, so coverage can only go up.
       // Raise it as tests are added (see README, "Testing").
-      thresholds: { statements: 18, branches: 65, functions: 22, lines: 18 },
+      // A floor, not a target: raised with FE-05's suite, and measured at 53/82/55/53 when it was set.
+      thresholds: { statements: 25, branches: 70, functions: 35, lines: 25 },
     },
   },
 });

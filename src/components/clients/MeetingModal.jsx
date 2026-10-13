@@ -1,3 +1,4 @@
+import Modal, { ModalTitle } from "../ui/Modal";
 import { useState } from "react";
 import { X, CalendarPlus, CalendarX } from "lucide-react";
 import { useClients } from "../../context/ClientsContext";
@@ -121,118 +122,108 @@ export default function MeetingModal({ client, stage, onClose }) {
           : "Connect Google Calendar";
 
   return (
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
-      onClick={onClose}
-    >
-      <div
-        role="presentation"
-        className="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-md sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Edit Meeting</p>
-            <h2 className="text-lg font-semibold text-navy">{stage.label}</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
+    <Modal onClose={onClose} variant="sheet" panelClassName="max-h-[90vh] overflow-y-auto rounded-t-2xl sm:max-w-md sm:rounded-2xl">
+      <div className="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Edit Meeting</p>
+          <ModalTitle className="text-lg font-semibold text-navy">{stage.label}</ModalTitle>
         </div>
+        <button
+          onClick={onClose}
+          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-5">
-          <div className="grid grid-cols-2 gap-4">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Meeting Date</span>
-              <input
-                type="date"
-                value={date}
-                min={todayISO()}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-              />
-            </label>
-            <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={MEETING_DURATION_MINUTES} />
-          </div>
-
-          {isConfigured && googleEventId && googleStatus === "connected" ? (
-            <button
-              type="button"
-              onClick={handleCancelMeeting}
-              disabled={cancelling}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-av-red/30 bg-av-red/5 px-3 py-2 text-xs font-semibold text-av-red transition hover:bg-av-red/10 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <CalendarX size={14} />
-              {cancelling ? "Cancelling..." : "Cancel Meeting"}
-            </button>
-          ) : (
-            isConfigured && (
-              <button
-                type="button"
-                onClick={handleGoogleButton}
-                disabled={(googleStatus === "connected" && (!date || !time)) || syncing || googleStatus === "connecting"}
-                className="flex items-center justify-center gap-1.5 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold-dark transition hover:bg-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <CalendarPlus size={14} />
-                {googleButtonLabel}
-              </button>
-            )
-          )}
-
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-5">
+        <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Outcome</span>
-            <div className="flex items-center gap-2">
-              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${getStageStatusMeta(status).dot}`} />
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-              >
-                {STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {(status === "completed" || status === "skipped") && stage.id === client.currentStage && (
-              <span className="text-xs text-gold-dark">Pipeline will advance to the next stage on save.</span>
-            )}
-          </label>
-
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Add Note</span>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              placeholder="What happened in this meeting..."
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Meeting Date</span>
+            <input
+              type="date"
+              value={date}
+              min={todayISO()}
+              onChange={(e) => setDate(e.target.value)}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
+          <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={MEETING_DURATION_MINUTES} />
+        </div>
 
-          <div className="mt-2 flex justify-end gap-3">
+        {isConfigured && googleEventId && googleStatus === "connected" ? (
+          <button
+            type="button"
+            onClick={handleCancelMeeting}
+            disabled={cancelling}
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-av-red/30 bg-av-red/5 px-3 py-2 text-xs font-semibold text-av-red transition hover:bg-av-red/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <CalendarX size={14} />
+            {cancelling ? "Cancelling..." : "Cancel Meeting"}
+          </button>
+        ) : (
+          isConfigured && (
             <button
               type="button"
-              onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+              onClick={handleGoogleButton}
+              disabled={(googleStatus === "connected" && (!date || !time)) || syncing || googleStatus === "connecting"}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold-dark transition hover:bg-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Cancel
+              <CalendarPlus size={14} />
+              {googleButtonLabel}
             </button>
-            <button
-              type="submit"
-              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+          )
+        )}
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Outcome</span>
+          <div className="flex items-center gap-2">
+            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${getStageStatusMeta(status).dot}`} />
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             >
-              Save
-            </button>
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
-        </form>
-      </div>
-    </div>
+          {(status === "completed" || status === "skipped") && stage.id === client.currentStage && (
+            <span className="text-xs text-gold-dark">Pipeline will advance to the next stage on save.</span>
+          )}
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Add Note</span>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={3}
+            placeholder="What happened in this meeting..."
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          />
+        </label>
+
+        <div className="mt-2 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }

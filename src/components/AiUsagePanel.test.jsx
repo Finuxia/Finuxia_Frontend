@@ -105,7 +105,7 @@ describe("AI usage panel", () => {
       })
     );
     render();
-    expect(await screen.findByRole("status")).toHaveTextContent(/82%.*180 credits left/);
+    expect(await screen.findByTestId("ai-usage-warning")).toHaveTextContent(/82%.*180 credits left/);
   });
 
   it("warns urgently at 95%", async () => {
@@ -117,7 +117,7 @@ describe("AI usage panel", () => {
       })
     );
     render();
-    const warning = await screen.findByRole("status");
+    const warning = await screen.findByTestId("ai-usage-warning");
     expect(warning).toHaveTextContent(/96%/);
     expect(warning.className).toContain("av-red");
   });
@@ -126,7 +126,7 @@ describe("AI usage panel", () => {
     serve(allowance());
     render();
     await screen.findByText(/895/);
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ai-usage-warning")).not.toBeInTheDocument();
   });
 
   it("when used up but the wallet can still pay, says the wallet is paying and does not call it blocked", async () => {
@@ -138,7 +138,7 @@ describe("AI usage panel", () => {
       })
     );
     render();
-    expect(await screen.findByRole("status")).toHaveTextContent(/paid from your wallet \(\$12\.50\)/);
+    expect(await screen.findByTestId("ai-usage-warning")).toHaveTextContent(/paid from your wallet \(\$12\.50\)/);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
