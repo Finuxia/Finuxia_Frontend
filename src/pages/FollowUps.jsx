@@ -17,8 +17,9 @@ import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
 import { getStage, getMissedStage } from "../lib/pipeline";
 import { daysAgoLabel, daysUntil, formatDate, todayISO } from "../lib/followUp";
-import { api } from "../lib/api";
+import { api, isIncompleteList } from "../lib/api";
 import ReminderModal from "../components/ReminderModal";
+import IncompleteListNotice from "../components/IncompleteListNotice";
 import FollowUpRuleModal from "../components/FollowUpRuleModal";
 
 const PRIORITY_BADGE = {
@@ -43,11 +44,15 @@ export default function FollowUps() {
   const [pickerMode, setPickerMode] = useState(null); // null | "followup" | "automate" — "which client?" step
   const [pickerClientId, setPickerClientId] = useState("");
   const [followUpItems, setFollowUpItems] = useState([]);
+  const [followUpsIncomplete, setFollowUpsIncomplete] = useState(false);
 
   const loadFollowUps = () =>
     api
       .getReminders()
-      .then((all) => setFollowUpItems(all.filter((r) => r.kind === "followup" && r.status === "pending")))
+      .then((all) => {
+        setFollowUpsIncomplete(isIncompleteList(all));
+        setFollowUpItems(all.filter((r) => r.kind === "followup" && r.status === "pending"));
+      })
       .catch(() => {});
   useEffect(() => {
     loadFollowUps();
@@ -96,6 +101,7 @@ export default function FollowUps() {
 
   return (
     <div className="flex flex-col gap-8">
+      {followUpsIncomplete && <IncompleteListNotice what="follow-ups" />}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-navy">Follow-ups</h1>

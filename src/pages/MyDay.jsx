@@ -6,12 +6,13 @@ import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import { todayLong, todayISO, addDays, formatDate } from "../lib/followUp";
 import { formatTime } from "../lib/notifications";
 import { useToast } from "../context/ToastContext";
-import { api } from "../lib/api";
+import { api, isIncompleteList } from "../lib/api";
 import ClientCard from "../components/ClientCard";
 import RescheduleModal from "../components/RescheduleModal";
 import GoogleMeetingsSection from "../components/GoogleMeetingsSection";
 import RemindersSection from "../components/RemindersSection";
 import ReminderModal from "../components/ReminderModal";
+import IncompleteListNotice from "../components/IncompleteListNotice";
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -22,12 +23,16 @@ export default function MyDay() {
   const { addToast } = useToast();
   const [rescheduleTarget, setRescheduleTarget] = useState(null);
   const [reminders, setReminders] = useState([]);
+  const [remindersIncomplete, setRemindersIncomplete] = useState(false);
   const [reminderModal, setReminderModal] = useState(null); // null | 'create' | reminder object being edited
 
   const loadReminders = () =>
     api
       .getReminders()
-      .then((all) => setReminders(all.filter((r) => (r.kind || "reminder") === "reminder")))
+      .then((all) => {
+        setRemindersIncomplete(isIncompleteList(all));
+        setReminders(all.filter((r) => (r.kind || "reminder") === "reminder"));
+      })
       .catch(() => {});
   useEffect(() => {
     loadReminders();
@@ -115,6 +120,7 @@ export default function MyDay() {
 
   return (
     <div className="flex flex-col gap-6">
+      {remindersIncomplete && <IncompleteListNotice what="reminders" />}
       <section className="overflow-hidden rounded-2xl bg-navy px-6 py-7 text-white shadow-lg sm:px-8">
         <div className="flex flex-col gap-3">
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">

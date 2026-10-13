@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { useClients } from "../context/ClientsContext";
 import { buildNotifications } from "../lib/notifications";
-import { api } from "../lib/api";
+import { api, isIncompleteList } from "../lib/api";
+import IncompleteListNotice from "./IncompleteListNotice";
 
 const SEEN_KEY = "advisorpilot.seenNotifications";
 
@@ -28,12 +29,25 @@ export default function NotificationsDropdown() {
   const [seen, setSeen] = useState(loadSeen);
   const [reminders, setReminders] = useState([]);
   const [bookingRequests, setBookingRequests] = useState([]);
+  const [incomplete, setIncomplete] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.getReminders().then(setReminders).catch(() => {});
-    api.getBookingRequests().then(setBookingRequests).catch(() => {});
+    api
+      .getReminders()
+      .then((list) => {
+        if (isIncompleteList(list)) setIncomplete(true);
+        setReminders(list);
+      })
+      .catch(() => {});
+    api
+      .getBookingRequests()
+      .then((list) => {
+        if (isIncompleteList(list)) setIncomplete(true);
+        setBookingRequests(list);
+      })
+      .catch(() => {});
   }, []);
 
   const notifications = useMemo(
@@ -90,6 +104,7 @@ export default function NotificationsDropdown() {
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-80 animate-fade-in rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
           <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">Notifications</p>
+          {incomplete && <IncompleteListNotice what="reminders or booking requests" className="mb-1" />}
           {notifications.length === 0 ? (
             <p className="px-2 py-4 text-center text-sm text-slate-400">You're all caught up.</p>
           ) : (

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { FileStack, Plus, Download, FileText, Clock, CheckCircle2, XCircle } from "lucide-react";
 import usePagedList from "../hooks/usePagedList";
-import { api } from "../lib/api";
+import { api, isIncompleteList } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import LoadMore from "../components/LoadMore";
 import SubmitDocumentModal from "../components/SubmitDocumentModal";
+import IncompleteListNotice from "../components/IncompleteListNotice";
 
 const STATUS_META = {
   pending: { label: "Pending review", badge: "bg-av-amber/10 text-av-amber", icon: Clock },
@@ -20,6 +21,7 @@ export default function Documents() {
   const [mine, setMine] = useState([]);
   const [loadingMine, setLoadingMine] = useState(true);
   const [errorMine, setErrorMine] = useState(null);
+  const [mineIncomplete, setMineIncomplete] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
 
@@ -27,7 +29,9 @@ export default function Documents() {
     setLoadingMine(true);
     setErrorMine(null);
     try {
-      setMine(await api.getMyDocuments());
+      const list = await api.getMyDocuments();
+      setMineIncomplete(isIncompleteList(list));
+      setMine(list);
     } catch (err) {
       setErrorMine(err);
     } finally {
@@ -61,6 +65,7 @@ export default function Documents() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      {mineIncomplete && <IncompleteListNotice what="your submitted documents" />}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy text-gold">
