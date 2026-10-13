@@ -57,16 +57,10 @@ describe("removed dead code stays removed", () => {
     expect(read("src/components/layout/Layout.jsx")).not.toContain("scrollbar-none");
   });
 
+  // (A plan change is back as BIL-11: our own local transition, priced by us, not a subscription held at the provider, so previewPlanChange / changePlan
+  // and /api/billing/plan-change are no longer on this list.)
   it("nothing in the web app still talks to a provider-held subscription (BIL-09: plans are one-time purchases we record ourselves)", () => {
-    const gone = [
-      "openBillingPortal",
-      "getInvoices",
-      "previewPlanChange",
-      "changePlan",
-      "cancelScheduledPlanChange",
-      "cancelSubscription",
-      "reactivateSubscription",
-    ];
+    const gone = ["openBillingPortal", "getInvoices", "cancelScheduledPlanChange", "cancelSubscription", "reactivateSubscription"];
     const found = [];
     const walk = (dir) => {
       for (const name of readdirSync(dir)) {
@@ -74,13 +68,7 @@ describe("removed dead code stays removed", () => {
         if (statSync(path).isDirectory()) walk(path);
         else if (/\.(jsx?|ts)$/.test(name) && !/\.test\./.test(name)) {
           const text = read(path);
-          for (const word of [
-            ...gone,
-            "/api/billing/portal",
-            "/api/billing/invoices",
-            "/api/billing/plan-change",
-            "/api/billing/reactivate",
-          ])
+          for (const word of [...gone, "/api/billing/portal", "/api/billing/invoices", "/api/billing/reactivate"])
             if (text.includes(word)) found.push(`${path}: ${word}`);
         }
       }

@@ -207,6 +207,7 @@ async function apiErrorFromResponse(res, path) {
  *   `credentials: "include"` regardless. It is in this type only so those existing call sites
  *   type-check while the real question is settled on SCRUM-115: either make it work, or take it
  *   off the call sites. Do not add new uses of it.
+ * @returns {Promise<any>} the parsed JSON body (null for a 204); the public methods below narrow it with their own return types.
  */
 async function request(path, { method = "GET", body, headers: extraHeaders } = {}) {
   const headers = { "Content-Type": "application/json", ...extraHeaders };
@@ -621,6 +622,19 @@ export const api = {
   // "I do not intend to continue" (true takes it back). Only a statement: it changes no access, plan or feature, charges nothing, and
   // can be reversed until access ends; the answer is the billing status.
   setContinueIntent: (willContinue) => request("/api/billing/intent", { method: "PUT", body: { willContinue } }),
+  // What changing to this plan would do, worked out by the server from its own prices before anything happens (BIL-11): the kind, the amount due
+  // now, the new access end, what would be lost, which limits the account is over, and whether the change is allowed at all.
+  /** @param {number} planId @returns {Promise<import("./types").PlanChangeQuote>} */
+  previewPlanChange: (planId) => request(`/api/billing/plan-change/preview?planId=${encodeURIComponent(planId)}`),
+  // Makes the change the customer saw and confirmed. The amount they were shown is sent back and checked by the server (a changed price is a 409
+  // `quote_changed` with the new quote); the key makes a double click or a retry after a slow reply act once.
+  /** @param {number} planId @param {{ expectedAmountCents: number, expectedCurrency: string }} seen @param {string} [idempotencyKey] */
+  changePlan: (planId, { expectedAmountCents, expectedCurrency }, idempotencyKey) =>
+    request("/api/billing/plan-change", {
+      method: "POST",
+      body: { planId, expectedAmountCents, expectedCurrency },
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    }),
   // Nothing about where to return, and nothing about the amount, is sent from here: the server builds the return pages from its own
   // configuration and always charges the plan's own price. It still accepts a successUrl from an older bundle and ignores it for a
   // purchase, so sending one was only dead weight. The idempotency key (SEC-08) stays: it makes a double click, or a retry after a slow
