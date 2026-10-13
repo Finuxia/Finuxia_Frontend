@@ -1,0 +1,117 @@
+# End-to-end smoke suite (TEST-06, SCRUM-58)
+
+Browser journeys through the real application and a real backend. Not unit tests: nothing here is
+mocked, which is the point — these catch the things that only break when the pieces are joined
+together.
+
+## Running it
+
+Two processes, in two terminals. The backend first:
+
+```bash
+# in Finuxia_Backend
+export FINUXIA_DB_PORT=55432          # 5433-5435 are often taken by other projects
+docker compose up e2e-api             # http://127.0.0.1:8000, writes emails to ./.e2e-mail
+```
+
+Then the suite, which starts the Vite dev server itself:
+
+```bash
+# in Finuxia_Frontend
+E2E_MAIL_DIR=../Finuxia_Backend/.e2e-mail npm run test:e2e
+```
+
+Useful variants:
+
+```bash
+npm run test:e2e -- --headed        # watch it
+npm run test:e2e -- --debug         # step through
+npm run test:e2e -- account         # one file
+npx playwright show-report          # after a failure
+```
+
+## Why there is a separate backend service for this
+
+Two journeys need a link that only ever arrives by email — confirming an address, and resetting a
+password. A browser cannot read an inbox.
+
+The tempting shortcut is a test-only HTTP endpoint that returns the token for an address. That is an
+endpoint which hands out account-takeover tokens, living in production code, guarded by a flag. It
+would be one careless change away from being reachable for real, and it is not worth that for a test
+convenience.
+
+So `e2e-api` runs with Django's own **file-based** email backend and writes each message into
+`Finuxia_Backend/.e2e-mail`, which `support/mail.js` reads. No application code exists for the
+benefit of the tests and nothing new is exposed over HTTP. SEC-14 made `EMAIL_BACKEND` an explicit
+opt-in that overrides the `DEBUG` default; this is that mechanism used as intended.
+
+Without `E2E_MAIL_DIR` those journeys **skip** rather than pass, so a misconfigured run cannot look
+like a green one.
+
+## Where it is allowed to run
+
+These journeys register accounts and write client records. `support/target.js` has two gates:
+
+1. an **allowlist** — local addresses, plus anything named in `E2E_ALLOWED_HOSTS`, so running against
+   a remote environment is a deliberate act;
+2. a **denylist** the allowlist cannot override — the hostnames that serve real users are refused
+   even if someone adds them to `E2E_ALLOWED_HOSTS`, because the realistic mistake is not inventing
+   a hostname, it is pasting one from a runbook into the wrong variable.
+
+The check runs when the Playwright config loads, so a bad target fails before a browser starts
+rather than after it has created an account.
+
+```bash
+# a deployed environment that holds no real data
+E2E_ALLOWED_HOSTS=finuxia-staging.example.com \
+E2E_BASE_URL=https://finuxia-staging.example.com npm run test:e2e
+```
+
+Against a remote target the mail-reading journeys skip, because the backend writes its messages on
+its own disk.
+
+## Two traps worth knowing before writing another journey
+
+**Unique email addresses must not use `+tag`.** The backend canonicalises a mailbox by lower-casing
+it and stripping `+tag` and Gmail dots before deciding whether it has already had a free trial
+(`canonical_mailbox`, and DATA-07 which hashes that form). So every `e2e+anything@example.com` is one
+mailbox: the first run would get a trial and pass, and every run after it would register an account
+with no trial, land on the subscribe page instead of the application, and fail nowhere near the
+cause. `uniqueEmail()` puts the stamp in the local part for this reason. It cost an afternoon to
+find once.
+
+**No fixed waits, ever.** `retries` is 0 on purpose, because this story's criteria say flaky tests
+are fixed or deleted rather than retried until they pass — and a retry turns a real intermittent bug
+into a green run that tells you nothing. Every wait in here waits for a condition. The project has
+already paid for this lesson elsewhere: a `sleep(2.2)` in the AI concurrency tests failed once under
+load and took three full suite runs plus a diagnostic to prove it was the sleep and not a defect.
+
+## Selectors
+
+By **label** and by **role**, never by CSS class. The classes are Tailwind utility strings that
+change whenever the design does, and a suite that fails on a restyle teaches people to ignore it. A
+label changing is a real change to what the user sees, and a test noticing that is the test working.
+
+One exception, flagged in `support/actions.js`: the avatar menu is found by `title`, because its only
+visible text is the account's first initial and the menu is portalled outside the `<nav>` landmark.
+FE-05 (SCRUM-48) adds accessible menu primitives; it can have a proper label then.
+
+## What is here, and what is not
+
+| Journey | State |
+|---|---|
+| register → confirm → sign in → create a client → sign out → sign back in | **done** |
+| forgot password → reset → old password dead, new one works, link not reusable | **done** |
+| public booking link → pick a slot → submit → advisor approves | not yet |
+| subscribe → pay with a test card → entitlement granted | not yet, deliberately — see below |
+| use an AI feature until the quota is exhausted → blocked state | not yet; needs the AI provider stubbed |
+| import a real spreadsheet → row counts match | not yet; needs the fixture from TEST-08 (SCRUM-86) |
+
+**The payment journey is last on purpose.** BIL-20 (SCRUM-108) walks a real Stripe sandbox checkout
+by hand first and captures what the provider actually sends. Automating it before anyone has seen it
+work would encode our assumptions about Stripe rather than Stripe's behaviour — which is the exact
+mistake TEST-04 was raised to fix, where a hand-written fixture contained a field the provider does
+not send and the test passed anyway.
+
+Still outstanding from the story: running in CI against a deployed environment and gating promotion.
+That needs OPS-12 (SCRUM-112) to exist first.
