@@ -9,12 +9,14 @@ import GoogleDrivePanel from "../components/GoogleDrivePanel";
 import ZoomPanel from "../components/ZoomPanel";
 import AvailabilityPanel from "../components/AvailabilityPanel";
 import ComplianceProfilePanel from "../components/ComplianceProfilePanel";
+import AiUsagePanel from "../components/AiUsagePanel";
 
 const TABS = [
   { key: "account", label: "Account" },
   { key: "integrations", label: "Integrations" },
   { key: "availability", label: "Availability" },
   { key: "compliance", label: "Compliance" },
+  { key: "ai-usage", label: "AI usage" },
 ];
 
 export default function Profile() {
@@ -268,6 +270,8 @@ export default function Profile() {
       {tab === "availability" && <AvailabilityPanel />}
 
       {tab === "compliance" && <ComplianceProfilePanel />}
+
+      {tab === "ai-usage" && <AiUsagePanel />}
 
       <button
         onClick={handleLogout}

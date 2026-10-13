@@ -1,9 +1,11 @@
 import { Plus, Trash2 } from "lucide-react";
+import IncompleteListNotice from "../IncompleteListNotice";
 
 /** Shown when the advisor already has sales packages: continue one, delete a draft, or start a new package. */
-export default function PackagePicker({ packages, onResume, onDelete, onStartNew }) {
+export default function PackagePicker({ packages, incomplete = false, onResume, onDelete, onStartNew }) {
   return (
     <div className="flex flex-col gap-6">
+      {incomplete && <IncompleteListNotice what="sales packages" />}
       <div>
         <h1 className="text-2xl font-bold text-navy">Sales Package Prep</h1>
         <p className="text-sm text-slate-500">You have saved sales packages in progress — continue one, or start a new one.</p>

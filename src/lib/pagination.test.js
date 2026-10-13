@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
-import { api, PAGE_SIZE, toPage, withQuery } from "./api";
+import { api, isIncompleteList, PAGE_SIZE, toPage, withQuery } from "./api";
+import * as errorReporting from "./errorReporting";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
 
@@ -125,13 +126,87 @@ describe("getAllPages", () => {
 
   it("does not loop for ever on a cursor that never ends", async () => {
     server.use(http.get(`${API}/api/things`, () => HttpResponse.json({ results: [{ id: 1 }], nextCursor: "again" })));
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const all = await api.getAllPages("/api/things", {}, { maxPages: 4 });
+    spy.mockRestore();
     expect(all).toHaveLength(4);
   });
 
   it("by default it gives up after two hundred pages rather than loop for ever", async () => {
     server.use(http.get(`${API}/api/things`, () => HttpResponse.json({ results: [{ id: 1 }], nextCursor: "again" })));
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await api.getAllPages("/api/things")).toHaveLength(200);
+    spy.mockRestore();
+  });
+
+  describe("reaching the cap is not the same as reaching the end (DATA-11)", () => {
+    const endless = () => server.use(http.get(`${API}/api/things`, () => HttpResponse.json({ results: [{ id: 1 }], nextCursor: "again" })));
+
+    it("a list cut off by the cap is marked incomplete, so the caller can tell", async () => {
+      endless();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const all = await api.getAllPages("/api/things", {}, { maxPages: 4 });
+      expect(all).toHaveLength(4);
+      expect(isIncompleteList(all)).toBe(true);
+      spy.mockRestore();
+    });
+
+    it("it is reported: an error in the console and an event to the error tracker, naming the path and the count", async () => {
+      endless();
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      const report = vi.spyOn(errorReporting, "reportError").mockImplementation(() => {});
+      await api.getAllPages("/api/things", {}, { maxPages: 3 });
+      expect(consoleError).toHaveBeenCalledWith(expect.stringContaining("/api/things: stopped after 3 pages (3 items)"));
+      expect(report).toHaveBeenCalledTimes(1);
+      expect(report.mock.calls[0][0].message).toContain("incomplete");
+      expect(report.mock.calls[0][1]).toEqual({ errorId: "list-incomplete" });
+      consoleError.mockRestore();
+      report.mockRestore();
+    });
+
+    it("more pages than the default cap still returns, and says so", async () => {
+      endless();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const all = await api.getAllPages("/api/things");
+      expect(all).toHaveLength(200);
+      expect(isIncompleteList(all)).toBe(true);
+      spy.mockRestore();
+    });
+
+    it("a list that ends exactly at the cap is complete, not flagged", async () => {
+      pagedServer("/api/things", numbered(4), { size: 1 });
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const all = await api.getAllPages("/api/things", {}, { maxPages: 4 });
+      expect(all).toHaveLength(4);
+      expect(isIncompleteList(all)).toBe(false);
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it("an ordinary list, an empty list and a copy of an incomplete list are not marked", async () => {
+      pagedServer("/api/things", numbered(120));
+      expect(isIncompleteList(await api.getAllPages("/api/things"))).toBe(false);
+      pagedServer("/api/things", []);
+      expect(isIncompleteList(await api.getAllPages("/api/things"))).toBe(false);
+      endless();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const all = await api.getAllPages("/api/things", {}, { maxPages: 2 });
+      expect(isIncompleteList([...all])).toBe(false); // the mark belongs to the list it was put on
+      spy.mockRestore();
+    });
+
+    it("things that are not lists are never incomplete", () => {
+      for (const v of [null, undefined, {}, "x", 3]) expect(isIncompleteList(v)).toBe(false);
+    });
+
+    it("a cancelled load is not reported as incomplete", async () => {
+      endless();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const all = await api.getAllPages("/api/things", {}, { maxPages: 4, isCancelled: () => true });
+      expect(isIncompleteList(all)).toBe(false);
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
   });
 
   it("a failure partway is an error, not a silently short list", async () => {

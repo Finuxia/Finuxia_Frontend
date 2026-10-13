@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import { createAttemptKeys, isRetryable } from "../lib/idempotency";
+import ContinueIntent from "../components/ContinueIntent";
 import PlanCards from "../components/PlanCards";
 
 export default function Billing() {
@@ -83,6 +84,8 @@ export default function Billing() {
         <h1 className="text-2xl font-bold text-navy">Plans &amp; Billing</h1>
         <p className="text-sm text-slate-500">Pick a plan to unlock its modules. Each plan below only affects what your own account can use.</p>
       </div>
+
+      <ContinueIntent />
 
       {isLegacy && (
         <div className="flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold-dark">

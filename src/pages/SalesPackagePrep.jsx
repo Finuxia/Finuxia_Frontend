@@ -3,12 +3,13 @@ import { useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { api } from "../lib/api";
+import { api, isIncompleteList } from "../lib/api";
 import { INVESTMENT_BEARING_TYPES } from "../lib/salesPackageOptions";
 import { STEPS, advanceBlocker, computeStepStates } from "../lib/salesPackage/wizard";
 import useSalesPackageCatalog from "../hooks/useSalesPackageCatalog";
 import useSalesPackageDraft from "../hooks/useSalesPackageDraft";
 import useSalesPackageActions from "../hooks/useSalesPackageActions";
+import useAiUsage from "../hooks/useAiUsage";
 import useDocumentUploads from "../hooks/useDocumentUploads";
 import useProductRows from "../hooks/useProductRows";
 import Stepper from "../components/sales-package/Stepper";
@@ -35,6 +36,7 @@ export default function SalesPackagePrep() {
 
   const [mode, setMode] = useState("loading"); // loading | picker | wizard
   const [myPackages, setMyPackages] = useState([]);
+  const [packagesIncomplete, setPackagesIncomplete] = useState(false);
   const [step, setStep] = useState(0);
   const [visited, setVisited] = useState(() => new Set([0]));
   const [confirmChecked, setConfirmChecked] = useState(false);
@@ -52,7 +54,8 @@ export default function SalesPackagePrep() {
   const { data, patch, documents } = draft;
   const rows = useProductRows({ draft, catalog });
   const uploads = useDocumentUploads({ packageId, applyDocuments: draft.applyDocuments });
-  const actions = useSalesPackageActions({ packageId, draft });
+  const { usage: aiUsage, refresh: refreshAiUsage } = useAiUsage(); // for the 80% / 95% warning next to the draft button
+  const actions = useSalesPackageActions({ packageId, draft, onAiUsed: refreshAiUsage });
 
   // --- bootstrap ---
   useEffect(() => {
@@ -74,6 +77,7 @@ export default function SalesPackagePrep() {
       try {
         const list = await api.getSalesPackages();
         if (cancelled) return;
+        setPackagesIncomplete(isIncompleteList(list));
         if (list.length > 0) {
           setMyPackages(list);
           setMode("picker");
@@ -133,7 +137,7 @@ export default function SalesPackagePrep() {
   }
 
   if (mode === "picker") {
-    return <PackagePicker packages={myPackages} onResume={openPackage} onDelete={deleteDraft} onStartNew={startNewDraft} />;
+    return <PackagePicker packages={myPackages} incomplete={packagesIncomplete} onResume={openPackage} onDelete={deleteDraft} onStartNew={startNewDraft} />;
   }
 
   const stepStatuses = computeStepStates({ data, documents, status: draft.status }).map((st, i) => {
@@ -196,6 +200,9 @@ export default function SalesPackagePrep() {
           onDownloadLetterPdf={actions.downloadLetterPdf}
           onDraftLetter={actions.draftLetter}
           letterDrafting={actions.letterDrafting}
+          aiUsage={aiUsage}
+          letterBlocked={actions.letterBlocked}
+          onDismissBlocked={actions.dismissLetterBlocked}
           onSaveLetter={actions.saveLetter}
         />
       )}

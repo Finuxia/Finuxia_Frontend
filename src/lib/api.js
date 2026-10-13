@@ -5,6 +5,9 @@
  * sends them with `credentials: "include"`, and state-changing requests echo the
  * readable CSRF cookie in `X-CSRF-Token`.
  */
+import { messageForStatus, parseRetryAfter } from "./apiErrors";
+import { reportError } from "./errorReporting";
+
 const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:4000").replace(/\/$/, "");
 const CSRF_COOKIE = "fx_csrf";
 const LEGACY_TOKEN_KEY = "advisorpilot.token";
@@ -133,12 +136,14 @@ export function throttledMessage(retryAfterHeader) {
 }
 
 export class ApiError extends Error {
-  constructor(message, { status, data, retryAfter } = {}) {
+  constructor(message, { status, data, retryAfter = null, path = "" } = {}) {
     super(message);
     this.name = "ApiError";
     this.status = status;
-    // Seconds until the next attempt is allowed (from Retry-After), for 429 responses.
+    // Seconds the server asked us to wait (Retry-After on a 429), the machine-readable `code` it sent, and the request path.
     this.retryAfter = retryAfter;
+    this.code = data?.code || "";
+    this.path = path;
     // The parsed error body — e.g. a 409 on a client edit carries `client`, the server's latest copy.
     this.data = data;
   }
@@ -169,6 +174,25 @@ function firstErrorMessage(data) {
   return null;
 }
 
+// The one place a refused response becomes an ApiError: the server's own sentence if it sent one (a sensible fallback
+// per status if not), and the Retry-After wait on a 429 (see lib/apiErrors.js).
+function apiErrorFrom(status, data, path, retryAfterHeader) {
+  const retryAfter = parseRetryAfter(retryAfterHeader);
+  const sent = data?.error || data?.detail || firstErrorMessage(data);
+  return new ApiError(messageForStatus(status, sent, { retryAfter, path }), { status, data, retryAfter, path });
+}
+
+// The same, from a fetch Response whose body is not read yet (file downloads and previews).
+async function apiErrorFromResponse(res, path) {
+  let data = null;
+  try {
+    data = JSON.parse(await res.text());
+  } catch {
+    // not JSON
+  }
+  return apiErrorFrom(res.status, data, path, res.headers.get("Retry-After"));
+}
+
 async function request(path, { method = "GET", body, headers: extraHeaders } = {}) {
   const headers = { "Content-Type": "application/json", ...extraHeaders };
 
@@ -195,17 +219,7 @@ async function request(path, { method = "GET", body, headers: extraHeaders } = {
     }
   }
 
-  if (!res.ok) {
-    if (res.status === 429) {
-      const header = res.headers.get("Retry-After");
-      throw new ApiError(throttledMessage(header), { status: 429, data, retryAfter: parseInt(header, 10) || undefined });
-    }
-    const message =
-      data?.error ||
-      firstErrorMessage(data) ||
-      `Request failed (${res.status})`;
-    throw new ApiError(String(message), { status: res.status, data });
-  }
+  if (!res.ok) throw apiErrorFrom(res.status, data, path, res.headers.get("Retry-After"));
 
   return data;
 }
@@ -229,17 +243,7 @@ async function requestMultipart(path, formData) {
       data = null;
     }
   }
-  if (!res.ok) {
-    if (res.status === 429) {
-      const header = res.headers.get("Retry-After");
-      throw new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header, 10) || undefined });
-    }
-    const message =
-      data?.error ||
-      firstErrorMessage(data) ||
-      `Request failed (${res.status})`;
-    throw new ApiError(String(message), { status: res.status });
-  }
+  if (!res.ok) throw apiErrorFrom(res.status, data, path, res.headers.get("Retry-After"));
   return data;
 }
 
@@ -252,16 +256,7 @@ async function downloadFile(path, fallbackName) {
   } catch {
     throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
-  if (!res.ok) {
-    let message = `Request failed (${res.status})`;
-    try {
-      const data = JSON.parse(await res.text());
-      message = data?.error || message;
-    } catch {
-      // ignore
-    }
-    throw new ApiError(message, { status: res.status });
-  }
+  if (!res.ok) throw await apiErrorFromResponse(res, path);
 
   const disposition = res.headers.get("Content-Disposition") || "";
   const match = disposition.match(/filename="([^"]+)"/);
@@ -287,7 +282,7 @@ async function fetchBlobUrl(path) {
   } catch {
     throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
-  if (!res.ok) throw new ApiError(`Request failed (${res.status})`, { status: res.status });
+  if (!res.ok) throw await apiErrorFromResponse(res, path);
   return URL.createObjectURL(await res.blob());
 }
 
@@ -332,8 +327,7 @@ function sendMultipartXHR(path, formData, onProgress) {
         const header = xhr.getResponseHeader("Retry-After");
         reject(new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header, 10) || undefined }));
       } else {
-        const message = data?.error || firstErrorMessage(data) || `Request failed (${xhr.status})`;
-        reject(new ApiError(String(message), { status: xhr.status }));
+        reject(apiErrorFrom(xhr.status, data, path, xhr.getResponseHeader("Retry-After")));
       }
     };
     xhr.send(formData);
@@ -350,16 +344,7 @@ async function requestMultipartDownload(path, formData, fallbackName) {
   } catch {
     throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
-  if (!res.ok) {
-    let message = `Request failed (${res.status})`;
-    try {
-      const data = JSON.parse(await res.text());
-      message = data?.error || firstErrorMessage(data) || message;
-    } catch {
-      // ignore — non-JSON error body
-    }
-    throw new ApiError(message, { status: res.status });
-  }
+  if (!res.ok) throw await apiErrorFromResponse(res, path);
 
   const disposition = res.headers.get("Content-Disposition") || "";
   const match = disposition.match(/filename="([^"]+)"/);
@@ -401,6 +386,13 @@ export function toPage(body) {
   return { results: Array.isArray(page?.results) ? page.results : [], nextCursor: page?.nextCursor || null };
 }
 
+// Lists `getAllPages` gave up on at its cap, so a screen can tell a partial list from a complete one. A WeakSet: the marker goes away with the list.
+const incompleteLists = new WeakSet();
+const markIncomplete = (list) => incompleteLists.add(list);
+/** True for a list `getAllPages` returned only part of (it hit its page cap while the server still had more). */
+export const isIncompleteList = (list) => Array.isArray(list) && incompleteLists.has(list);
+const MAX_PAGES = 200;
+
 export const api = {
   /**
    * One page of a collection (clients, tickets, ...): `getPage("/api/tickets", { cursor })`. Filters and sorting go in `params`.
@@ -413,14 +405,16 @@ export const api = {
   /**
    * Every page of a collection, one request at a time, for the places that need the whole set. `onPage(items, all)` is called after each page, so a
    * caller can show the first page while the rest arrive. Stops with what it has if `isCancelled()` turns true. A server that returns the whole list
-   * at once is one page. The cap (`maxPages`) is a guard against a cursor that never ends, not a limit anyone is expected to meet.
+   * at once is one page. The cap (`maxPages`, 200 pages = 10,000 items) is a guard against a cursor that never ends, not a limit anyone is expected to meet,
+   * and meeting it is NOT silent: the list comes back marked (`isIncompleteList(list)`), the console gets an error and the error tracker an event. A
+   * screen that genuinely needs more than that should page on demand with `usePagedList` and a Load more button instead.
    * @template T
    * @param {string} path
    * @param {{ [filter: string]: unknown }} [params]
    * @param {{ onPage?: (items: T[], all: T[]) => void, isCancelled?: () => boolean, maxPages?: number }} [options]
    * @returns {Promise<T[]>}
    */
-  getAllPages: async (path, params = {}, { onPage, isCancelled = () => false, maxPages = 200 } = {}) => {
+  getAllPages: async (path, params = {}, { onPage, isCancelled = () => false, maxPages = MAX_PAGES } = {}) => {
     const all = [];
     let cursor = null;
     for (let page = 0; page < maxPages; page += 1) {
@@ -431,6 +425,12 @@ export const api = {
       if (!nextCursor) return all;
       cursor = nextCursor;
     }
+    // The cap was reached and the server still had more: this list is NOT everything. It is returned (a partial list is more useful than none) but
+    // marked, so a screen can say so (`isIncompleteList`), and it is reported where someone will see it.
+    markIncomplete(all);
+    const error = new Error(`${path}: stopped after ${maxPages} pages (${all.length} items) and the server still had more. The list is incomplete.`);
+    console.error(error.message);
+    reportError(error, { errorId: "list-incomplete" });
     return all;
   },
 
@@ -591,11 +591,28 @@ export const api = {
   // Checkout once configured, an instant "mock" purchase until then).
   getBillingPlans: () => request("/api/billing/plans"),
   getMyBillingStatus: () => request("/api/billing/me"),
+  // The advisor's AI use this billing period, in credits: used / remaining, when they start again, what each feature used, the wallet and the
+  // recent calls, a warning level and, when the account cannot pay for the next AI action, the blocked state with the ways out.
+  getAiUsage: () => request("/api/billing/ai-usage"),
+  // Adds credit to the AI wallet. The key makes a double click or a retry after a slow reply act once (SEC-08); the return pages are ours.
+  topUpWallet: (amountCents, idempotencyKey) =>
+    request("/api/billing/wallet/topup", {
+      method: "POST",
+      body: {
+        amountCents,
+        successUrl: `${window.location.origin}/profile?tab=ai-usage&topup=success`,
+        cancelUrl: `${window.location.origin}/profile?tab=ai-usage&topup=canceled`,
+      },
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    }),
   // Two separate concerns, both required:
   //   - the idempotency key (SEC-08) makes a double click or a retry after a slow response act
   //     once: the server replays the first response instead of creating a second pending payment
   //   - successUrl / cancelUrl are where the provider returns the customer, to pages that confirm
   //     the payment with the server rather than trusting the URL (see PaymentReturn)
+  // "I do not intend to continue" (true takes it back). Only a statement: it changes no access, plan or feature, charges nothing, and
+  // can be reversed until access ends; the answer is the billing status.
+  setContinueIntent: (willContinue) => request("/api/billing/intent", { method: "PUT", body: { willContinue } }),
   purchasePlan: (planId, idempotencyKey) =>
     request("/api/billing/purchase", {
       method: "POST",

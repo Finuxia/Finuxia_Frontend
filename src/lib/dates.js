@@ -35,6 +35,19 @@ export function formatLongDate(iso) {
 }
 
 /**
+ * An instant as a date and time a person reads, in their own time zone: "January 15, 2026 at 3:30 PM EST". Empty for a missing or invalid
+ * value. Used where the exact moment matters (when access ends), not only the day.
+ * @param {string | null | undefined} iso
+ */
+export function formatLongDateTime(iso) {
+  const date = iso ? new Date(iso) : null;
+  if (!date || Number.isNaN(date.getTime())) return "";
+  const day = date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+  return `${day} at ${time}`;
+}
+
+/**
  * Whole days left until an instant (an ISO string from the server), counting a part day as a day: 0 once it has passed. Null if there is no
  * valid date, so a caller can show nothing instead of "NaN days".
  * @param {string | null | undefined} iso

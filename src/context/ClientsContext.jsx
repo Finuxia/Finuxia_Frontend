@@ -149,6 +149,13 @@ export function ClientsProvider({ children }) {
     }
   };
 
+  // "Refresh" on a conflict message: drop what this tab holds and take the server's copy.
+  const refreshFromServer = () => {
+    hydratedRef.current = false;
+    setLoading(true);
+    return loadFromServer();
+  };
+
   // ---- load on login / clear on logout -------------------------------
   useEffect(() => {
     hydratedRef.current = false;
@@ -189,7 +196,9 @@ export function ClientsProvider({ children }) {
     const [fresh] = normalize([serverClient]);
     snapshotRef.current.set(id, { version: fresh.version, json: contentJson(fresh) });
     setClients((prev) => prev.map((c) => (String(c.id) === id ? fresh : c)));
-    addToast(`${fresh.first} ${fresh.last}`.trim() + " was changed elsewhere — showing the latest version");
+    addToast(`${fresh.first} ${fresh.last}`.trim() + " was changed elsewhere — showing the latest version", {
+      action: { label: "Refresh", onClick: refreshFromServer },
+    });
   };
 
   const syncOnce = async () => {
@@ -612,6 +621,7 @@ export function ClientsProvider({ children }) {
       loading,
       loadingMore,
       syncError,
+      refreshFromServer,
       addClient,
       updateClient,
       editClient,

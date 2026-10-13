@@ -5,7 +5,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { destinationAfterLogin } from "../lib/redirects";
 import { API, testUser } from "../test/handlers";
 import { server } from "../test/server";
-import { renderWithProviders, screen, userEvent } from "../test/utils";
+import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import Login from "./Login";
 
 function Where() {
@@ -86,5 +86,45 @@ describe("destinationAfterLogin", () => {
     [from(42), "/dashboard"],
   ])("%j -> %s", (location, expected) => {
     expect(destinationAfterLogin(location)).toBe(expected);
+  });
+});
+
+describe("login rate limiting", () => {
+  const lockedOut = (retryAfter = 2) =>
+    server.use(
+      http.get(`${API}/api/auth/me`, () => new HttpResponse(null, { status: 401 })),
+      http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 })),
+      http.post(`${API}/api/auth/login`, () =>
+        HttpResponse.json({ detail: "Request was throttled. Expected available in 2 seconds." }, { status: 429, headers: { "Retry-After": String(retryAfter) } })
+      )
+    );
+
+  it("shows a clear lockout message with the wait, not 'request failed'", async () => {
+    lockedOut(600);
+    renderWithProviders(<App />, { route: "/login", providers: ["router", "toast", "auth"] });
+    await logIn();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Too many attempts. Try again in 10 minutes.");
+    expect(screen.queryByText(/request failed/i)).not.toBeInTheDocument();
+  });
+
+  it("holds the Log In button until the wait is over, then lets the user try again", async () => {
+    lockedOut(2);
+    renderWithProviders(<App />, { route: "/login", providers: ["router", "toast", "auth"] });
+    await logIn();
+    await screen.findByRole("alert");
+    expect(screen.getByRole("button", { name: "Log In" })).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Log In" })).toBeEnabled(), { timeout: 3500 });
+  });
+
+  it("a wrong password is still just the server's message, not a lockout", async () => {
+    server.use(
+      http.get(`${API}/api/auth/me`, () => new HttpResponse(null, { status: 401 })),
+      http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 })),
+      http.post(`${API}/api/auth/login`, () => HttpResponse.json({ error: "Invalid email or password." }, { status: 401 }))
+    );
+    renderWithProviders(<App />, { route: "/login", providers: ["router", "toast", "auth"] });
+    await logIn();
+    expect(await screen.findByText("Invalid email or password.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Log In" })).toBeEnabled();
   });
 });
