@@ -13,10 +13,18 @@ function toTimeInput(iso) {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-export default function GoogleEventForm({ title, initial, onSubmit, onClose, submitLabel = "Save" }) {
+export default function GoogleEventForm({
+  title,
+  initial,
+  onSubmit,
+  onClose,
+  submitLabel = "Save",
+}) {
   const { checkAvailability } = useGoogleCalendar();
   const [summary, setSummary] = useState(initial?.summary || "");
-  const [date, setDate] = useState(toDateInput(initial?.startISO) || new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(
+    toDateInput(initial?.startISO) || new Date().toISOString().slice(0, 10),
+  );
   const [time, setTime] = useState(toTimeInput(initial?.startISO));
   const [durationMin, setDurationMin] = useState(30);
   const [saving, setSaving] = useState(false);
@@ -33,13 +41,20 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
 
       // Final guard: re-check just this slot right before booking — the
       // dropdown's availability snapshot can go stale between pick and submit.
-      const stillBusy = await checkAvailability(start.toISOString(), end.toISOString()).catch(() => null);
+      const stillBusy = await checkAvailability(
+        start.toISOString(),
+        end.toISOString(),
+      ).catch(() => null);
       if (stillBusy === null) {
-        setError("Couldn't confirm this time is still free — please try again.");
+        setError(
+          "Couldn't confirm this time is still free — please try again.",
+        );
         return;
       }
       if (stillBusy.length > 0) {
-        setError("This time is no longer available. Please select another time.");
+        setError(
+          "This time is no longer available. Please select another time.",
+        );
         setTime("");
         return;
       }
@@ -79,7 +94,9 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Title
+            </span>
             <input
               autoFocus
               value={summary}
@@ -91,7 +108,9 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
 
           <div className="grid grid-cols-2 gap-4">
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Date</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Date
+              </span>
               <input
                 type="date"
                 value={date}
@@ -99,11 +118,18 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
-            <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={durationMin} />
+            <TimeSlotSelect
+              date={date}
+              value={time}
+              onChange={setTime}
+              durationMinutes={durationMin}
+            />
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Duration</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Duration
+            </span>
             <select
               value={durationMin}
               onChange={(e) => setDurationMin(Number(e.target.value))}

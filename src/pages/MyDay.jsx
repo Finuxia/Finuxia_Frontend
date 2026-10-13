@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { CalendarDays, Flame, PhoneCall, CalendarClock, FileText, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import {
+  CalendarDays,
+  Flame,
+  PhoneCall,
+  CalendarClock,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+} from "lucide-react";
 import { useClients } from "../context/ClientsContext";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import { todayLong, todayISO, addDays, formatDate } from "../lib/followUp";
@@ -16,8 +25,15 @@ import ReminderModal from "../components/ReminderModal";
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export default function MyDay() {
-  const { clients, isTaskDoneToday, toggleDailyTask, snooze, rescheduleFollowUp, rescheduleMeeting, toggleFileStatus } =
-    useClients();
+  const {
+    clients,
+    isTaskDoneToday,
+    toggleDailyTask,
+    snooze,
+    rescheduleFollowUp,
+    rescheduleMeeting,
+    toggleFileStatus,
+  } = useClients();
   const { status, fetchDay, getDayState } = useGoogleCalendar();
   const { addToast } = useToast();
   const [rescheduleTarget, setRescheduleTarget] = useState(null);
@@ -27,7 +43,9 @@ export default function MyDay() {
   const loadReminders = () =>
     api
       .getReminders()
-      .then((all) => setReminders(all.filter((r) => (r.kind || "reminder") === "reminder")))
+      .then((all) =>
+        setReminders(all.filter((r) => (r.kind || "reminder") === "reminder")),
+      )
       .catch(() => {});
   useEffect(() => {
     loadReminders();
@@ -49,27 +67,36 @@ export default function MyDay() {
   // --- application data for the selected date ---
   const dueClients = useMemo(
     () => clients.filter((c) => c.followUpDate === selectedDate),
-    [clients, selectedDate]
+    [clients, selectedDate],
   );
   const meetings = useMemo(
     () => clients.filter((c) => c.meeting?.date === selectedDate),
-    [clients, selectedDate]
+    [clients, selectedDate],
   );
-  const meetingIds = useMemo(() => new Set(meetings.map((c) => c.id)), [meetings]);
+  const meetingIds = useMemo(
+    () => new Set(meetings.map((c) => c.id)),
+    [meetings],
+  );
 
   const highPriority = useMemo(
-    () => dueClients.filter((c) => c.priority === "High" && !meetingIds.has(c.id)),
-    [dueClients, meetingIds]
+    () =>
+      dueClients.filter((c) => c.priority === "High" && !meetingIds.has(c.id)),
+    [dueClients, meetingIds],
   );
   const calls = useMemo(
-    () => dueClients.filter((c) => c.priority !== "High" && !meetingIds.has(c.id)),
-    [dueClients, meetingIds]
+    () =>
+      dueClients.filter((c) => c.priority !== "High" && !meetingIds.has(c.id)),
+    [dueClients, meetingIds],
   );
   // Files aren't date-bound; only surface them on today's view.
   const pendingFiles = useMemo(() => {
     if (!isToday) return [];
     const items = [];
-    clients.forEach((c) => (c.files || []).filter((f) => f.status === "pending").forEach((f) => items.push({ client: c, file: f })));
+    clients.forEach((c) =>
+      (c.files || [])
+        .filter((f) => f.status === "pending")
+        .forEach((f) => items.push({ client: c, file: f })),
+    );
     return items;
   }, [clients, isToday]);
 
@@ -84,34 +111,48 @@ export default function MyDay() {
   const pendingReminders = useMemo(
     () =>
       reminders.filter((r) => {
-        const due = isToday ? r.dueDate <= selectedDate : r.dueDate === selectedDate;
+        const due = isToday
+          ? r.dueDate <= selectedDate
+          : r.dueDate === selectedDate;
         return r.status === "pending" && due;
       }),
-    [reminders, selectedDate, isToday]
+    [reminders, selectedDate, isToday],
   );
   const completedRemindersForDate = useMemo(
     () =>
       reminders.filter((r) => {
-        const due = isToday ? r.dueDate <= selectedDate : r.dueDate === selectedDate;
+        const due = isToday
+          ? r.dueDate <= selectedDate
+          : r.dueDate === selectedDate;
         return r.status === "completed" && due;
       }),
-    [reminders, selectedDate, isToday]
+    [reminders, selectedDate, isToday],
   );
 
   // --- stats for the selected date ---
   // Reminders are counted here (My Day's own daily progress) but never in
   // Reports/analytics — those pages never query the reminders endpoint.
   const totalItems =
-    highPriority.length + calls.length + meetings.length + pendingFiles.length + googleEvents.length + pendingReminders.length + completedRemindersForDate.length;
+    highPriority.length +
+    calls.length +
+    meetings.length +
+    pendingFiles.length +
+    googleEvents.length +
+    pendingReminders.length +
+    completedRemindersForDate.length;
   const doneCount =
-    highPriority.filter((c) => isTaskDoneToday(c.id, "high", selectedDate)).length +
+    highPriority.filter((c) => isTaskDoneToday(c.id, "high", selectedDate))
+      .length +
     calls.filter((c) => isTaskDoneToday(c.id, "call", selectedDate)).length +
-    meetings.filter((c) => isTaskDoneToday(c.id, "meeting", selectedDate)).length +
+    meetings.filter((c) => isTaskDoneToday(c.id, "meeting", selectedDate))
+      .length +
     pendingFiles.filter(({ file }) => file.status === "done").length +
-    googleEvents.filter((e) => isTaskDoneToday(e.id, "gcal", selectedDate)).length +
+    googleEvents.filter((e) => isTaskDoneToday(e.id, "gcal", selectedDate))
+      .length +
     completedRemindersForDate.length;
   const remainingCount = totalItems - doneCount;
-  const progressPct = totalItems === 0 ? 0 : Math.round((doneCount / totalItems) * 100);
+  const progressPct =
+    totalItems === 0 ? 0 : Math.round((doneCount / totalItems) * 100);
 
   return (
     <div className="flex flex-col gap-6">
@@ -136,7 +177,9 @@ export default function MyDay() {
               <input
                 type="date"
                 value={selectedDate}
-                onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+                onChange={(e) =>
+                  e.target.value && setSelectedDate(e.target.value)
+                }
                 onClick={(e) => {
                   // Open the native calendar immediately on click (supported in
                   // modern browsers); falls back to normal focus behavior.
@@ -194,7 +237,10 @@ export default function MyDay() {
             <span className="font-semibold text-white">{progressPct}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-gold transition-all duration-300" style={{ width: `${progressPct}%` }} />
+            <div
+              className="h-full rounded-full bg-gold transition-all duration-300"
+              style={{ width: `${progressPct}%` }}
+            />
           </div>
         </div>
       </section>
@@ -226,12 +272,18 @@ export default function MyDay() {
             key={client.id}
             client={client}
             done={isTaskDoneToday(client.id, "high", selectedDate)}
-            onToggleDone={() => toggleDailyTask(client.id, "high", selectedDate)}
+            onToggleDone={() =>
+              toggleDailyTask(client.id, "high", selectedDate)
+            }
             onSnooze={(id) => {
               snooze(id, 3);
-              addToast(`Follow-up snoozed 3 days for ${client.first} ${client.last}`.trim());
+              addToast(
+                `Follow-up snoozed 3 days for ${client.first} ${client.last}`.trim(),
+              );
             }}
-            onReschedule={(c) => setRescheduleTarget({ type: "followup", client: c })}
+            onReschedule={(c) =>
+              setRescheduleTarget({ type: "followup", client: c })
+            }
           />
         ))}
       </Section>
@@ -242,12 +294,18 @@ export default function MyDay() {
             key={client.id}
             client={client}
             done={isTaskDoneToday(client.id, "call", selectedDate)}
-            onToggleDone={() => toggleDailyTask(client.id, "call", selectedDate)}
+            onToggleDone={() =>
+              toggleDailyTask(client.id, "call", selectedDate)
+            }
             onSnooze={(id) => {
               snooze(id, 3);
-              addToast(`Follow-up snoozed 3 days for ${client.first} ${client.last}`.trim());
+              addToast(
+                `Follow-up snoozed 3 days for ${client.first} ${client.last}`.trim(),
+              );
             }}
-            onReschedule={(c) => setRescheduleTarget({ type: "followup", client: c })}
+            onReschedule={(c) =>
+              setRescheduleTarget({ type: "followup", client: c })
+            }
           />
         ))}
       </Section>
@@ -259,8 +317,12 @@ export default function MyDay() {
             client={client}
             subtitle={`${client.meeting.label ?? "Meeting"} at ${formatTime(client.meeting.time || "09:00")}`}
             done={isTaskDoneToday(client.id, "meeting", selectedDate)}
-            onToggleDone={() => toggleDailyTask(client.id, "meeting", selectedDate)}
-            onReschedule={(c) => setRescheduleTarget({ type: "meeting", client: c })}
+            onToggleDone={() =>
+              toggleDailyTask(client.id, "meeting", selectedDate)
+            }
+            onReschedule={(c) =>
+              setRescheduleTarget({ type: "meeting", client: c })
+            }
             showFeedbackEmail
           />
         ))}
@@ -271,23 +333,40 @@ export default function MyDay() {
         events={googleEvents}
         loading={dayState.status === "loading"}
         error={dayState.error}
-        onRefresh={() => fetchDay(selectedDate, { force: true }).catch(() => {})}
+        onRefresh={() =>
+          fetchDay(selectedDate, { force: true }).catch(() => {})
+        }
       />
 
-      <Section icon={FileText} title="Pending Files" count={pendingFiles.length}>
+      <Section
+        icon={FileText}
+        title="Pending Files"
+        count={pendingFiles.length}
+      >
         {pendingFiles.map(({ client, file }) => (
-          <div key={file.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div
+            key={file.id}
+            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+          >
             <button
               onClick={() => toggleFileStatus(client.id, file.id)}
-              aria-label={file.status === "done" ? "Mark file pending" : "Mark file done"}
+              aria-label={
+                file.status === "done" ? "Mark file pending" : "Mark file done"
+              }
               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition ${
-                file.status === "done" ? "border-gold bg-gold" : "border-slate-300 hover:border-gold"
+                file.status === "done"
+                  ? "border-gold bg-gold"
+                  : "border-slate-300 hover:border-gold"
               }`}
             >
-              {file.status === "done" && <span className="h-2 w-2 rounded-full bg-white" />}
+              {file.status === "done" && (
+                <span className="h-2 w-2 rounded-full bg-white" />
+              )}
             </button>
             <div className="min-w-0 flex-1">
-              <p className={`truncate text-sm font-semibold ${file.status === "done" ? "text-slate-400 line-through" : "text-navy"}`}>
+              <p
+                className={`truncate text-sm font-semibold ${file.status === "done" ? "text-slate-400 line-through" : "text-navy"}`}
+              >
                 {file.name}
               </p>
               <p className="truncate text-xs text-slate-400">
@@ -300,23 +379,36 @@ export default function MyDay() {
 
       {rescheduleTarget && (
         <RescheduleModal
-          title={rescheduleTarget.type === "meeting" ? "Reschedule Meeting" : "Reschedule Follow-up"}
+          title={
+            rescheduleTarget.type === "meeting"
+              ? "Reschedule Meeting"
+              : "Reschedule Follow-up"
+          }
           currentDate={
-            rescheduleTarget.type === "meeting" ? rescheduleTarget.client.meeting?.date : rescheduleTarget.client.followUpDate
+            rescheduleTarget.type === "meeting"
+              ? rescheduleTarget.client.meeting?.date
+              : rescheduleTarget.client.followUpDate
           }
           onClose={() => setRescheduleTarget(null)}
           onSave={(newDate) => {
             const c = rescheduleTarget.client;
-            if (rescheduleTarget.type === "meeting") rescheduleMeeting(c.id, newDate, c.meeting?.time);
+            if (rescheduleTarget.type === "meeting")
+              rescheduleMeeting(c.id, newDate, c.meeting?.time);
             else rescheduleFollowUp(c.id, newDate);
-            addToast(`Rescheduled to ${formatDate(newDate)} for ${c.first} ${c.last}`.trim());
+            addToast(
+              `Rescheduled to ${formatDate(newDate)} for ${c.first} ${c.last}`.trim(),
+            );
           }}
         />
       )}
 
       {reminderModal && (
         <ReminderModal
-          initial={reminderModal === "create" ? { dueDate: selectedDate } : reminderModal}
+          initial={
+            reminderModal === "create"
+              ? { dueDate: selectedDate }
+              : reminderModal
+          }
           onClose={() => setReminderModal(null)}
           onSubmit={async (payload) => {
             if (reminderModal === "create") {
@@ -357,7 +449,9 @@ function Section({ icon: Icon, title, count, children }) {
           <Icon size={16} />
         </div>
         <h2 className="text-sm font-semibold text-navy">{title}</h2>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">{count}</span>
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+          {count}
+        </span>
       </div>
       <div className="flex flex-col gap-2.5">{children}</div>
     </div>

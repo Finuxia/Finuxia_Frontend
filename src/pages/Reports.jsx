@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CalendarRange, Link2, RefreshCcw, AlertTriangle, Users, CalendarCheck, Presentation, Download, FileText, Table2, CheckCircle2 } from "lucide-react";
+import {
+  CalendarRange,
+  Link2,
+  RefreshCcw,
+  AlertTriangle,
+  Users,
+  CalendarCheck,
+  Presentation,
+  Download,
+  FileText,
+  Table2,
+  CheckCircle2,
+} from "lucide-react";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
@@ -17,7 +29,10 @@ import {
   currentMonthKey,
   monthRange,
 } from "../lib/chartPipeline";
-import { matchClientForEvent, guessClientNameFromEvent } from "../services/meetingClients";
+import {
+  matchClientForEvent,
+  guessClientNameFromEvent,
+} from "../services/meetingClients";
 import { toCsv, downloadCsv } from "../lib/csv";
 import { PIPELINE_STAGES, STAGE_INDEX } from "../lib/pipeline";
 import { openPrintableReport } from "../lib/pdfReport";
@@ -32,15 +47,32 @@ function toInput(d) {
 }
 
 const PRESETS = [
-  { key: "this", label: "This month", range: () => ({ start: firstOfMonth(0), end: firstOfMonth(1) }) },
-  { key: "last", label: "Last month", range: () => ({ start: firstOfMonth(-1), end: firstOfMonth(0) }) },
-  { key: "3mo", label: "Last 3 months", range: () => ({ start: firstOfMonth(-2), end: firstOfMonth(1) }) },
-  { key: "6mo", label: "Last 6 months", range: () => ({ start: firstOfMonth(-5), end: firstOfMonth(1) }) },
+  {
+    key: "this",
+    label: "This month",
+    range: () => ({ start: firstOfMonth(0), end: firstOfMonth(1) }),
+  },
+  {
+    key: "last",
+    label: "Last month",
+    range: () => ({ start: firstOfMonth(-1), end: firstOfMonth(0) }),
+  },
+  {
+    key: "3mo",
+    label: "Last 3 months",
+    range: () => ({ start: firstOfMonth(-2), end: firstOfMonth(1) }),
+  },
+  {
+    key: "6mo",
+    label: "Last 6 months",
+    range: () => ({ start: firstOfMonth(-5), end: firstOfMonth(1) }),
+  },
 ];
 
 export default function Reports() {
   const { clients } = useClients();
-  const { isConfigured, status, connect, fetchEventsInRange } = useGoogleCalendar();
+  const { isConfigured, status, connect, fetchEventsInRange } =
+    useGoogleCalendar();
   const { addToast } = useToast();
   const [searchParams] = useSearchParams();
 
@@ -48,7 +80,9 @@ export default function Reports() {
   const initialMonth = searchParams.get("month") || currentMonthKey();
   const initialRange = monthRange(initialMonth);
   const [preset, setPreset] = useState("this");
-  const [startDate, setStartDate] = useState(initialRange.startISO.slice(0, 10));
+  const [startDate, setStartDate] = useState(
+    initialRange.startISO.slice(0, 10),
+  );
   const [endDate, setEndDate] = useState(initialRange.endISO.slice(0, 10));
 
   const [events, setEvents] = useState([]);
@@ -86,28 +120,44 @@ export default function Reports() {
 
   /* -------- client-based metrics (always available, local data) -------- */
   const rangeClients = useMemo(
-    () => runPipeline(clients, [filterByDateRange(startISO, endISO, clientActivityDate)]),
-    [clients, startISO, endISO]
+    () =>
+      runPipeline(clients, [
+        filterByDateRange(startISO, endISO, clientActivityDate),
+      ]),
+    [clients, startISO, endISO],
   );
-  const stageBreakdown = useMemo(() => runPipeline(rangeClients, [groupByStage()]), [rangeClients]);
+  const stageBreakdown = useMemo(
+    () => runPipeline(rangeClients, [groupByStage()]),
+    [rangeClients],
+  );
 
   // Of clients who've had a business (Strategy) meeting, what share made it
   // all the way to Closing? Uses currentStage position, not a separate
   // outcome field — every client's path still funnels through Closing.
   const businessMeetingClients = useMemo(
-    () => rangeClients.filter((c) => (STAGE_INDEX[c.currentStage] ?? 0) >= STAGE_INDEX.strategy_meeting),
-    [rangeClients]
+    () =>
+      rangeClients.filter(
+        (c) =>
+          (STAGE_INDEX[c.currentStage] ?? 0) >= STAGE_INDEX.strategy_meeting,
+      ),
+    [rangeClients],
   );
   const closedClients = useMemo(
-    () => businessMeetingClients.filter((c) => (STAGE_INDEX[c.currentStage] ?? 0) >= STAGE_INDEX.closing),
-    [businessMeetingClients]
+    () =>
+      businessMeetingClients.filter(
+        (c) => (STAGE_INDEX[c.currentStage] ?? 0) >= STAGE_INDEX.closing,
+      ),
+    [businessMeetingClients],
   );
   const closingRate = businessMeetingClients.length
     ? Math.round((closedClients.length / businessMeetingClients.length) * 100)
     : 0;
 
   /* --------- calendar-based metrics (need a live connection) ----------- */
-  const meetingsByType = useMemo(() => runPipeline(events, [countBy(classifyEventType)]), [events]);
+  const meetingsByType = useMemo(
+    () => runPipeline(events, [countBy(classifyEventType)]),
+    [events],
+  );
 
   const cpsPerClient = useMemo(() => {
     const cps = events.filter((e) => classifyEventType(e) === "CP");
@@ -122,7 +172,9 @@ export default function Reports() {
           })();
       counts.set(name, (counts.get(name) || 0) + 1);
     });
-    return [...counts.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+    return [...counts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
   }, [events, clients]);
 
   const monthOverMonth = useMemo(() => {
@@ -132,7 +184,9 @@ export default function Reports() {
       if (!key) return;
       map.set(key, (map.get(key) || 0) + 1);
     });
-    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([key, count]) => ({ key, count }));
+    return [...map.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, count]) => ({ key, count }));
   }, [events]);
 
   const totalMeetings = events.length;
@@ -163,7 +217,10 @@ export default function Reports() {
     rows.push(["CPs run per client", "Count"]);
     cpsPerClient.forEach((c) => rows.push([c.name, c.count]));
 
-    downloadCsv(`advisorpilot-report-${startDate}_to_${endDate}.csv`, toCsv(rows));
+    downloadCsv(
+      `advisorpilot-report-${startDate}_to_${endDate}.csv`,
+      toCsv(rows),
+    );
     addToast("Report exported");
   };
 
@@ -176,7 +233,10 @@ export default function Reports() {
           { label: "Meetings held", value: totalMeetings },
           { label: "CP meetings", value: cpMeetings },
           { label: "Clients active", value: rangeClients.length },
-          { label: "Business meeting -> Closing", value: `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})` },
+          {
+            label: "Business meeting -> Closing",
+            value: `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})`,
+          },
         ],
         sections: [
           {
@@ -186,12 +246,18 @@ export default function Reports() {
           },
           {
             heading: "Meetings month over month",
-            rows: monthOverMonth.map((m) => ({ label: monthShortLabel(m.key), value: m.count })),
+            rows: monthOverMonth.map((m) => ({
+              label: monthShortLabel(m.key),
+              value: m.count,
+            })),
             emptyText: "No meetings in this range.",
           },
           {
             heading: "Pipeline stage breakdown",
-            rows: stageBreakdown.map((s) => ({ label: s.stage.label, value: s.count })),
+            rows: stageBreakdown.map((s) => ({
+              label: s.stage.label,
+              value: s.count,
+            })),
             emptyText: "No client activity in this range.",
           },
           {
@@ -211,7 +277,12 @@ export default function Reports() {
   // uses), as a styled Excel checklist.
   const handleExportFunnel = async () => {
     try {
-      const headerRow = ["#", "Name", "Priority", ...PIPELINE_STAGES.map((s) => s.short)];
+      const headerRow = [
+        "#",
+        "Name",
+        "Priority",
+        ...PIPELINE_STAGES.map((s) => s.short),
+      ];
       const dataRows = rangeClients.map((c, i) => {
         const currentIdx = STAGE_INDEX[c.currentStage] ?? 0;
         return [
@@ -228,7 +299,10 @@ export default function Reports() {
         dataRows,
         columnWidths: [5, 24, 10, ...PIPELINE_STAGES.map(() => 12)],
       });
-      await downloadWorkbook(workbook, `advisorpilot-funnel-${startDate}_to_${endDate}.xlsx`);
+      await downloadWorkbook(
+        workbook,
+        `advisorpilot-funnel-${startDate}_to_${endDate}.xlsx`,
+      );
       addToast("Funnel exported");
     } catch (err) {
       addToast(err.message || "Could not export the funnel");
@@ -240,7 +314,9 @@ export default function Reports() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-navy">Reports</h1>
-          <p className="text-sm text-slate-500">Aggregate your meetings and pipeline over any date range.</p>
+          <p className="text-sm text-slate-500">
+            Aggregate your meetings and pipeline over any date range.
+          </p>
         </div>
         <div className="flex gap-2">
           <button
@@ -276,7 +352,9 @@ export default function Reports() {
                 key={p.key}
                 onClick={() => applyPreset(p)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  preset === p.key ? "bg-navy text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  preset === p.key
+                    ? "bg-navy text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 {p.label}
@@ -285,7 +363,9 @@ export default function Reports() {
           </div>
           <div className="flex items-end gap-2">
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">From</span>
+              <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                From
+              </span>
               <input
                 type="date"
                 value={startDate}
@@ -297,7 +377,9 @@ export default function Reports() {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">To</span>
+              <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                To
+              </span>
               <input
                 type="date"
                 value={endDate}
@@ -324,10 +406,29 @@ export default function Reports() {
 
       {/* Summary tiles */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile icon={CalendarCheck} label="Meetings held" value={totalMeetings} hint={status !== "connected" ? "Connect Google" : undefined} />
-        <StatTile icon={Presentation} label="CP meetings" value={cpMeetings} hint={status !== "connected" ? "Connect Google" : undefined} />
-        <StatTile icon={Users} label="Clients active" value={rangeClients.length} />
-        <StatTile icon={CalendarRange} label="Types" value={meetingsByType.length} hint={status !== "connected" ? "Connect Google" : undefined} />
+        <StatTile
+          icon={CalendarCheck}
+          label="Meetings held"
+          value={totalMeetings}
+          hint={status !== "connected" ? "Connect Google" : undefined}
+        />
+        <StatTile
+          icon={Presentation}
+          label="CP meetings"
+          value={cpMeetings}
+          hint={status !== "connected" ? "Connect Google" : undefined}
+        />
+        <StatTile
+          icon={Users}
+          label="Clients active"
+          value={rangeClients.length}
+        />
+        <StatTile
+          icon={CalendarRange}
+          label="Types"
+          value={meetingsByType.length}
+          hint={status !== "connected" ? "Connect Google" : undefined}
+        />
         <StatTile
           icon={CheckCircle2}
           label="Business meeting → Closing"
@@ -340,7 +441,9 @@ export default function Reports() {
       {isConfigured && status !== "connected" && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-4">
           <p className="flex items-center gap-2 text-sm text-slate-500">
-            {status === "expired" && <AlertTriangle size={15} className="text-av-red" />}
+            {status === "expired" && (
+              <AlertTriangle size={15} className="text-av-red" />
+            )}
             Connect Google Calendar to include meeting analytics in this report.
           </p>
           <button
@@ -369,7 +472,12 @@ export default function Reports() {
           ) : meetingsByType.length === 0 ? (
             <Empty text="No meetings in this range." />
           ) : (
-            <BarList rows={meetingsByType.map((t) => ({ label: t.key, value: t.count }))} />
+            <BarList
+              rows={meetingsByType.map((t) => ({
+                label: t.key,
+                value: t.count,
+              }))}
+            />
           )}
         </ReportCard>
 
@@ -380,14 +488,22 @@ export default function Reports() {
           ) : monthOverMonth.length === 0 ? (
             <Empty text="No meetings in this range." />
           ) : (
-            <BarList rows={monthOverMonth.map((m) => ({ label: monthShortLabel(m.key), value: m.count }))} />
+            <BarList
+              rows={monthOverMonth.map((m) => ({
+                label: monthShortLabel(m.key),
+                value: m.count,
+              }))}
+            />
           )}
         </ReportCard>
 
         {/* Stage breakdown (local clients) */}
         <ReportCard title="Pipeline stage breakdown">
           <BarList
-            rows={stageBreakdown.map((s) => ({ label: s.stage.short, value: s.count }))}
+            rows={stageBreakdown.map((s) => ({
+              label: s.stage.short,
+              value: s.count,
+            }))}
             emptyText="No client activity in this range."
           />
         </ReportCard>
@@ -401,9 +517,14 @@ export default function Reports() {
           ) : (
             <ul className="flex flex-col divide-y divide-slate-100">
               {cpsPerClient.map((row) => (
-                <li key={row.name} className="flex items-center justify-between py-2 text-sm">
+                <li
+                  key={row.name}
+                  className="flex items-center justify-between py-2 text-sm"
+                >
                   <span className="text-navy">{row.name}</span>
-                  <span className="rounded-full bg-navy/5 px-2.5 py-0.5 text-xs font-semibold text-navy">{row.count}</span>
+                  <span className="rounded-full bg-navy/5 px-2.5 py-0.5 text-xs font-semibold text-navy">
+                    {row.count}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -444,14 +565,21 @@ function BarList({ rows, emptyText }) {
     <div className="flex flex-col gap-2.5">
       {rows.map((r) => (
         <div key={r.label} className="flex items-center gap-3">
-          <span className="w-24 shrink-0 truncate text-xs font-medium text-slate-600">{r.label}</span>
+          <span className="w-24 shrink-0 truncate text-xs font-medium text-slate-600">
+            {r.label}
+          </span>
           <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
             <div
               className="h-full rounded-full bg-gold transition-all duration-300"
-              style={{ width: r.value === 0 ? 0 : `${Math.max((r.value / max) * 100, 4)}%` }}
+              style={{
+                width:
+                  r.value === 0 ? 0 : `${Math.max((r.value / max) * 100, 4)}%`,
+              }}
             />
           </div>
-          <span className="w-6 shrink-0 text-right text-sm font-semibold text-navy">{r.value}</span>
+          <span className="w-6 shrink-0 text-right text-sm font-semibold text-navy">
+            {r.value}
+          </span>
         </div>
       ))}
     </div>

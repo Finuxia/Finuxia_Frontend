@@ -8,8 +8,17 @@ import { server } from "../test/server";
 import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import PaymentReturn from "./PaymentReturn";
 
-const starter = { plan: { key: "starter", name: "Starter", priceCents: 0 }, status: "active", moduleKeys: [], currentPeriodEnd: null };
-const pro = { ...testBilling, plan: { key: "professional", name: "Professional", priceCents: 4900 }, status: "active" };
+const starter = {
+  plan: { key: "starter", name: "Starter", priceCents: 0 },
+  status: "active",
+  moduleKeys: [],
+  currentPeriodEnd: null,
+};
+const pro = {
+  ...testBilling,
+  plan: { key: "professional", name: "Professional", priceCents: 4900 },
+  status: "active",
+};
 
 function billingSequence(...answers) {
   const calls = { n: 0 };
@@ -17,8 +26,10 @@ function billingSequence(...answers) {
     http.get(`${API}/api/billing/me`, () => {
       const answer = answers[Math.min(calls.n, answers.length - 1)];
       calls.n += 1;
-      return answer === "error" ? HttpResponse.error() : HttpResponse.json(answer);
-    })
+      return answer === "error"
+        ? HttpResponse.error()
+        : HttpResponse.json(answer);
+    }),
   );
   return calls;
 }
@@ -26,14 +37,37 @@ function billingSequence(...answers) {
 function App(props) {
   return (
     <Routes>
-      <Route path="/billing/success" element={<ProtectedRoute><PaymentReturn outcome="success" intervalMs={20} maxAttempts={4} {...props} /></ProtectedRoute>} />
-      <Route path="/billing/cancel" element={<ProtectedRoute><PaymentReturn outcome="cancel" /></ProtectedRoute>} />
+      <Route
+        path="/billing/success"
+        element={
+          <ProtectedRoute>
+            <PaymentReturn
+              outcome="success"
+              intervalMs={20}
+              maxAttempts={4}
+              {...props}
+            />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing/cancel"
+        element={
+          <ProtectedRoute>
+            <PaymentReturn outcome="cancel" />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/billing" element={<p>plans page</p>} />
       <Route path="/dashboard" element={<p>dashboard page</p>} />
     </Routes>
   );
 }
-const render = (route, props) => renderWithProviders(<App {...props} />, { route, providers: ["router", "toast", "auth"] });
+const render = (route, props) =>
+  renderWithProviders(<App {...props} />, {
+    route,
+    providers: ["router", "toast", "auth"],
+  });
 
 beforeEach(() => sessionStorage.clear());
 
@@ -42,20 +76,28 @@ describe("the success page", () => {
     rememberPlanBeforeCheckout("starter");
     const calls = billingSequence(starter, starter, starter, pro);
     render("/billing/success");
-    expect(await screen.findByText("Confirming your payment…")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Confirming your payment…"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("You're all set")).not.toBeInTheDocument();
     expect(await screen.findByText("You're all set")).toBeInTheDocument();
     expect(screen.getByText(/now on Professional/)).toBeInTheDocument();
     expect(calls.n).toBeGreaterThanOrEqual(4); // it kept asking until the server agreed
-    await userEvent.click(screen.getByRole("link", { name: "Continue to the app" }));
+    await userEvent.click(
+      screen.getByRole("link", { name: "Continue to the app" }),
+    );
     expect(await screen.findByText("dashboard page")).toBeInTheDocument();
   });
 
   it("never trusts a success flag in the URL: the server still says Starter, so nothing is confirmed", async () => {
     rememberPlanBeforeCheckout("starter");
     billingSequence(starter);
-    render("/billing/success?checkout=success&success=true&status=paid&session_id=cs_test_123");
-    expect(await screen.findByText("We haven't received confirmation yet")).toBeInTheDocument();
+    render(
+      "/billing/success?checkout=success&success=true&status=paid&session_id=cs_test_123",
+    );
+    expect(
+      await screen.findByText("We haven't received confirmation yet"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("You're all set")).not.toBeInTheDocument();
     expect(screen.queryByText(/payment is confirmed/)).not.toBeInTheDocument();
   });
@@ -63,21 +105,34 @@ describe("the success page", () => {
   it("opening the success URL by hand, with no purchase, confirms nothing", async () => {
     billingSequence(starter);
     render("/billing/success");
-    expect(await screen.findByText("We haven't received confirmation yet")).toBeInTheDocument();
+    expect(
+      await screen.findByText("We haven't received confirmation yet"),
+    ).toBeInTheDocument();
   });
 
   it("an account that was already on that paid plan is not 'confirmed' by it", async () => {
     rememberPlanBeforeCheckout("professional");
     billingSequence(pro);
     render("/billing/success");
-    expect(await screen.findByText("We haven't received confirmation yet")).toBeInTheDocument();
+    expect(
+      await screen.findByText("We haven't received confirmation yet"),
+    ).toBeInTheDocument();
   });
 
   it("when time runs out it says so, tells the customer not to pay again, and can check again", async () => {
     rememberPlanBeforeCheckout("starter");
-    const calls = billingSequence(starter, starter, starter, starter, starter, pro);
+    const calls = billingSequence(
+      starter,
+      starter,
+      starter,
+      starter,
+      starter,
+      pro,
+    );
     render("/billing/success");
-    expect(await screen.findByText("We haven't received confirmation yet")).toBeInTheDocument();
+    expect(
+      await screen.findByText("We haven't received confirmation yet"),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Please don't pay again/)).toBeInTheDocument();
     const asked = calls.n;
     await new Promise((r) => setTimeout(r, 150));
@@ -90,14 +145,19 @@ describe("the success page", () => {
     rememberPlanBeforeCheckout("starter");
     billingSequence("error");
     render("/billing/success");
-    expect(await screen.findByText(/couldn't reach the server/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/couldn't reach the server/),
+    ).toBeInTheDocument();
     expect(screen.queryByText("You're all set")).not.toBeInTheDocument();
   });
 
   it("stops polling when the page is left", async () => {
     rememberPlanBeforeCheckout("starter");
     const calls = billingSequence(starter);
-    const { unmount } = render("/billing/success", { intervalMs: 30, maxAttempts: 50 });
+    const { unmount } = render("/billing/success", {
+      intervalMs: 30,
+      maxAttempts: 50,
+    });
     await waitFor(() => expect(calls.n).toBeGreaterThanOrEqual(2));
     unmount();
     const seen = calls.n;
@@ -106,7 +166,11 @@ describe("the success page", () => {
   });
 
   it("is reachable by an account whose trial has ended: it is not bounced to the subscribe page", async () => {
-    server.use(http.get(`${API}/api/auth/me`, () => HttpResponse.json({ user: { ...testUser, subscriptionActive: false } })));
+    server.use(
+      http.get(`${API}/api/auth/me`, () =>
+        HttpResponse.json({ user: { ...testUser, subscriptionActive: false } }),
+      ),
+    );
     rememberPlanBeforeCheckout("starter");
     billingSequence(pro);
     render("/billing/success");
@@ -115,11 +179,21 @@ describe("the success page", () => {
 
   it("needs a login, like every other page of the account", async () => {
     server.use(
-      http.get(`${API}/api/auth/me`, () => new HttpResponse(null, { status: 401 })),
-      http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 }))
+      http.get(
+        `${API}/api/auth/me`,
+        () => new HttpResponse(null, { status: 401 }),
+      ),
+      http.post(
+        `${API}/api/auth/refresh`,
+        () => new HttpResponse(null, { status: 401 }),
+      ),
     );
     render("/billing/success");
-    await waitFor(() => expect(screen.queryByText("Confirming your payment…")).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Confirming your payment…"),
+      ).not.toBeInTheDocument(),
+    );
     expect(screen.queryByText("You're all set")).not.toBeInTheDocument();
   });
 });

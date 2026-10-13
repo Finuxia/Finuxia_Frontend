@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 const STEPS = [
   {
     title: "Connect your Zoom account",
-    body: "In Finuxia, go to Profile → Zoom and click \"Connect Zoom.\" You'll be redirected to Zoom to authorize Finuxia, then brought back to your Profile.",
+    body: 'In Finuxia, go to Profile → Zoom and click "Connect Zoom." You\'ll be redirected to Zoom to authorize Finuxia, then brought back to your Profile.',
   },
   {
     title: "Use Zoom on a booking link",
@@ -32,9 +32,12 @@ export default function ZoomIntegrationDocs() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-          <h1 className="text-xl font-bold text-navy">Zoom integration guide</h1>
+          <h1 className="text-xl font-bold text-navy">
+            Zoom integration guide
+          </h1>
           <p className="mt-1 text-sm text-slate-500">
-            How connecting Zoom to Finuxia works, what it does, and how to remove it.
+            How connecting Zoom to Finuxia works, what it does, and how to
+            remove it.
           </p>
 
           <div className="mt-6 flex flex-col gap-5">
@@ -44,7 +47,9 @@ export default function ZoomIntegrationDocs() {
                   {i + 1}
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold text-navy">{step.title}</h2>
+                  <h2 className="text-sm font-semibold text-navy">
+                    {step.title}
+                  </h2>
                   <p className="mt-0.5 text-sm text-slate-600">{step.body}</p>
                 </div>
               </div>
@@ -53,7 +58,10 @@ export default function ZoomIntegrationDocs() {
 
           <p className="mt-6 border-t border-slate-100 pt-4 text-xs text-slate-400">
             Questions? Email{" "}
-            <a href="mailto:info@finuxia.com" className="font-medium text-gold-dark hover:underline">
+            <a
+              href="mailto:info@finuxia.com"
+              className="font-medium text-gold-dark hover:underline"
+            >
               info@finuxia.com
             </a>
             .

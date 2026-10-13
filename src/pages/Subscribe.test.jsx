@@ -4,10 +4,17 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { planBeforeCheckout } from "../lib/checkout";
 import { API, testBilling, testUser } from "../test/handlers";
 import { server } from "../test/server";
-import { act, renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
+import {
+  act,
+  renderWithProviders,
+  screen,
+  userEvent,
+  waitFor,
+} from "../test/utils";
 import Subscribe from "./Subscribe";
 
-const inDays = (n) => new Date(Date.now() + n * 86400000 - 3600000).toISOString(); // a little under n days, so it counts as n
+const inDays = (n) =>
+  new Date(Date.now() + n * 86400000 - 3600000).toISOString(); // a little under n days, so it counts as n
 const plans = [
   {
     id: 0,
@@ -40,7 +47,13 @@ const plans = [
     modules: [{ key: "strategy_prep", name: "Strategy Prep" }],
   },
 ];
-const catalogue = (over = {}) => ({ plans, stripeConfigured: true, purchasesOpen: true, supportEmail: "", ...over });
+const catalogue = (over = {}) => ({
+  plans,
+  stripeConfigured: true,
+  purchasesOpen: true,
+  supportEmail: "",
+  ...over,
+});
 const realLocation = window.location;
 let me;
 let purchases;
@@ -65,13 +78,16 @@ const show = () =>
       <Route path="/dashboard" element={<Where />} />
       <Route path="/login" element={<Where />} />
     </Routes>,
-    { route: "/subscribe", providers: ["router", "toast", "auth"] }
+    { route: "/subscribe", providers: ["router", "toast", "auth"] },
   );
 
 function serve({
   user = {},
   catalog = catalogue(),
-  billing = { ...testBilling, plan: { key: "starter", name: "Starter", priceCents: 0 } },
+  billing = {
+    ...testBilling,
+    plan: { key: "starter", name: "Starter", priceCents: 0 },
+  },
 } = {}) {
   me = { ...testUser, ...user };
   purchases = [];
@@ -84,12 +100,16 @@ function serve({
     }),
     http.get(`${API}/api/billing/me`, () => HttpResponse.json(billing)),
     http.get(`${API}/api/billing/plans`, () =>
-      catalog === "error" ? HttpResponse.json({ error: "Could not load plans" }, { status: 500 }) : HttpResponse.json(catalog)
+      catalog === "error"
+        ? HttpResponse.json({ error: "Could not load plans" }, { status: 500 })
+        : HttpResponse.json(catalog),
     ),
     http.post(`${API}/api/billing/purchase`, async ({ request }) => {
       purchases.push(await request.json());
-      return HttpResponse.json({ checkoutUrl: "https://checkout.stripe.com/c/pay/abc" });
-    })
+      return HttpResponse.json({
+        checkoutUrl: "https://checkout.stripe.com/c/pay/abc",
+      });
+    }),
   );
 }
 
@@ -97,18 +117,33 @@ beforeEach(() => {
   sessionStorage.clear();
   Object.defineProperty(window, "location", {
     configurable: true,
-    value: { ...realLocation, origin: realLocation.origin, href: "http://localhost/subscribe" },
+    value: {
+      ...realLocation,
+      origin: realLocation.origin,
+      href: "http://localhost/subscribe",
+    },
   });
 });
-afterEach(() => Object.defineProperty(window, "location", { configurable: true, value: realLocation }));
+afterEach(() =>
+  Object.defineProperty(window, "location", {
+    configurable: true,
+    value: realLocation,
+  }),
+);
 
 describe("a trial that is running", () => {
   it("shows the end date, the days left, and the way back into the app", async () => {
-    serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(12) } });
+    serve({
+      user: { subscriptionActive: true, subscriptionUntil: inDays(12) },
+    });
     show();
-    expect(await screen.findByRole("heading", { name: "You're on the free trial" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "You're on the free trial" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/\(12 days left\)/)).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Back to the app" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Back to the app" }),
+    );
     expect(screen.getByTestId("where")).toHaveTextContent("/dashboard");
   });
 
@@ -128,25 +163,36 @@ describe("a trial that is running", () => {
   it("offers the plans too, so a customer can subscribe before it ends", async () => {
     serve({ user: { subscriptionActive: true, subscriptionUntil: inDays(5) } });
     show();
-    expect(await screen.findAllByRole("button", { name: "Subscribe" })).toHaveLength(2);
+    expect(
+      await screen.findAllByRole("button", { name: "Subscribe" }),
+    ).toHaveLength(2);
   });
 });
 
 describe("a trial that has ended", () => {
-  const ended = { subscriptionActive: false, subscriptionUntil: new Date(2026, 0, 5, 12).toISOString() };
+  const ended = {
+    subscriptionActive: false,
+    subscriptionUntil: new Date(2026, 0, 5, 12).toISOString(),
+  };
 
   it("says what is lost and what subscribing restores, and that nothing was deleted", async () => {
     serve({ user: ended });
     show();
-    expect(await screen.findByRole("heading", { name: "Your free trial has ended" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Your free trial has ended" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/It ended on January 5, 2026/)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Access to your clients, meetings, follow-ups and the rest of the app is paused\. Nothing you added has been deleted\./
-      )
+        /Access to your clients, meetings, follow-ups and the rest of the app is paused\. Nothing you added has been deleted\./,
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/everything switches back on right away/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Back to the app" })).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/everything switches back on right away/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Back to the app" }),
+    ).not.toBeInTheDocument();
   });
 
   it("there is no mailto link to anyone: the way back is the plans", async () => {
@@ -161,20 +207,34 @@ describe("the plans and the real checkout", () => {
   it("shows the paid plans only: a free plan would not bring access back", async () => {
     serve({ user: { subscriptionActive: false } });
     show();
-    expect(await screen.findByRole("heading", { name: "Professional" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Professional" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Elite" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Starter" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Starter" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Strategy Prep")).toBeInTheDocument();
   });
 
   it("subscribing starts Stripe checkout and remembers the plan the account had, so the return page can tell", async () => {
     serve({ user: { subscriptionActive: false } });
     show();
-    const subscribe = await screen.findAllByRole("button", { name: "Subscribe" });
+    const subscribe = await screen.findAllByRole("button", {
+      name: "Subscribe",
+    });
     await userEvent.click(subscribe[1]);
-    await waitFor(() => expect(window.location.href).toBe("https://checkout.stripe.com/c/pay/abc"));
+    await waitFor(() =>
+      expect(window.location.href).toBe(
+        "https://checkout.stripe.com/c/pay/abc",
+      ),
+    );
     expect(purchases).toEqual([
-      { planId: 2, successUrl: `${window.location.origin}/billing/success`, cancelUrl: `${window.location.origin}/billing/cancel` },
+      {
+        planId: 2,
+        successUrl: `${window.location.origin}/billing/success`,
+        cancelUrl: `${window.location.origin}/billing/cancel`,
+      },
     ]);
     expect(planBeforeCheckout()).toBe("starter");
   });
@@ -182,11 +242,21 @@ describe("the plans and the real checkout", () => {
   it("the buttons stay busy while the browser leaves, so it cannot be clicked twice", async () => {
     serve({ user: { subscriptionActive: false } });
     show();
-    const subscribe = await screen.findAllByRole("button", { name: "Subscribe" });
+    const subscribe = await screen.findAllByRole("button", {
+      name: "Subscribe",
+    });
     await userEvent.click(subscribe[0]);
-    await waitFor(() => expect(window.location.href).toBe("https://checkout.stripe.com/c/pay/abc"));
-    expect(screen.getByRole("button", { name: "Processing..." })).toBeDisabled();
-    screen.getAllByRole("button", { name: "Subscribe" }).forEach((b) => expect(b).toBeDisabled());
+    await waitFor(() =>
+      expect(window.location.href).toBe(
+        "https://checkout.stripe.com/c/pay/abc",
+      ),
+    );
+    expect(
+      screen.getByRole("button", { name: "Processing..." }),
+    ).toBeDisabled();
+    screen
+      .getAllByRole("button", { name: "Subscribe" })
+      .forEach((b) => expect(b).toBeDisabled());
   });
 
   describe("a purchase is one attempt, however many times it is sent", () => {
@@ -199,8 +269,10 @@ describe("the plans and the real checkout", () => {
           await delay(30);
           const status = statuses.shift();
           if (status) return HttpResponse.json({ error: "No" }, { status });
-          return HttpResponse.json({ checkoutUrl: "https://checkout.stripe.com/c/pay/abc" });
-        })
+          return HttpResponse.json({
+            checkoutUrl: "https://checkout.stripe.com/c/pay/abc",
+          });
+        }),
       );
       return keys;
     }
@@ -209,7 +281,9 @@ describe("the plans and the real checkout", () => {
       serve({ user: { subscriptionActive: false } });
       const keys = answerWith();
       show();
-      await userEvent.click((await screen.findAllByRole("button", { name: "Subscribe" }))[0]);
+      await userEvent.click(
+        (await screen.findAllByRole("button", { name: "Subscribe" }))[0],
+      );
       await waitFor(() => expect(keys).toHaveLength(1));
       expect(keys[0]).toMatch(/^[0-9a-f-]{16,}$/i);
     });
@@ -218,9 +292,17 @@ describe("the plans and the real checkout", () => {
       serve({ user: { subscriptionActive: false } });
       const keys = answerWith(503);
       show();
-      await userEvent.click((await screen.findAllByRole("button", { name: "Subscribe" }))[0]);
-      await waitFor(() => expect(screen.getAllByRole("button", { name: "Subscribe" })[0]).toBeEnabled());
-      await userEvent.click(screen.getAllByRole("button", { name: "Subscribe" })[0]);
+      await userEvent.click(
+        (await screen.findAllByRole("button", { name: "Subscribe" }))[0],
+      );
+      await waitFor(() =>
+        expect(
+          screen.getAllByRole("button", { name: "Subscribe" })[0],
+        ).toBeEnabled(),
+      );
+      await userEvent.click(
+        screen.getAllByRole("button", { name: "Subscribe" })[0],
+      );
       await waitFor(() => expect(keys).toHaveLength(2));
       expect(keys[1]).toBe(keys[0]);
     });
@@ -229,9 +311,17 @@ describe("the plans and the real checkout", () => {
       serve({ user: { subscriptionActive: false } });
       const keys = answerWith(400);
       show();
-      await userEvent.click((await screen.findAllByRole("button", { name: "Subscribe" }))[0]);
-      await waitFor(() => expect(screen.getAllByRole("button", { name: "Subscribe" })[0]).toBeEnabled());
-      await userEvent.click(screen.getAllByRole("button", { name: "Subscribe" })[0]);
+      await userEvent.click(
+        (await screen.findAllByRole("button", { name: "Subscribe" }))[0],
+      );
+      await waitFor(() =>
+        expect(
+          screen.getAllByRole("button", { name: "Subscribe" })[0],
+        ).toBeEnabled(),
+      );
+      await userEvent.click(
+        screen.getAllByRole("button", { name: "Subscribe" })[0],
+      );
       await waitFor(() => expect(keys).toHaveLength(2));
       expect(keys[1]).not.toBe(keys[0]);
     });
@@ -240,12 +330,18 @@ describe("the plans and the real checkout", () => {
       serve({ user: { subscriptionActive: false } });
       const keys = answerWith();
       show();
-      const button = (await screen.findAllByRole("button", { name: "Subscribe" }))[0];
+      const button = (
+        await screen.findAllByRole("button", { name: "Subscribe" })
+      )[0];
       act(() => {
         button.click(); // both clicks are handled before the page has re-rendered the buttons as disabled
         button.click();
       });
-      await waitFor(() => expect(window.location.href).toBe("https://checkout.stripe.com/c/pay/abc"));
+      await waitFor(() =>
+        expect(window.location.href).toBe(
+          "https://checkout.stripe.com/c/pay/abc",
+        ),
+      );
       expect(keys).toHaveLength(1);
     });
   });
@@ -253,26 +349,44 @@ describe("the plans and the real checkout", () => {
   it("a failure is a message and the plans can be tried again", async () => {
     serve({ user: { subscriptionActive: false } });
     server.use(
-      http.post(`${API}/api/billing/purchase`, () => HttpResponse.json({ error: "Plan purchases aren't open yet." }, { status: 503 }))
+      http.post(`${API}/api/billing/purchase`, () =>
+        HttpResponse.json(
+          { error: "Plan purchases aren't open yet." },
+          { status: 503 },
+        ),
+      ),
     );
     show();
-    await userEvent.click((await screen.findAllByRole("button", { name: "Subscribe" }))[0]);
+    await userEvent.click(
+      (await screen.findAllByRole("button", { name: "Subscribe" }))[0],
+    );
     expect(await screen.findByText(/aren't open yet/)).toBeInTheDocument(); // the toast the page raised
     expect(window.location.href).toBe("http://localhost/subscribe");
-    expect(screen.getAllByRole("button", { name: "Subscribe" })[0]).toBeEnabled();
+    expect(
+      screen.getAllByRole("button", { name: "Subscribe" })[0],
+    ).toBeEnabled();
   });
 
   it("in demo mode (payments not connected) a purchase takes effect and goes back to the app", async () => {
-    serve({ user: { subscriptionActive: false }, catalog: catalogue({ stripeConfigured: false }) });
+    serve({
+      user: { subscriptionActive: false },
+      catalog: catalogue({ stripeConfigured: false }),
+    });
     server.use(
       http.post(`${API}/api/billing/purchase`, () => {
         me = { ...me, subscriptionActive: true };
         return HttpResponse.json({ mock: true });
-      })
+      }),
     );
     show();
-    await userEvent.click((await screen.findAllByRole("button", { name: "Get this plan (test)" }))[0]);
-    await waitFor(() => expect(screen.getByTestId("where")).toHaveTextContent("/dashboard"));
+    await userEvent.click(
+      (
+        await screen.findAllByRole("button", { name: "Get this plan (test)" })
+      )[0],
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("where")).toHaveTextContent("/dashboard"),
+    );
     expect(await screen.findByText(/test purchase/)).toBeInTheDocument(); // the toast the page raised
     expect(meReads).toBeGreaterThanOrEqual(2); // the account was read again, so the app no longer thinks the trial is over
   });
@@ -280,7 +394,11 @@ describe("the plans and the real checkout", () => {
   it("an account already on a paid plan sees it marked as current", async () => {
     serve({
       user: { subscriptionActive: true, subscriptionUntil: inDays(3) },
-      billing: { ...testBilling, status: "active", plan: { key: "professional", name: "Professional", priceCents: 4900 } },
+      billing: {
+        ...testBilling,
+        status: "active",
+        plan: { key: "professional", name: "Professional", priceCents: 4900 },
+      },
     });
     show();
     expect(await screen.findByText("Current plan")).toBeInTheDocument();
@@ -291,17 +409,30 @@ describe("when plans cannot be bought online yet", () => {
   it("says so, and points at the support address from configuration", async () => {
     serve({
       user: { subscriptionActive: false },
-      catalog: catalogue({ purchasesOpen: false, stripeConfigured: false, supportEmail: "help@finuxia.example" }),
+      catalog: catalogue({
+        purchasesOpen: false,
+        stripeConfigured: false,
+        supportEmail: "help@finuxia.example",
+      }),
     });
     show();
-    expect(await screen.findByText("Plans can't be bought online yet.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Plans can't be bought online yet."),
+    ).toBeInTheDocument();
     const link = screen.getByRole("link", { name: "help@finuxia.example" });
-    expect(link.getAttribute("href")).toMatch(/^mailto:help@finuxia\.example\?subject=/);
-    screen.getAllByRole("button", { name: "Not available yet" }).forEach((b) => expect(b).toBeDisabled());
+    expect(link.getAttribute("href")).toMatch(
+      /^mailto:help@finuxia\.example\?subject=/,
+    );
+    screen
+      .getAllByRole("button", { name: "Not available yet" })
+      .forEach((b) => expect(b).toBeDisabled());
   });
 
   it("with no address configured it points at the support page, and invents no address", async () => {
-    serve({ user: { subscriptionActive: false }, catalog: catalogue({ purchasesOpen: false, supportEmail: "" }) });
+    serve({
+      user: { subscriptionActive: false },
+      catalog: catalogue({ purchasesOpen: false, supportEmail: "" }),
+    });
     show();
     const link = await screen.findByRole("link", { name: "contact support" });
     expect(link).toHaveAttribute("href", "/support");
@@ -311,10 +442,15 @@ describe("when plans cannot be bought online yet", () => {
   it("the wording follows whether the trial is still running", async () => {
     serve({
       user: { subscriptionActive: true, subscriptionUntil: inDays(4) },
-      catalog: catalogue({ purchasesOpen: false, supportEmail: "help@finuxia.example" }),
+      catalog: catalogue({
+        purchasesOpen: false,
+        supportEmail: "help@finuxia.example",
+      }),
     });
     show();
-    expect(await screen.findByText(/To subscribe, contact us at/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/To subscribe, contact us at/),
+    ).toBeInTheDocument();
   });
 });
 
@@ -323,9 +459,17 @@ describe("the rest of the page", () => {
     serve({ user: { subscriptionActive: false }, catalog: "error" });
     show();
     expect(await screen.findByText(/Could not load plans/)).toBeInTheDocument();
-    server.use(http.get(`${API}/api/billing/plans`, () => HttpResponse.json(catalogue())));
-    await userEvent.click(screen.getByRole("button", { name: /retry|try again/i }));
-    expect(await screen.findByRole("heading", { name: "Professional" })).toBeInTheDocument();
+    server.use(
+      http.get(`${API}/api/billing/plans`, () =>
+        HttpResponse.json(catalogue()),
+      ),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /retry|try again/i }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Professional" }),
+    ).toBeInTheDocument();
   });
 
   it("says it is loading the plans, then shows them", async () => {
@@ -334,11 +478,13 @@ describe("the rest of the page", () => {
       http.get(`${API}/api/billing/plans`, async () => {
         await delay(150);
         return HttpResponse.json(catalogue());
-      })
+      }),
     );
     show();
     expect(await screen.findByText("Loading plans...")).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "Professional" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Professional" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Loading plans...")).not.toBeInTheDocument();
   });
 
@@ -348,11 +494,15 @@ describe("the rest of the page", () => {
       http.post(`${API}/api/auth/logout`, () => {
         loggedOut += 1;
         return HttpResponse.json({});
-      })
+      }),
     );
     show();
-    await userEvent.click(await screen.findByRole("button", { name: "Log out" }));
-    await waitFor(() => expect(screen.getByTestId("where")).toHaveTextContent("/login"));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Log out" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("where")).toHaveTextContent("/login"),
+    );
     expect(loggedOut).toBe(1); // the session is really ended at the server, not just left
   });
 });

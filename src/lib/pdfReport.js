@@ -6,7 +6,13 @@
  * CSV export in lib/csv.js works the same way — pure browser APIs).
  */
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
 }
 
 /**
@@ -19,7 +25,9 @@ function escapeHtml(value) {
 export function openPrintableReport({ title, rangeLabel, stats, sections }) {
   const win = window.open("", "_blank");
   if (!win) {
-    throw new Error("Your browser blocked the print window. Please allow popups for this site.");
+    throw new Error(
+      "Your browser blocked the print window. Please allow popups for this site.",
+    );
   }
 
   const statsHtml = stats
@@ -27,7 +35,7 @@ export function openPrintableReport({ title, rangeLabel, stats, sections }) {
       (s) => `<div class="stat">
         <div class="stat-value">${escapeHtml(s.value)}</div>
         <div class="stat-label">${escapeHtml(s.label)}</div>
-      </div>`
+      </div>`,
     )
     .join("");
 
@@ -35,7 +43,10 @@ export function openPrintableReport({ title, rangeLabel, stats, sections }) {
     .map((section) => {
       const rowsHtml = section.rows.length
         ? section.rows
-            .map((r) => `<tr><td>${escapeHtml(r.label)}</td><td class="num">${escapeHtml(r.value)}</td></tr>`)
+            .map(
+              (r) =>
+                `<tr><td>${escapeHtml(r.label)}</td><td class="num">${escapeHtml(r.value)}</td></tr>`,
+            )
             .join("")
         : `<tr><td colspan="2" class="empty">${escapeHtml(section.emptyText || "No data in this range.")}</td></tr>`;
       return `<section>

@@ -9,7 +9,11 @@ import { useToast } from "../context/ToastContext";
  * file, they're notified automatically — see src.drive's email_client for
  * why that part is silent until real SMTP credentials are configured.
  */
-export default function UploadClientFileButton({ clientId, clientName, clientEmail }) {
+export default function UploadClientFileButton({
+  clientId,
+  clientName,
+  clientEmail,
+}) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef(null);
   const { addToast } = useToast();
@@ -20,8 +24,16 @@ export default function UploadClientFileButton({ clientId, clientName, clientEma
     if (!file) return;
     setUploading(true);
     try {
-      await api.uploadClientDriveFile(String(clientId), { displayName: clientName, clientEmail, file: file });
-      addToast(clientEmail ? `Uploaded — ${clientName} was notified` : "Uploaded to Drive");
+      await api.uploadClientDriveFile(String(clientId), {
+        displayName: clientName,
+        clientEmail,
+        file: file,
+      });
+      addToast(
+        clientEmail
+          ? `Uploaded — ${clientName} was notified`
+          : "Uploaded to Drive",
+      );
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         addToast("Connect Google Drive on your Profile page first.");
@@ -43,7 +55,12 @@ export default function UploadClientFileButton({ clientId, clientName, clientEma
         <Upload size={14} />
         {uploading ? "Uploading..." : "Upload File"}
       </button>
-      <input ref={inputRef} type="file" className="hidden" onChange={handleFile} />
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFile}
+      />
     </>
   );
 }

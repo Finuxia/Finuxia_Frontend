@@ -20,19 +20,41 @@ export default function PipelineBarChart({ clients, onSelectStage }) {
   const CHART_H = rows * ROW_H + 16; // +16 for the axis-label row
   const maxRaw = Math.max(...counts.map((c) => c.count), 1);
   const niceMax = niceCeiling(maxRaw);
-  const selectStage = (stageId) => (onSelectStage ? onSelectStage(stageId) : navigate(`/clients?stage=${stageId}`));
+  const selectStage = (stageId) =>
+    onSelectStage
+      ? onSelectStage(stageId)
+      : navigate(`/clients?stage=${stageId}`);
 
   return (
     <div className="relative">
-      <svg viewBox={`0 0 560 ${CHART_H}`} className="w-full" role="img" aria-label="Client count by pipeline stage">
+      <svg
+        viewBox={`0 0 560 ${CHART_H}`}
+        className="w-full"
+        role="img"
+        aria-label="Client count by pipeline stage"
+      >
         {/* gridlines */}
         {Array.from({ length: AXIS_TICKS + 1 }).map((_, i) => {
           const x = LABEL_W + 4 + ((560 - LABEL_W - 40) / AXIS_TICKS) * i;
           const value = Math.round((niceMax / AXIS_TICKS) * i);
           return (
             <g key={i}>
-              <line x1={x} y1={4} x2={x} y2={CHART_H - 4} stroke="#eef0f3" strokeWidth="1" />
-              <text x={x} y={CHART_H - 4} dy={12} fontSize="9" fill="#94a3b8" textAnchor="middle">
+              <line
+                x1={x}
+                y1={4}
+                x2={x}
+                y2={CHART_H - 4}
+                stroke="#eef0f3"
+                strokeWidth="1"
+              />
+              <text
+                x={x}
+                y={CHART_H - 4}
+                dy={12}
+                fontSize="9"
+                fill="#94a3b8"
+                textAnchor="middle"
+              >
                 {value}
               </text>
             </g>
@@ -54,11 +76,31 @@ export default function PipelineBarChart({ clients, onSelectStage }) {
               onClick={() => selectStage(stage.id)}
               className="cursor-pointer"
             >
-              <rect x={0} y={i * ROW_H} width={560} height={ROW_H} fill={isHover ? "#f8fafc" : "transparent"} />
-              <text x={LABEL_W - 8} y={i * ROW_H + ROW_H / 2} dy={3.5} fontSize="11" textAnchor="end" fill="#475569">
+              <rect
+                x={0}
+                y={i * ROW_H}
+                width={560}
+                height={ROW_H}
+                fill={isHover ? "#f8fafc" : "transparent"}
+              />
+              <text
+                x={LABEL_W - 8}
+                y={i * ROW_H + ROW_H / 2}
+                dy={3.5}
+                fontSize="11"
+                textAnchor="end"
+                fill="#475569"
+              >
                 {stage.short}
               </text>
-              <rect x={trackX} y={y} width={trackW} height={BAR_H} rx={4} fill="#f1f5f9" />
+              <rect
+                x={trackX}
+                y={y}
+                width={trackW}
+                height={BAR_H}
+                rx={4}
+                fill="#f1f5f9"
+              />
               {barW > 0 && (
                 <rect
                   x={trackX}
@@ -95,7 +137,8 @@ export default function PipelineBarChart({ clients, onSelectStage }) {
               className="pointer-events-none absolute right-2 -translate-y-1/2 rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white shadow-lg"
               style={{ top: `${topPct}%` }}
             >
-              {stage.label}: <span className="font-bold text-gold">{count}</span>
+              {stage.label}:{" "}
+              <span className="font-bold text-gold">{count}</span>
             </div>
           );
         })()}

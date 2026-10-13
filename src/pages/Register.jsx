@@ -8,11 +8,17 @@ export default function Register() {
   const { register } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm: "",
+  });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const update = (key) => (e) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,8 +34,13 @@ export default function Register() {
     setSubmitting(true);
     try {
       await register(form.name, form.email, form.password);
-      addToast(`Welcome to Finuxia, ${form.name.split(" ")[0]}! Check your email to confirm your address.`);
-      navigate("/dashboard", { replace: true, state: { justRegistered: true } });
+      addToast(
+        `Welcome to Finuxia, ${form.name.split(" ")[0]}! Check your email to confirm your address.`,
+      );
+      navigate("/dashboard", {
+        replace: true,
+        state: { justRegistered: true },
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -44,7 +55,10 @@ export default function Register() {
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" className="font-semibold text-gold-dark hover:underline">
+          <Link
+            to="/login"
+            className="font-semibold text-gold-dark hover:underline"
+          >
             Log in
           </Link>
         </>

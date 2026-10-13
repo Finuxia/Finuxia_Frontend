@@ -111,7 +111,9 @@ export function toISODate(value) {
     const ms = Math.round((value - 25569) * 86400 * 1000);
     const d = new Date(ms);
     if (Number.isNaN(d.getTime())) return "";
-    return localISO(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    return localISO(
+      new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+    );
   }
   const s = String(value).trim();
   if (!s) return "";

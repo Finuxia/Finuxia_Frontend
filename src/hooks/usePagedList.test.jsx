@@ -6,7 +6,8 @@ import { server } from "../test/server";
 import { act, render, screen, userEvent, waitFor } from "../test/utils";
 import usePagedList from "./usePagedList";
 
-const numbered = (n, from = 1) => Array.from({ length: n }, (_, i) => ({ id: from + i }));
+const numbered = (n, from = 1) =>
+  Array.from({ length: n }, (_, i) => ({ id: from + i }));
 
 function serve(path, items, { size = 2, delayMs = 0, failOn = [] } = {}) {
   const log = [];
@@ -16,11 +17,18 @@ function serve(path, items, { size = 2, delayMs = 0, failOn = [] } = {}) {
       const cursor = url.searchParams.get("cursor");
       log.push(Object.fromEntries(url.searchParams));
       if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
-      if (failOn.includes(log.length)) return HttpResponse.json({ error: `Page ${log.length} failed` }, { status: 500 });
+      if (failOn.includes(log.length))
+        return HttpResponse.json(
+          { error: `Page ${log.length} failed` },
+          { status: 500 },
+        );
       const start = cursor ? Number(atob(cursor)) : 0;
       const end = Math.min(start + size, items.length);
-      return HttpResponse.json({ results: items.slice(start, end), nextCursor: end < items.length ? btoa(String(end)) : null });
-    })
+      return HttpResponse.json({
+        results: items.slice(start, end),
+        nextCursor: end < items.length ? btoa(String(end)) : null,
+      });
+    }),
   );
   return log;
 }
@@ -42,7 +50,8 @@ function Probe({ path = "/api/things", params }) {
     </div>
   );
 }
-const items = () => screen.queryAllByRole("listitem").map((li) => li.textContent);
+const items = () =>
+  screen.queryAllByRole("listitem").map((li) => li.textContent);
 
 describe("usePagedList", () => {
   it("shows the first page and says there is more", async () => {
@@ -92,7 +101,9 @@ describe("usePagedList", () => {
     act(() => {
       pending = list.loadMore();
     });
-    await waitFor(() => expect(screen.getByTestId("loading-more")).toHaveTextContent("true"));
+    await waitFor(() =>
+      expect(screen.getByTestId("loading-more")).toHaveTextContent("true"),
+    );
     await act(() => pending);
     expect(screen.getByTestId("loading-more")).toHaveTextContent("false");
   });
@@ -135,7 +146,7 @@ describe("usePagedList", () => {
         const q = new URL(request.url).searchParams.get("q");
         if (q === "a") await new Promise((r) => setTimeout(r, 120));
         return HttpResponse.json({ results: answers[q], nextCursor: null });
-      })
+      }),
     );
     function Switch() {
       const [q, setQ] = useState("a");
@@ -162,8 +173,11 @@ describe("usePagedList", () => {
           await new Promise((r) => setTimeout(r, 150));
           return HttpResponse.json({ results: [{ id: 99 }], nextCursor: null });
         }
-        return HttpResponse.json({ results: [{ id: q === "a" ? 1 : 2 }], nextCursor: "more" });
-      })
+        return HttpResponse.json({
+          results: [{ id: q === "a" ? 1 : 2 }],
+          nextCursor: "more",
+        });
+      }),
     );
     function Switch() {
       const [q, setQ] = useState("a");
@@ -189,7 +203,9 @@ describe("usePagedList", () => {
   it("a failure on the first page is an error with nothing shown", async () => {
     serve("/api/things", numbered(4), { failOn: [1] });
     render(<Probe />);
-    await waitFor(() => expect(screen.getByTestId("error")).toHaveTextContent("Page 1 failed"));
+    await waitFor(() =>
+      expect(screen.getByTestId("error")).toHaveTextContent("Page 1 failed"),
+    );
     expect(items()).toEqual([]);
     expect(screen.getByText("ready")).toBeInTheDocument();
   });
@@ -205,7 +221,11 @@ describe("usePagedList", () => {
     await act(() => list.loadMore());
     expect(items()).toEqual(["item 1", "item 2", "item 3", "item 4"]);
     expect(screen.getByTestId("error")).toHaveTextContent("");
-    expect(log.map((r) => r.cursor ?? null)).toEqual([null, btoa("2"), btoa("2")]); // the same page, asked for again
+    expect(log.map((r) => r.cursor ?? null)).toEqual([
+      null,
+      btoa("2"),
+      btoa("2"),
+    ]); // the same page, asked for again
   });
 
   it("a reload whose first page fails keeps what was shown, reports it, and trying again recovers", async () => {
@@ -248,7 +268,9 @@ describe("usePagedList", () => {
   });
 
   it("a server that does not paginate gives the whole list as the one page", async () => {
-    server.use(http.get(`${API}/api/things`, () => HttpResponse.json(numbered(3))));
+    server.use(
+      http.get(`${API}/api/things`, () => HttpResponse.json(numbered(3))),
+    );
     render(<Probe />);
     await screen.findByText("ready");
     expect(items()).toEqual(["item 1", "item 2", "item 3"]);

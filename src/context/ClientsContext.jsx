@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { calcNextFollowUp, todayISO, addDays } from "../lib/followUp";
 import { getNextStageId, FIRST_STAGE_ID } from "../lib/pipeline";
 import { api } from "../lib/api";
@@ -6,7 +13,14 @@ import { mapImportRows } from "../lib/clientImport";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 
-const AV_COLORS = ["av-blue", "av-green", "av-amber", "av-red", "av-purple", "av-teal"];
+const AV_COLORS = [
+  "av-blue",
+  "av-green",
+  "av-amber",
+  "av-red",
+  "av-purple",
+  "av-teal",
+];
 const SYNC_DEBOUNCE_MS = 600;
 const RETRY_MS = 5000;
 
@@ -15,12 +29,16 @@ const ClientsContext = createContext(null);
 // Ids for things that live *inside* a client (notes) or user state (groups):
 // unique per call, no timestamps.
 const newLocalId = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
 
 function normalize(clients) {
   return clients.map((c) => ({
     ...c,
-    nextFollowUp: c.followUpDate ? calcNextFollowUp(c.followUpDate) : c.nextFollowUp ?? "TBD",
+    nextFollowUp: c.followUpDate
+      ? calcNextFollowUp(c.followUpDate)
+      : (c.nextFollowUp ?? "TBD"),
     telegram: c.telegram ?? "",
     referredBy: c.referredBy ?? "",
     preferredContact: c.preferredContact ?? "phone",
@@ -90,7 +108,10 @@ export function ClientsProvider({ children }) {
 
   // Fetches the server's clients and state and makes them the confirmed copy (what edits are diffed against).
   // `isCancelled` lets the login effect drop the result if the user changed while it was in flight.
-  const loadFromServer = async (isCancelled = () => false, showEarly = clientsRef.current.length === 0) => {
+  const loadFromServer = async (
+    isCancelled = () => false,
+    showEarly = clientsRef.current.length === 0,
+  ) => {
     // The server hands clients over a page at a time. With nothing on screen yet (`showEarly`: no cache), the first page is shown at once and the
     // rest are added behind it, so a long list does not keep the advisor waiting; edits made meanwhile are kept (pages are merged by id, never
     // replacing what is there). With the cache already on screen the complete list is swapped in at the end, as before: no flicker of a shrinking
@@ -101,14 +122,23 @@ export function ClientsProvider({ children }) {
       const page = normalize(items);
       if (!shownFirstPage) {
         shownFirstPage = true;
-        snapshotRef.current = new Map(page.map((c) => [String(c.id), { version: c.version, json: contentJson(c) }]));
+        snapshotRef.current = new Map(
+          page.map((c) => [
+            String(c.id),
+            { version: c.version, json: contentJson(c) },
+          ]),
+        );
         setClients(page);
         setLoading(false);
         setLoadingMore(true);
         return;
       }
       for (const c of page)
-        if (!snapshotRef.current.has(String(c.id))) snapshotRef.current.set(String(c.id), { version: c.version, json: contentJson(c) });
+        if (!snapshotRef.current.has(String(c.id)))
+          snapshotRef.current.set(String(c.id), {
+            version: c.version,
+            json: contentJson(c),
+          });
       setClients((prev) => {
         const have = new Set(prev.map((c) => String(c.id)));
         return [...prev, ...page.filter((c) => !have.has(String(c.id)))];
@@ -122,7 +152,12 @@ export function ClientsProvider({ children }) {
       if (isCancelled()) return;
       const normalized = normalize(serverClients);
       if (!shownFirstPage) {
-        snapshotRef.current = new Map(normalized.map((c) => [String(c.id), { version: c.version, json: contentJson(c) }]));
+        snapshotRef.current = new Map(
+          normalized.map((c) => [
+            String(c.id),
+            { version: c.version, json: contentJson(c) },
+          ]),
+        );
         setClients(normalized);
       }
       setDoneTasks(serverState?.doneTasks || {});
@@ -187,9 +222,15 @@ export function ClientsProvider({ children }) {
   // first: we adopt the server's copy instead of overwriting it.
   const adoptServerCopy = (id, serverClient) => {
     const [fresh] = normalize([serverClient]);
-    snapshotRef.current.set(id, { version: fresh.version, json: contentJson(fresh) });
+    snapshotRef.current.set(id, {
+      version: fresh.version,
+      json: contentJson(fresh),
+    });
     setClients((prev) => prev.map((c) => (String(c.id) === id ? fresh : c)));
-    addToast(`${fresh.first} ${fresh.last}`.trim() + " was changed elsewhere — showing the latest version");
+    addToast(
+      `${fresh.first} ${fresh.last}`.trim() +
+        " was changed elsewhere — showing the latest version",
+    );
   };
 
   const syncOnce = async () => {
@@ -220,16 +261,25 @@ export function ClientsProvider({ children }) {
       if (json === entry.json) continue;
       const { id: _id, version: _version, ...body } = c; // eslint-disable-line no-unused-vars
       try {
-        const saved = await api.patchClient(id, { ...body, version: entry.version });
+        const saved = await api.patchClient(id, {
+          ...body,
+          version: entry.version,
+        });
         snap.set(id, { version: saved.version, json });
-        setClients((prev) => prev.map((x) => (String(x.id) === id ? { ...x, version: saved.version } : x)));
+        setClients((prev) =>
+          prev.map((x) =>
+            String(x.id) === id ? { ...x, version: saved.version } : x,
+          ),
+        );
       } catch (err) {
         if (err.status === 409 && err.data?.client) {
           adoptServerCopy(id, err.data.client);
         } else if (err.status === 404) {
           snap.delete(id);
           setClients((prev) => prev.filter((x) => String(x.id) !== id));
-          addToast("A client you edited no longer exists — it was removed elsewhere");
+          addToast(
+            "A client you edited no longer exists — it was removed elsewhere",
+          );
         } else {
           failed = true;
           setSyncError(err);
@@ -305,7 +355,9 @@ export function ClientsProvider({ children }) {
   // groups, daily tasks) only ever see the real one. `clientToken` makes a retry
   // of the same submit return the same client instead of a duplicate.
   const addClient = async (form, { clientToken } = {}) => {
-    const nextFollowUp = form.nextFollowUpDate ? calcNextFollowUp(form.nextFollowUpDate) : "TBD";
+    const nextFollowUp = form.nextFollowUpDate
+      ? calcNextFollowUp(form.nextFollowUpDate)
+      : "TBD";
 
     const draft = {
       first: form.first.trim(),
@@ -325,24 +377,43 @@ export function ClientsProvider({ children }) {
       followUpDate: form.nextFollowUpDate || "",
       nextFollowUp,
       lastContactDate: form.lastContactDate || "",
-      lastContact: form.lastContactDate ? `Last contact — ${form.lastContactDate}` : "Not yet contacted",
+      lastContact: form.lastContactDate
+        ? `Last contact — ${form.lastContactDate}`
+        : "Not yet contacted",
       interests: [],
       currentStage: form.currentStage || FIRST_STAGE_ID,
-      stages: { [form.currentStage || FIRST_STAGE_ID]: { status: "pending", data: {}, files: [] } },
+      stages: {
+        [form.currentStage || FIRST_STAGE_ID]: {
+          status: "pending",
+          data: {},
+          files: [],
+        },
+      },
       meeting: null,
       files: [],
-      notes: form.notes?.trim() ? [{ id: newLocalId(), text: form.notes.trim(), date: todayISO() }] : [],
+      notes: form.notes?.trim()
+        ? [{ id: newLocalId(), text: form.notes.trim(), date: todayISO() }]
+        : [],
       clientToken,
     };
 
     const [created] = normalize([await api.createClient(draft)]);
-    snapshotRef.current.set(String(created.id), { version: created.version, json: contentJson(created) });
-    setClients((prev) => (prev.some((c) => String(c.id) === String(created.id)) ? prev : [created, ...prev]));
+    snapshotRef.current.set(String(created.id), {
+      version: created.version,
+      json: contentJson(created),
+    });
+    setClients((prev) =>
+      prev.some((c) => String(c.id) === String(created.id))
+        ? prev
+        : [created, ...prev],
+    );
     return created;
   };
 
   const updateClient = (clientId, patch) => {
-    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, ...patch } : c)));
+    setClients((prev) =>
+      prev.map((c) => (c.id === clientId ? { ...c, ...patch } : c)),
+    );
   };
 
   /**
@@ -379,7 +450,7 @@ export function ClientsProvider({ children }) {
               : `Last contact — ${lastContactDate}`
             : "Not yet contacted",
         };
-      })
+      }),
     );
   };
 
@@ -392,9 +463,15 @@ export function ClientsProvider({ children }) {
     setClients((prev) =>
       prev.map((c) =>
         c.id === clientId
-          ? { ...c, notes: [{ id: newLocalId(), text: text.trim(), date: todayISO() }, ...c.notes] }
-          : c
-      )
+          ? {
+              ...c,
+              notes: [
+                { id: newLocalId(), text: text.trim(), date: todayISO() },
+                ...c.notes,
+              ],
+            }
+          : c,
+      ),
     );
   };
 
@@ -402,15 +479,22 @@ export function ClientsProvider({ children }) {
     setClients((prev) =>
       prev.map((c) =>
         c.id === clientId
-          ? { ...c, notes: c.notes.map((n) => (n.id === noteId ? { ...n, text } : n)) }
-          : c
-      )
+          ? {
+              ...c,
+              notes: c.notes.map((n) => (n.id === noteId ? { ...n, text } : n)),
+            }
+          : c,
+      ),
     );
   };
 
   const deleteNote = (clientId, noteId) => {
     setClients((prev) =>
-      prev.map((c) => (c.id === clientId ? { ...c, notes: c.notes.filter((n) => n.id !== noteId) } : c))
+      prev.map((c) =>
+        c.id === clientId
+          ? { ...c, notes: c.notes.filter((n) => n.id !== noteId) }
+          : c,
+      ),
     );
   };
 
@@ -429,7 +513,10 @@ export function ClientsProvider({ children }) {
         stages[stageId] = { ...existing, status, date: date || existing.date };
 
         let currentStage = c.currentStage;
-        if (stageId === c.currentStage && (status === "completed" || status === "skipped")) {
+        if (
+          stageId === c.currentStage &&
+          (status === "completed" || status === "skipped")
+        ) {
           const next = getNextStageId(stageId);
           if (next) {
             currentStage = next;
@@ -441,7 +528,15 @@ export function ClientsProvider({ children }) {
         }
 
         const notes = note?.trim()
-          ? [{ id: newLocalId(), text: note.trim(), date: todayISO(), stage: stageId }, ...c.notes]
+          ? [
+              {
+                id: newLocalId(),
+                text: note.trim(),
+                date: todayISO(),
+                stage: stageId,
+              },
+              ...c.notes,
+            ]
           : c.notes;
 
         const lastContact = date
@@ -449,7 +544,7 @@ export function ClientsProvider({ children }) {
           : c.lastContact;
 
         return { ...c, stages, currentStage, notes, lastContact };
-      })
+      }),
     );
   };
 
@@ -464,9 +559,12 @@ export function ClientsProvider({ children }) {
         if (c.id !== clientId) return c;
         const stages = { ...c.stages };
         const existing = stages[stageId] ?? { data: {}, files: [] };
-        stages[stageId] = { ...existing, googleEventId: googleEventId || undefined };
+        stages[stageId] = {
+          ...existing,
+          googleEventId: googleEventId || undefined,
+        };
         return { ...c, stages };
-      })
+      }),
     );
   };
 
@@ -482,8 +580,8 @@ export function ClientsProvider({ children }) {
               followUpDate: addDays(today, 7),
               nextFollowUp: calcNextFollowUp(addDays(today, 7)),
             }
-          : c
-      )
+          : c,
+      ),
     );
   };
 
@@ -492,24 +590,43 @@ export function ClientsProvider({ children }) {
       prev.map((c) => {
         if (c.id !== clientId) return c;
         const newDate = addDays(c.followUpDate || todayISO(), days);
-        return { ...c, followUpDate: newDate, nextFollowUp: calcNextFollowUp(newDate) };
-      })
+        return {
+          ...c,
+          followUpDate: newDate,
+          nextFollowUp: calcNextFollowUp(newDate),
+        };
+      }),
     );
   };
 
   const rescheduleFollowUp = (clientId, newDate) => {
     setClients((prev) =>
       prev.map((c) =>
-        c.id === clientId ? { ...c, followUpDate: newDate, nextFollowUp: calcNextFollowUp(newDate) } : c
-      )
+        c.id === clientId
+          ? {
+              ...c,
+              followUpDate: newDate,
+              nextFollowUp: calcNextFollowUp(newDate),
+            }
+          : c,
+      ),
     );
   };
 
   const rescheduleMeeting = (clientId, newDate, time) => {
     setClients((prev) =>
       prev.map((c) =>
-        c.id === clientId ? { ...c, meeting: { ...(c.meeting || {}), date: newDate, time: time || c.meeting?.time } } : c
-      )
+        c.id === clientId
+          ? {
+              ...c,
+              meeting: {
+                ...(c.meeting || {}),
+                date: newDate,
+                time: time || c.meeting?.time,
+              },
+            }
+          : c,
+      ),
     );
   };
 
@@ -520,11 +637,16 @@ export function ClientsProvider({ children }) {
           ? {
               ...c,
               files: c.files.map((f) =>
-                f.id === fileId ? { ...f, status: f.status === "pending" ? "done" : "pending" } : f
+                f.id === fileId
+                  ? {
+                      ...f,
+                      status: f.status === "pending" ? "done" : "pending",
+                    }
+                  : f,
               ),
             }
-          : c
-      )
+          : c,
+      ),
     );
   };
 
@@ -552,7 +674,12 @@ export function ClientsProvider({ children }) {
 
     if (created.length) {
       const saved = normalize(await api.importClients(created));
-      saved.forEach((c) => snapshotRef.current.set(String(c.id), { version: c.version, json: contentJson(c) }));
+      saved.forEach((c) =>
+        snapshotRef.current.set(String(c.id), {
+          version: c.version,
+          json: contentJson(c),
+        }),
+      );
       setClients((prev) => [...saved, ...prev]);
     }
     return results;
@@ -561,7 +688,14 @@ export function ClientsProvider({ children }) {
   const getClient = (id) => clients.find((c) => String(c.id) === String(id));
 
   // ---- client groups (free-form: families, companies, referral circles, whatever) ----
-  const GROUP_COLORS = ["av-blue", "av-green", "av-amber", "av-red", "av-purple", "av-teal"];
+  const GROUP_COLORS = [
+    "av-blue",
+    "av-green",
+    "av-amber",
+    "av-red",
+    "av-purple",
+    "av-teal",
+  ];
 
   const addGroup = (name, color) => {
     const trimmed = name.trim();
@@ -577,7 +711,9 @@ export function ClientsProvider({ children }) {
   };
 
   const updateGroup = (groupId, patch) => {
-    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, ...patch } : g)));
+    setGroups((prev) =>
+      prev.map((g) => (g.id === groupId ? { ...g, ...patch } : g)),
+    );
   };
 
   const deleteGroup = (groupId) => {
@@ -585,7 +721,9 @@ export function ClientsProvider({ children }) {
   };
 
   const setGroupMembers = (groupId, memberIds) => {
-    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, memberIds } : g)));
+    setGroups((prev) =>
+      prev.map((g) => (g.id === groupId ? { ...g, memberIds } : g)),
+    );
   };
 
   const toggleClientInGroup = (groupId, clientId) => {
@@ -599,12 +737,14 @@ export function ClientsProvider({ children }) {
             ? g.memberIds.filter((id) => String(id) !== String(clientId))
             : [...g.memberIds, clientId],
         };
-      })
+      }),
     );
   };
 
   const getGroupsForClient = (clientId) =>
-    groups.filter((g) => g.memberIds.some((id) => String(id) === String(clientId)));
+    groups.filter((g) =>
+      g.memberIds.some((id) => String(id) === String(clientId)),
+    );
 
   const value = useMemo(
     () => ({
@@ -638,10 +778,12 @@ export function ClientsProvider({ children }) {
       toggleClientInGroup,
       getGroupsForClient,
     }),
-    [clients, doneTasks, groups, loading, loadingMore, syncError]
+    [clients, doneTasks, groups, loading, loadingMore, syncError],
   );
 
-  return <ClientsContext.Provider value={value}>{children}</ClientsContext.Provider>;
+  return (
+    <ClientsContext.Provider value={value}>{children}</ClientsContext.Provider>
+  );
 }
 
 export function useClients() {

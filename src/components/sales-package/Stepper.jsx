@@ -22,7 +22,12 @@ export default function Stepper({ steps, current, statuses, onSelect }) {
                 ? "text-amber-600"
                 : "text-slate-400";
           return (
-            <button key={label} type="button" onClick={() => onSelect(i)} className="flex shrink-0 items-center gap-2 px-2">
+            <button
+              key={label}
+              type="button"
+              onClick={() => onSelect(i)}
+              className="flex shrink-0 items-center gap-2 px-2"
+            >
               <span
                 className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition ${circle}`}
               >
@@ -40,8 +45,12 @@ export default function Stepper({ steps, current, statuses, onSelect }) {
                   <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-av-green" />
                 )}
               </span>
-              <span className={`whitespace-nowrap text-sm font-medium ${text}`}>{label}</span>
-              {i < steps.length - 1 && <span className="mx-2 h-px w-6 shrink-0 bg-slate-200" />}
+              <span className={`whitespace-nowrap text-sm font-medium ${text}`}>
+                {label}
+              </span>
+              {i < steps.length - 1 && (
+                <span className="mx-2 h-px w-6 shrink-0 bg-slate-200" />
+              )}
             </button>
           );
         })}

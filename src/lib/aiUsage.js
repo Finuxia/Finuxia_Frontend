@@ -35,7 +35,14 @@ export function isAiBlocked(error) {
  * unlimited, or already blocked (the blocked notice says it better). When the allowance is used up but the wallet can still pay, it says the wallet is paying.
  */
 export function warningMessage(usage) {
-  if (!usage || !usage.warning || usage.blocked || usage.mode !== "allowance" || !usage.credits) return null;
+  if (
+    !usage ||
+    !usage.warning ||
+    usage.blocked ||
+    usage.mode !== "allowance" ||
+    !usage.credits
+  )
+    return null;
   const { remaining, total } = usage.credits;
   const again = formatResetDay(usage.period?.end);
   const reset = again ? ` They start again on ${again}.` : "";

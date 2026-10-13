@@ -32,19 +32,25 @@ export default function NotificationsDropdown() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.getReminders().then(setReminders).catch(() => {});
-    api.getBookingRequests().then(setBookingRequests).catch(() => {});
+    api
+      .getReminders()
+      .then(setReminders)
+      .catch(() => {});
+    api
+      .getBookingRequests()
+      .then(setBookingRequests)
+      .catch(() => {});
   }, []);
 
   const notifications = useMemo(
     () => buildNotifications(clients, reminders, bookingRequests),
-    [clients, reminders, bookingRequests]
+    [clients, reminders, bookingRequests],
   );
   // The badge counts only notifications the user hasn't seen yet, so opening
   // the panel (or acting on one) makes the number go down.
   const unseenCount = useMemo(
     () => notifications.filter((n) => !seen.has(n.id)).length,
-    [notifications, seen]
+    [notifications, seen],
   );
 
   useEffect(() => {
@@ -89,9 +95,13 @@ export default function NotificationsDropdown() {
 
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-80 animate-fade-in rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-          <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">Notifications</p>
+          <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Notifications
+          </p>
           {notifications.length === 0 ? (
-            <p className="px-2 py-4 text-center text-sm text-slate-400">You're all caught up.</p>
+            <p className="px-2 py-4 text-center text-sm text-slate-400">
+              You're all caught up.
+            </p>
           ) : (
             <div className="flex max-h-80 flex-col gap-0.5 overflow-y-auto">
               {notifications.map((n) => (
@@ -103,7 +113,9 @@ export default function NotificationsDropdown() {
                   }}
                   className="flex items-start gap-2.5 rounded-lg px-2 py-2 text-left text-sm text-slate-600 transition hover:bg-slate-50"
                 >
-                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.dot}`} />
+                  <span
+                    className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.dot}`}
+                  />
                   {n.text}
                 </button>
               ))}

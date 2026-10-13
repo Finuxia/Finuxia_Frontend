@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Presentation as PresentationIcon, Info, Download, FileX, ChevronDown } from "lucide-react";
+import {
+  Presentation as PresentationIcon,
+  Info,
+  Download,
+  FileX,
+  ChevronDown,
+} from "lucide-react";
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 
@@ -20,7 +26,9 @@ export default function Presentations() {
         if (!cancelled) {
           setItems(data);
           // Auto-expand any item that has variants, so they're visible by default.
-          setExpanded(new Set(data.filter((d) => d.variants?.length).map((d) => d.slug)));
+          setExpanded(
+            new Set(data.filter((d) => d.variants?.length).map((d) => d.slug)),
+          );
         }
       } catch (err) {
         if (!cancelled) setError(err);
@@ -64,7 +72,9 @@ export default function Presentations() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-navy">Presentations</h1>
-          <p className="text-sm text-slate-500">Download the presentation decks to use with clients.</p>
+          <p className="text-sm text-slate-500">
+            Download the presentation decks to use with clients.
+          </p>
         </div>
       </div>
 
@@ -87,11 +97,16 @@ export default function Presentations() {
             const hasVariants = item.variants?.length > 0;
             const isOpen = expanded.has(item.slug);
             return (
-              <div key={item.slug} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div
+                key={item.slug}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+              >
                 <div className="flex items-center gap-3 px-5 py-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-base font-semibold text-navy">{item.title}</h2>
+                      <h2 className="text-base font-semibold text-navy">
+                        {item.title}
+                      </h2>
                       <InfoTooltip text={item.info} />
                       {hasVariants && (
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
@@ -107,34 +122,56 @@ export default function Presentations() {
                       aria-label={isOpen ? "Collapse" : "Expand"}
                       className="shrink-0 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
                     >
-                      <ChevronDown size={18} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        size={18}
+                        className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                      />
                     </button>
                   ) : (
                     <DownloadButton
                       hasPdf={item.hasPdf}
                       onClick={() =>
-                        handleDownload(item.title, item.hasPdf, () => api.downloadPresentationPdf(item.slug, `${item.title}.pdf`))
+                        handleDownload(item.title, item.hasPdf, () =>
+                          api.downloadPresentationPdf(
+                            item.slug,
+                            `${item.title}.pdf`,
+                          ),
+                        )
                       }
                     />
                   )}
                 </div>
 
                 {hasVariants && (
-                  <div className={`grid transition-all duration-200 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                  <div
+                    className={`grid transition-all duration-200 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                  >
                     <div className="overflow-hidden">
                       <div className="flex flex-col divide-y divide-slate-100 border-t border-slate-100">
                         {item.variants.map((variant) => (
-                          <div key={variant.id} className="flex items-center gap-3 px-5 py-3 pl-8">
+                          <div
+                            key={variant.id}
+                            className="flex items-center gap-3 px-5 py-3 pl-8"
+                          >
                             <div className="flex min-w-0 flex-1 items-center gap-2">
-                              <span className="text-sm font-medium text-slate-700">{variant.label}</span>
+                              <span className="text-sm font-medium text-slate-700">
+                                {variant.label}
+                              </span>
                               <InfoTooltip text={variant.info} />
                             </div>
                             <DownloadButton
                               compact
                               hasPdf={variant.hasPdf}
                               onClick={() =>
-                                handleDownload(`${item.title} — ${variant.label}`, variant.hasPdf, () =>
-                                  api.downloadPresentationVariantPdf(item.slug, variant.id, `${item.title} - ${variant.label}.pdf`)
+                                handleDownload(
+                                  `${item.title} — ${variant.label}`,
+                                  variant.hasPdf,
+                                  () =>
+                                    api.downloadPresentationVariantPdf(
+                                      item.slug,
+                                      variant.id,
+                                      `${item.title} - ${variant.label}.pdf`,
+                                    ),
                                 )
                               }
                             />

@@ -5,6 +5,12 @@
 export function destinationAfterLogin(location, fallback = "/dashboard") {
   const from = location?.state?.from;
   const path = from?.pathname;
-  if (typeof path !== "string" || !path.startsWith("/") || path.startsWith("//") || path === "/login") return fallback;
+  if (
+    typeof path !== "string" ||
+    !path.startsWith("/") ||
+    path.startsWith("//") ||
+    path === "/login"
+  )
+    return fallback;
   return `${path}${from.search || ""}${from.hash || ""}`;
 }

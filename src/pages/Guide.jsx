@@ -39,7 +39,9 @@ export default function Guide() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-navy">Guide &amp; Tutorial</h1>
-          <p className="text-sm text-slate-500">Everything you need to get productive in Finuxia.</p>
+          <p className="text-sm text-slate-500">
+            Everything you need to get productive in Finuxia.
+          </p>
         </div>
       </div>
 
@@ -56,23 +58,32 @@ export default function Guide() {
       ) : groups.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
           <LifeBuoy size={24} className="text-slate-300" />
-          <p className="text-sm text-slate-400">No guide entries yet. Add some in the admin panel.</p>
+          <p className="text-sm text-slate-400">
+            No guide entries yet. Add some in the admin panel.
+          </p>
         </div>
       ) : (
         groups.map((group) => (
           <section key={group.category} className="flex flex-col gap-2">
-            <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-gold-dark">{group.category}</h2>
+            <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-gold-dark">
+              {group.category}
+            </h2>
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               {group.items.map((item, i) => {
                 const open = openId === item.id;
                 return (
-                  <div key={item.id} className={i > 0 ? "border-t border-slate-100" : ""}>
+                  <div
+                    key={item.id}
+                    className={i > 0 ? "border-t border-slate-100" : ""}
+                  >
                     <button
                       onClick={() => setOpenId(open ? null : item.id)}
                       className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
                       aria-expanded={open}
                     >
-                      <span className={`text-sm font-semibold ${open ? "text-navy" : "text-slate-700"}`}>
+                      <span
+                        className={`text-sm font-semibold ${open ? "text-navy" : "text-slate-700"}`}
+                      >
                         {item.question}
                       </span>
                       <ChevronDown

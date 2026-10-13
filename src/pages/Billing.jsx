@@ -40,11 +40,16 @@ export default function Billing() {
     inFlight.current = true;
     setPurchasingId(plan.id);
     try {
-      const result = await api.purchasePlan(plan.id, attemptKeys.current.keyFor(plan.id));
+      const result = await api.purchasePlan(
+        plan.id,
+        attemptKeys.current.keyFor(plan.id),
+      );
       attemptKeys.current.settle(plan.id);
       if (result.mock) {
         await refreshBilling();
-        addToast(`You're now on the ${plan.name} plan (test purchase — no real charge, Stripe isn't connected yet).`);
+        addToast(
+          `You're now on the ${plan.name} plan (test purchase — no real charge, Stripe isn't connected yet).`,
+        );
       } else if (result.checkoutUrl) {
         rememberPlanBeforeCheckout(currentPlanKey); // so the return page can tell that the purchase really went through
         window.location.href = result.checkoutUrl;
@@ -64,7 +69,11 @@ export default function Billing() {
     const isCurrent = plan.key === currentPlanKey;
     return {
       onClick: () => handlePurchase(plan),
-      disabled: isCurrent || purchasingId === plan.id || isLegacy || (!purchasesOpen && plan.priceCents > 0),
+      disabled:
+        isCurrent ||
+        purchasingId === plan.id ||
+        isLegacy ||
+        (!purchasesOpen && plan.priceCents > 0),
       label: isCurrent
         ? "Active"
         : purchasingId === plan.id
@@ -81,31 +90,41 @@ export default function Billing() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">Plans &amp; Billing</h1>
-        <p className="text-sm text-slate-500">Pick a plan to unlock its modules. Each plan below only affects what your own account can use.</p>
+        <p className="text-sm text-slate-500">
+          Pick a plan to unlock its modules. Each plan below only affects what
+          your own account can use.
+        </p>
       </div>
 
       {isLegacy && (
         <div className="flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold-dark">
           <ShieldCheck size={16} />
-          You joined before plans existed, so your account keeps full access to every module for free — no need to pick a plan.
+          You joined before plans existed, so your account keeps full access to
+          every module for free — no need to pick a plan.
         </div>
       )}
 
       {!purchasesOpen && (
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
           <Sparkles size={14} className="shrink-0 text-gold-dark" />
-          Plan purchases aren't open yet. Your current plan stays as it is — we'll announce when paid plans are available.
+          Plan purchases aren't open yet. Your current plan stays as it is —
+          we'll announce when paid plans are available.
         </div>
       )}
 
       {purchasesOpen && !stripeConfigured && (
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
           <Sparkles size={14} className="shrink-0 text-gold-dark" />
-          Payments aren't connected yet — "purchasing" a plan below activates it instantly for testing, with no real charge.
+          Payments aren't connected yet — "purchasing" a plan below activates it
+          instantly for testing, with no real charge.
         </div>
       )}
 
-      <PlanCards plans={plans} currentPlanKey={currentPlanKey} actionFor={actionFor} />
+      <PlanCards
+        plans={plans}
+        currentPlanKey={currentPlanKey}
+        actionFor={actionFor}
+      />
     </div>
   );
 }

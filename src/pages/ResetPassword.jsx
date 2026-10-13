@@ -41,8 +41,13 @@ export default function ResetPassword() {
   if (!uid || !token) {
     return (
       <AuthCard title="Reset link not valid" subtitle="">
-        <p className="text-sm text-slate-600">This link is incomplete. Request a new one and try again.</p>
-        <Link to="/forgot-password" className="mt-3 inline-block text-sm font-semibold text-gold-dark hover:underline">
+        <p className="text-sm text-slate-600">
+          This link is incomplete. Request a new one and try again.
+        </p>
+        <Link
+          to="/forgot-password"
+          className="mt-3 inline-block text-sm font-semibold text-gold-dark hover:underline"
+        >
           Request a new reset link
         </Link>
       </AuthCard>
@@ -56,8 +61,13 @@ export default function ResetPassword() {
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-av-green/10 text-av-green">
             <CheckCircle2 size={22} />
           </div>
-          <p className="text-sm text-slate-600">Your password was changed. You can log in with it now.</p>
-          <Link to="/login" className="text-sm font-semibold text-gold-dark hover:underline">
+          <p className="text-sm text-slate-600">
+            Your password was changed. You can log in with it now.
+          </p>
+          <Link
+            to="/login"
+            className="text-sm font-semibold text-gold-dark hover:underline"
+          >
             Go to log in
           </Link>
         </div>
@@ -70,7 +80,10 @@ export default function ResetPassword() {
       title="Choose a new password"
       subtitle="Use at least 12 characters."
       footer={
-        <Link to="/login" className="font-semibold text-gold-dark hover:underline">
+        <Link
+          to="/login"
+          className="font-semibold text-gold-dark hover:underline"
+        >
           Back to log in
         </Link>
       }

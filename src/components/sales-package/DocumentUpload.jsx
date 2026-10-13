@@ -5,7 +5,10 @@ export function UploadProgressBar({ percent }) {
   if (percent === undefined || percent === null) return null;
   return (
     <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-      <div className="h-full rounded-full bg-gold transition-all" style={{ width: `${percent}%` }} />
+      <div
+        className="h-full rounded-full bg-gold transition-all"
+        style={{ width: `${percent}%` }}
+      />
     </div>
   );
 }

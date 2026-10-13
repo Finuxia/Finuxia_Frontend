@@ -32,22 +32,36 @@ function App() {
 function signedOutUntilLogin() {
   let signedIn = false;
   server.use(
-    http.get(`${API}/api/auth/me`, () => (signedIn ? HttpResponse.json({ user: testUser }) : new HttpResponse(null, { status: 401 }))),
-    http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 })),
+    http.get(`${API}/api/auth/me`, () =>
+      signedIn
+        ? HttpResponse.json({ user: testUser })
+        : new HttpResponse(null, { status: 401 }),
+    ),
+    http.post(
+      `${API}/api/auth/refresh`,
+      () => new HttpResponse(null, { status: 401 }),
+    ),
     http.post(`${API}/api/auth/login`, () => {
       signedIn = true;
       return HttpResponse.json({ user: testUser });
-    })
+    }),
   );
 }
 
 async function logIn() {
-  await userEvent.type(await screen.findByLabelText(/email or username/i), "advisor");
+  await userEvent.type(
+    await screen.findByLabelText(/email or username/i),
+    "advisor",
+  );
   await userEvent.type(screen.getByLabelText(/password/i), "pw");
   await userEvent.click(screen.getByRole("button", { name: "Log In" }));
 }
 
-const render = (route) => renderWithProviders(<App />, { route, providers: ["router", "toast", "auth"] });
+const render = (route) =>
+  renderWithProviders(<App />, {
+    route,
+    providers: ["router", "toast", "auth"],
+  });
 
 describe("the protected-route wrapper and login", () => {
   it("sends a signed-out visitor to login, then back to the page they asked for", async () => {
@@ -61,7 +75,9 @@ describe("the protected-route wrapper and login", () => {
     signedOutUntilLogin();
     render("/reports?range=90&tab=aum#totals");
     await logIn();
-    expect(await screen.findByText("at /reports?range=90&tab=aum#totals")).toBeInTheDocument();
+    expect(
+      await screen.findByText("at /reports?range=90&tab=aum#totals"),
+    ).toBeInTheDocument();
   });
 
   it("goes to the dashboard when there was no intended page", async () => {
@@ -73,7 +89,9 @@ describe("the protected-route wrapper and login", () => {
 });
 
 describe("destinationAfterLogin", () => {
-  const from = (pathname, extra = {}) => ({ state: { from: { pathname, ...extra } } });
+  const from = (pathname, extra = {}) => ({
+    state: { from: { pathname, ...extra } },
+  });
 
   it.each([
     [from("/clients/1", { search: "?a=1", hash: "#x" }), "/clients/1?a=1#x"],

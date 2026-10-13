@@ -4,7 +4,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setErrorReporter } from "../lib/errorReporting";
 import Layout from "./Layout";
 import ProtectedRoute from "./ProtectedRoute";
-import { render, renderWithProviders, screen, userEvent, waitFor, within } from "../test/utils";
+import {
+  render,
+  renderWithProviders,
+  screen,
+  userEvent,
+  waitFor,
+  within,
+} from "../test/utils";
 import ErrorBoundary from "./ErrorBoundary";
 import RouteErrorBoundary from "./RouteErrorBoundary";
 
@@ -25,7 +32,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <p>all fine</p>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText("all fine")).toBeInTheDocument();
     expect(reporter).not.toHaveBeenCalled();
@@ -35,21 +42,27 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <Boom />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Reload" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Back to the dashboard" })).toHaveAttribute("href", "/dashboard");
+    expect(
+      screen.getByRole("link", { name: "Back to the dashboard" }),
+    ).toHaveAttribute("href", "/dashboard");
   });
 
   it("Reload reloads the page", async () => {
     const reload = vi.fn();
-    vi.spyOn(window, "location", "get").mockReturnValue({ ...window.location, reload, pathname: "/x" });
+    vi.spyOn(window, "location", "get").mockReturnValue({
+      ...window.location,
+      reload,
+      pathname: "/x",
+    });
     render(
       <ErrorBoundary>
         <Boom />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     await userEvent.click(screen.getByRole("button", { name: "Reload" }));
     expect(reload).toHaveBeenCalledTimes(1);
@@ -59,7 +72,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary variant="route">
         <Boom message="bad null" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(reporter).toHaveBeenCalledTimes(1);
     const [error, context] = reporter.mock.calls[0];
@@ -73,14 +86,14 @@ describe("ErrorBoundary", () => {
     const { unmount } = render(
       <ErrorBoundary showDetail>
         <Boom message="secret internals" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText(/secret internals/)).toBeInTheDocument();
     unmount();
     render(
       <ErrorBoundary showDetail={false}>
         <Boom message="secret internals" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.queryByText(/secret internals/)).not.toBeInTheDocument();
     expect(screen.getByText(/Reference: /)).toBeInTheDocument();
@@ -90,7 +103,7 @@ describe("ErrorBoundary", () => {
     const { unmount } = render(
       <ErrorBoundary>
         <Boom message="visible in dev" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText(/visible in dev/)).toBeInTheDocument();
     unmount();
@@ -98,7 +111,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <Boom message="hidden in prod" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.queryByText(/hidden in prod/)).not.toBeInTheDocument();
     vi.unstubAllEnvs();
@@ -108,7 +121,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary showDetail={false}>
         <Boom />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     const id = reporter.mock.calls[0][1].errorId;
     expect(screen.getByText(`Reference: ${id}`)).toBeInTheDocument();
@@ -121,7 +134,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <Boom />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
@@ -132,8 +145,8 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary variant="app">
           <Boom />
-        </ErrorBoundary>
-      )
+        </ErrorBoundary>,
+      ),
     ).not.toThrow();
   });
 
@@ -146,7 +159,7 @@ describe("ErrorBoundary", () => {
         <ErrorBoundary variant="route">
           <p>second is fine</p>
         </ErrorBoundary>
-      </>
+      </>,
     );
     expect(screen.getByText("second is fine")).toBeInTheDocument();
     expect(screen.getAllByRole("alert")).toHaveLength(1);
@@ -161,7 +174,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary variant="route">
         <Flaky />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     shouldThrow = false;
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
@@ -192,7 +205,9 @@ describe("in the application's layout", () => {
     renderWithProviders(<Routes_ />, { route: "/boom" });
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     // The navigation bar is still there, and still works:
-    const nav = within(screen.getByRole("navigation")).getByRole("link", { name: /my day/i });
+    const nav = within(screen.getByRole("navigation")).getByRole("link", {
+      name: /my day/i,
+    });
     expect(nav).toBeInTheDocument();
     await userEvent.click(nav);
     expect(await screen.findByText("my day page")).toBeInTheDocument();
@@ -218,11 +233,15 @@ describe("in the application's layout", () => {
           <Route path="/dashboard" element={<p>dashboard page</p>} />
         </Route>
       </Routes>,
-      { route: "/flaky" }
+      { route: "/flaky" },
     );
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     broken = false;
-    await userEvent.click(within(screen.getByRole("navigation")).getByRole("link", { name: /^dashboard$/i }));
+    await userEvent.click(
+      within(screen.getByRole("navigation")).getByRole("link", {
+        name: /^dashboard$/i,
+      }),
+    );
     expect(await screen.findByText("dashboard page")).toBeInTheDocument();
   });
 });
@@ -234,7 +253,9 @@ describe("the application root", () => {
     const boundary = main.indexOf("<ErrorBoundary");
     expect(boundary).toBeGreaterThan(-1);
     expect(boundary).toBeLessThan(main.indexOf("<BrowserRouter"));
-    expect(main.lastIndexOf("</ErrorBoundary>")).toBeGreaterThan(main.indexOf("</BrowserRouter>"));
+    expect(main.lastIndexOf("</ErrorBoundary>")).toBeGreaterThan(
+      main.indexOf("</BrowserRouter>"),
+    );
   });
 });
 
@@ -248,10 +269,26 @@ describe("RouteErrorBoundary", () => {
       const [ok, setOk] = useState(false);
       return (
         <>
-          <Link to="/b" onClick={() => setOk(true)}>go to b</Link>
+          <Link to="/b" onClick={() => setOk(true)}>
+            go to b
+          </Link>
           <Routes>
-            <Route path="/a" element={<RouteErrorBoundary><Page ok={ok} /></RouteErrorBoundary>} />
-            <Route path="/b" element={<RouteErrorBoundary><Page ok={ok} /></RouteErrorBoundary>} />
+            <Route
+              path="/a"
+              element={
+                <RouteErrorBoundary>
+                  <Page ok={ok} />
+                </RouteErrorBoundary>
+              }
+            />
+            <Route
+              path="/b"
+              element={
+                <RouteErrorBoundary>
+                  <Page ok={ok} />
+                </RouteErrorBoundary>
+              }
+            />
           </Routes>
         </>
       );

@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link2, Plus, Copy, Check, ExternalLink, Pencil, Trash2, Users, ListChecks } from "lucide-react";
+import {
+  Link2,
+  Plus,
+  Copy,
+  Check,
+  ExternalLink,
+  Pencil,
+  Trash2,
+  Users,
+  ListChecks,
+} from "lucide-react";
 import { api, bookingPublicUrl } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import BookingLinkModal from "../components/BookingLinkModal";
@@ -55,7 +65,12 @@ export default function BookingLinks() {
   };
 
   const handleQuickDelete = async (link) => {
-    if (!window.confirm(`Delete "${link.title}"? Existing bookings made through it are kept, but the link stops working.`)) return;
+    if (
+      !window.confirm(
+        `Delete "${link.title}"? Existing bookings made through it are kept, but the link stops working.`,
+      )
+    )
+      return;
     setDeletingId(link.id);
     try {
       await api.deleteBookingLink(link.id);
@@ -76,7 +91,9 @@ export default function BookingLinks() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-navy">Booking Links</h1>
-            <p className="text-sm text-slate-500">Give clients a link to book a meeting with you directly.</p>
+            <p className="text-sm text-slate-500">
+              Give clients a link to book a meeting with you directly.
+            </p>
           </div>
         </div>
         <button
@@ -96,7 +113,9 @@ export default function BookingLinks() {
       ) : links.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center">
           <Link2 size={24} className="text-slate-300" />
-          <p className="text-sm text-slate-400">No booking links yet. Create one to start taking requests.</p>
+          <p className="text-sm text-slate-400">
+            No booking links yet. Create one to start taking requests.
+          </p>
           <button
             onClick={() => setModalLink(null)}
             className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
@@ -112,15 +131,25 @@ export default function BookingLinks() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold text-navy">{link.title}</h2>
+                    <h2 className="text-base font-semibold text-navy">
+                      {link.title}
+                    </h2>
                     {!link.isActive && (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">Inactive</span>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
+                        Inactive
+                      </span>
                     )}
                   </div>
-                  {link.description && <p className="mt-1 line-clamp-2 text-sm text-slate-500">{link.description}</p>}
+                  {link.description && (
+                    <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                      {link.description}
+                    </p>
+                  )}
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400">
                     <span>{link.durationMinutes} min</span>
-                    {link.bufferMinutes > 0 && <span>{link.bufferMinutes} min buffer</span>}
+                    {link.bufferMinutes > 0 && (
+                      <span>{link.bufferMinutes} min buffer</span>
+                    )}
                     {link.guestsAllowed && (
                       <span className="flex items-center gap-1">
                         <Users size={11} />
@@ -130,7 +159,8 @@ export default function BookingLinks() {
                     {link.customQuestions?.length > 0 && (
                       <span className="flex items-center gap-1">
                         <ListChecks size={11} />
-                        {link.customQuestions.length} question{link.customQuestions.length === 1 ? "" : "s"}
+                        {link.customQuestions.length} question
+                        {link.customQuestions.length === 1 ? "" : "s"}
                       </span>
                     )}
                   </div>
@@ -156,12 +186,18 @@ export default function BookingLinks() {
 
               <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                 <Link2 size={13} className="shrink-0 text-slate-400" />
-                <span className="min-w-0 flex-1 truncate text-xs text-navy">{bookingPublicUrl(link.slug)}</span>
+                <span className="min-w-0 flex-1 truncate text-xs text-navy">
+                  {bookingPublicUrl(link.slug)}
+                </span>
                 <button
                   onClick={() => handleCopy(link.slug)}
                   className="flex shrink-0 items-center gap-1 rounded-lg bg-navy px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-navy-light"
                 >
-                  {copiedSlug === link.slug ? <Check size={12} /> : <Copy size={12} />}
+                  {copiedSlug === link.slug ? (
+                    <Check size={12} />
+                  ) : (
+                    <Copy size={12} />
+                  )}
                   {copiedSlug === link.slug ? "Copied" : "Copy"}
                 </button>
                 <a
@@ -180,7 +216,12 @@ export default function BookingLinks() {
       )}
 
       {modalLink !== undefined && (
-        <BookingLinkModal link={modalLink} onClose={() => setModalLink(undefined)} onSave={handleSave} onDelete={handleDelete} />
+        <BookingLinkModal
+          link={modalLink}
+          onClose={() => setModalLink(undefined)}
+          onSave={handleSave}
+          onDelete={handleDelete}
+        />
       )}
     </div>
   );

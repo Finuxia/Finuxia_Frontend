@@ -47,7 +47,11 @@ export default function FollowUps() {
   const loadFollowUps = () =>
     api
       .getReminders()
-      .then((all) => setFollowUpItems(all.filter((r) => r.kind === "followup" && r.status === "pending")))
+      .then((all) =>
+        setFollowUpItems(
+          all.filter((r) => r.kind === "followup" && r.status === "pending"),
+        ),
+      )
       .catch(() => {});
   useEffect(() => {
     loadFollowUps();
@@ -59,7 +63,7 @@ export default function FollowUps() {
         ...g,
         clients: clients.filter((c) => c.nextFollowUp === g.key),
       })),
-    [clients]
+    [clients],
   );
 
   const missed = useMemo(() => {
@@ -81,7 +85,12 @@ export default function FollowUps() {
       const existing = bySeries.get(key);
       if (!existing || item.dueDate < existing.dueDate) bySeries.set(key, item);
     }
-    const buckets = { Overdue: [], Today: [], "This week": [], "Next week": [] };
+    const buckets = {
+      Overdue: [],
+      Today: [],
+      "This week": [],
+      "Next week": [],
+    };
     for (const item of bySeries.values()) {
       const diff = daysUntil(item.dueDate);
       if (diff < 0) buckets.Overdue.push(item);
@@ -89,17 +98,24 @@ export default function FollowUps() {
       else if (diff <= 7) buckets["This week"].push(item);
       else if (diff <= 14) buckets["Next week"].push(item);
     }
-    Object.values(buckets).forEach((list) => list.sort((a, b) => a.dueDate.localeCompare(b.dueDate)));
+    Object.values(buckets).forEach((list) =>
+      list.sort((a, b) => a.dueDate.localeCompare(b.dueDate)),
+    );
     return buckets;
   }, [followUpItems]);
-  const totalFollowUpItems = Object.values(followUpBuckets).reduce((n, list) => n + list.length, 0);
+  const totalFollowUpItems = Object.values(followUpBuckets).reduce(
+    (n, list) => n + list.length,
+    0,
+  );
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-navy">Follow-ups</h1>
-          <p className="text-sm text-slate-500">Everyone waiting to hear from you, grouped by urgency.</p>
+          <p className="text-sm text-slate-500">
+            Everyone waiting to hear from you, grouped by urgency.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -142,12 +158,16 @@ export default function FollowUps() {
                 key={c.id}
                 className="flex flex-wrap items-center gap-3 rounded-xl border border-av-red/30 bg-white px-4 py-3 shadow-sm"
               >
-                <button onClick={() => navigate(`/clients/${c.id}`)} className="min-w-[160px] flex-1 text-left">
+                <button
+                  onClick={() => navigate(`/clients/${c.id}`)}
+                  className="min-w-[160px] flex-1 text-left"
+                >
                   <p className="text-sm font-semibold text-navy">
                     {c.first} {c.last}
                   </p>
                   <p className="text-xs text-av-red">
-                    {stage.label} was {daysAgoLabel(stage.date).toLowerCase()} — no action taken
+                    {stage.label} was {daysAgoLabel(stage.date).toLowerCase()} —
+                    no action taken
                   </p>
                 </button>
                 <div className="flex shrink-0 flex-wrap gap-2">
@@ -174,7 +194,9 @@ export default function FollowUps() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-av-blue/10 text-av-blue">
               <BellPlus size={16} />
             </div>
-            <h2 className="text-sm font-semibold text-navy">Follow-up Reminders</h2>
+            <h2 className="text-sm font-semibold text-navy">
+              Follow-up Reminders
+            </h2>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
               {totalFollowUpItems}
             </span>
@@ -185,10 +207,16 @@ export default function FollowUps() {
               if (!items.length) return null;
               return (
                 <div key={bucketKey}>
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">{bucketKey}</p>
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    {bucketKey}
+                  </p>
                   <div className="flex flex-col gap-2.5">
                     {items.map((item) => {
-                      const client = item.clientRef ? clients.find((c) => String(c.id) === String(item.clientRef)) : null;
+                      const client = item.clientRef
+                        ? clients.find(
+                            (c) => String(c.id) === String(item.clientRef),
+                          )
+                        : null;
                       const overdue = bucketKey === "Overdue";
                       return (
                         <div
@@ -197,14 +225,27 @@ export default function FollowUps() {
                             overdue ? "border-av-red/30" : "border-slate-200"
                           }`}
                         >
-                          <button onClick={() => setEditingFollowUp(item)} className="min-w-0 flex-1 text-left">
-                            <p className={`flex items-center gap-1.5 text-sm font-semibold ${overdue ? "text-av-red" : "text-navy"}`}>
+                          <button
+                            onClick={() => setEditingFollowUp(item)}
+                            className="min-w-0 flex-1 text-left"
+                          >
+                            <p
+                              className={`flex items-center gap-1.5 text-sm font-semibold ${overdue ? "text-av-red" : "text-navy"}`}
+                            >
                               <span className="truncate">{item.title}</span>
-                              {item.seriesId && <Repeat size={11} className="shrink-0 text-slate-400" aria-label="Repeats" />}
+                              {item.seriesId && (
+                                <Repeat
+                                  size={11}
+                                  className="shrink-0 text-slate-400"
+                                  aria-label="Repeats"
+                                />
+                              )}
                             </p>
                             <p className="text-xs text-slate-400">
                               {formatDate(item.dueDate)}
-                              {client ? ` · ${client.first} ${client.last}` : ""}
+                              {client
+                                ? ` · ${client.first} ${client.last}`
+                                : ""}
                             </p>
                           </button>
                         </div>
@@ -249,11 +290,14 @@ export default function FollowUps() {
                         {c.first} {c.last}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {stage?.label} · Last contact {daysAgoLabel(c.lastContactDate).toLowerCase()}
+                        {stage?.label} · Last contact{" "}
+                        {daysAgoLabel(c.lastContactDate).toLowerCase()}
                       </p>
                     </button>
 
-                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_BADGE[c.priority]}`}>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_BADGE[c.priority]}`}
+                    >
                       {c.priority}
                     </span>
 
@@ -313,13 +357,16 @@ export default function FollowUps() {
           kind="followup"
           lockClient={reminderFor}
           initial={{
-            title: `Follow up with ${reminderFor.first} ${reminderFor.last}`.trim(),
+            title:
+              `Follow up with ${reminderFor.first} ${reminderFor.last}`.trim(),
             dueDate: todayISO(),
           }}
           onClose={() => setReminderFor(null)}
           onSubmit={async (payload) => {
             await api.createReminder(payload);
-            addToast(`Follow-up set for ${reminderFor.first} ${reminderFor.last}`);
+            addToast(
+              `Follow-up set for ${reminderFor.first} ${reminderFor.last}`,
+            );
             setReminderFor(null);
             loadFollowUps();
           }}
@@ -362,7 +409,9 @@ export default function FollowUps() {
           >
             <div className="mb-1 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-navy">
-                {pickerMode === "automate" ? "Automate a Follow-up" : "Add a Follow-up"}
+                {pickerMode === "automate"
+                  ? "Automate a Follow-up"
+                  : "Add a Follow-up"}
               </h2>
               <button
                 onClick={() => setPickerMode(null)}
@@ -373,11 +422,14 @@ export default function FollowUps() {
               </button>
             </div>
             <p className="mb-4 text-sm text-slate-500">
-              Works the same whether or not this client shows up in a bucket above — pick anyone.
+              Works the same whether or not this client shows up in a bucket
+              above — pick anyone.
             </p>
 
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Client
+              </span>
               <select
                 value={pickerClientId}
                 onChange={(e) => setPickerClientId(e.target.value)}
@@ -401,7 +453,9 @@ export default function FollowUps() {
               </button>
               <button
                 onClick={() => {
-                  const client = clients.find((c) => String(c.id) === String(pickerClientId));
+                  const client = clients.find(
+                    (c) => String(c.id) === String(pickerClientId),
+                  );
                   if (!client) return;
                   const mode = pickerMode;
                   setPickerMode(null);
@@ -419,7 +473,10 @@ export default function FollowUps() {
       )}
 
       {automatingClient && (
-        <FollowUpRuleModal client={automatingClient} onClose={() => setAutomatingClient(null)} />
+        <FollowUpRuleModal
+          client={automatingClient}
+          onClose={() => setAutomatingClient(null)}
+        />
       )}
     </div>
   );

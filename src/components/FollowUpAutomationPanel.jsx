@@ -50,7 +50,11 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
       });
       setRule(saved);
       if ("enabled" in patch) {
-        addToast(saved.enabled ? `Automated follow-ups on for ${clientName}` : `Automated follow-ups off for ${clientName}`);
+        addToast(
+          saved.enabled
+            ? `Automated follow-ups on for ${clientName}`
+            : `Automated follow-ups off for ${clientName}`,
+        );
       }
     } catch (err) {
       addToast(err.message || "Could not save follow-up automation");
@@ -69,8 +73,12 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
             <Sparkles size={15} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-navy">Automated Follow-ups</h2>
-            <p className="text-xs text-slate-400">AI drafts and sends a check-in on its own, on this schedule.</p>
+            <h2 className="text-sm font-semibold text-navy">
+              Automated Follow-ups
+            </h2>
+            <p className="text-xs text-slate-400">
+              AI drafts and sends a check-in on its own, on this schedule.
+            </p>
           </div>
         </div>
         <label className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center">
@@ -89,7 +97,9 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
       {rule.enabled && (
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Frequency</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Frequency
+            </span>
             <select
               value={rule.frequency}
               disabled={saving}
@@ -104,7 +114,9 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
             </select>
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Tone</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Tone
+            </span>
             <select
               value={rule.tone}
               disabled={saving}
@@ -122,7 +134,9 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
       )}
 
       {rule.enabled && rule.lastSentAt && (
-        <p className="mt-3 text-xs text-slate-400">Last sent {new Date(rule.lastSentAt).toLocaleDateString()}</p>
+        <p className="mt-3 text-xs text-slate-400">
+          Last sent {new Date(rule.lastSentAt).toLocaleDateString()}
+        </p>
       )}
     </section>
   );

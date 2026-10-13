@@ -5,7 +5,11 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import { INVESTMENT_BEARING_TYPES } from "../lib/salesPackageOptions";
-import { STEPS, advanceBlocker, computeStepStates } from "../lib/salesPackage/wizard";
+import {
+  STEPS,
+  advanceBlocker,
+  computeStepStates,
+} from "../lib/salesPackage/wizard";
 import useSalesPackageCatalog from "../hooks/useSalesPackageCatalog";
 import useSalesPackageDraft from "../hooks/useSalesPackageDraft";
 import useSalesPackageActions from "../hooks/useSalesPackageActions";
@@ -52,9 +56,16 @@ export default function SalesPackagePrep() {
   });
   const { data, patch, documents } = draft;
   const rows = useProductRows({ draft, catalog });
-  const uploads = useDocumentUploads({ packageId, applyDocuments: draft.applyDocuments });
+  const uploads = useDocumentUploads({
+    packageId,
+    applyDocuments: draft.applyDocuments,
+  });
   const { usage: aiUsage, refresh: refreshAiUsage } = useAiUsage(); // for the 80% / 95% warning next to the draft button
-  const actions = useSalesPackageActions({ packageId, draft, onAiUsed: refreshAiUsage });
+  const actions = useSalesPackageActions({
+    packageId,
+    draft,
+    onAiUsed: refreshAiUsage,
+  });
 
   // --- bootstrap ---
   useEffect(() => {
@@ -68,7 +79,8 @@ export default function SalesPackagePrep() {
           draft.loadPackageInto(pkg);
           setMode("wizard");
         } catch (err) {
-          if (!cancelled) addToast(err.message || "Could not load this sales package.");
+          if (!cancelled)
+            addToast(err.message || "Could not load this sales package.");
         }
         return;
       }
@@ -83,7 +95,8 @@ export default function SalesPackagePrep() {
           await startNewDraft();
         }
       } catch (err) {
-        if (!cancelled) addToast(err.message || "Could not load your sales packages.");
+        if (!cancelled)
+          addToast(err.message || "Could not load your sales packages.");
       }
     }
     boot();
@@ -108,7 +121,12 @@ export default function SalesPackagePrep() {
   };
 
   const deleteDraft = async (id, label) => {
-    if (!window.confirm(`Delete "${label || "this draft"}"? This can't be undone.`)) return;
+    if (
+      !window.confirm(
+        `Delete "${label || "this draft"}"? This can't be undone.`,
+      )
+    )
+      return;
     try {
       await api.deleteSalesPackage(id);
       setMyPackages((list) => list.filter((p) => p.id !== id));
@@ -131,14 +149,27 @@ export default function SalesPackagePrep() {
   };
 
   if (mode === "loading") {
-    return <div className="py-20 text-center text-sm text-slate-400">Loading...</div>;
+    return (
+      <div className="py-20 text-center text-sm text-slate-400">Loading...</div>
+    );
   }
 
   if (mode === "picker") {
-    return <PackagePicker packages={myPackages} onResume={openPackage} onDelete={deleteDraft} onStartNew={startNewDraft} />;
+    return (
+      <PackagePicker
+        packages={myPackages}
+        onResume={openPackage}
+        onDelete={deleteDraft}
+        onStartNew={startNewDraft}
+      />
+    );
   }
 
-  const stepStatuses = computeStepStates({ data, documents, status: draft.status }).map((st, i) => {
+  const stepStatuses = computeStepStates({
+    data,
+    documents,
+    status: draft.status,
+  }).map((st, i) => {
     const done = st.complete && (!st.needsVisit || visited.has(i));
     if (done) return "complete";
     return st.started || visited.has(i) ? "incomplete" : "pending";
@@ -150,7 +181,8 @@ export default function SalesPackagePrep() {
         <div>
           <h1 className="text-2xl font-bold text-navy">Sales Package Prep</h1>
           <p className="text-sm text-slate-500">
-            Enter client information, select products, upload documents, and create a complete package.
+            Enter client information, select products, upload documents, and
+            create a complete package.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -166,7 +198,12 @@ export default function SalesPackagePrep() {
         </div>
       </div>
 
-      <Stepper steps={STEPS} current={step} statuses={stepStatuses} onSelect={goStep} />
+      <Stepper
+        steps={STEPS}
+        current={step}
+        statuses={stepStatuses}
+        onSelect={goStep}
+      />
 
       {step === 0 && <ClientStep data={data} patch={patch} />}
       {step === 1 && <NeedsStep data={data} patch={patch} />}
@@ -187,7 +224,13 @@ export default function SalesPackagePrep() {
         />
       )}
       {step === 3 && (
-        <DetailsStep data={data} patch={patch} hasInvestmentProduct={data.products.some((p) => INVESTMENT_BEARING_TYPES.has(p.type))} />
+        <DetailsStep
+          data={data}
+          patch={patch}
+          hasInvestmentProduct={data.products.some((p) =>
+            INVESTMENT_BEARING_TYPES.has(p.type),
+          )}
+        />
       )}
       {step === 4 && (
         <LetterStep
@@ -204,7 +247,9 @@ export default function SalesPackagePrep() {
           onSaveLetter={actions.saveLetter}
         />
       )}
-      {step === 5 && <ComplianceStep data={data} patch={patch} profile={user} />}
+      {step === 5 && (
+        <ComplianceStep data={data} patch={patch} profile={user} />
+      )}
       {step === 6 && (
         <DocumentsStep
           documents={documents}

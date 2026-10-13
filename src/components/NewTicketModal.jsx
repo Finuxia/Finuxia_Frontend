@@ -38,7 +38,11 @@ export default function NewTicketModal({ open, onClose, onCreated }) {
 
     setSubmitting(true);
     try {
-      const ticket = await api.createTicket({ type, title: title.trim(), description: description.trim() });
+      const ticket = await api.createTicket({
+        type,
+        title: title.trim(),
+        description: description.trim(),
+      });
       addToast("Ticket submitted — thanks for the feedback!");
       onCreated?.(ticket);
       handleClose();
@@ -80,7 +84,9 @@ export default function NewTicketModal({ open, onClose, onCreated }) {
                   type="button"
                   onClick={() => setType(opt.value)}
                   className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
-                    active ? "border-gold bg-gold/10 text-gold-dark" : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                    active
+                      ? "border-gold bg-gold/10 text-gold-dark"
+                      : "border-slate-200 text-slate-500 hover:bg-slate-50"
                   }`}
                 >
                   <Icon size={15} />
@@ -96,7 +102,11 @@ export default function NewTicketModal({ open, onClose, onCreated }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={inputClass(errors.title)}
-              placeholder={type === "bug" ? "Short summary of the bug" : "Short summary of the idea"}
+              placeholder={
+                type === "bug"
+                  ? "Short summary of the bug"
+                  : "Short summary of the idea"
+              }
             />
           </Field>
 

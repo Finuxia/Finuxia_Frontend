@@ -51,7 +51,10 @@ export default function VerifyEmail() {
 
   if (state === "done" || alreadyVerified) {
     return (
-      <AuthCard title={alreadyVerified ? "Already confirmed" : "Email confirmed"} subtitle="">
+      <AuthCard
+        title={alreadyVerified ? "Already confirmed" : "Email confirmed"}
+        subtitle=""
+      >
         <div className="flex flex-col items-center gap-3 py-2 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-av-green/10 text-av-green">
             <CheckCircle2 size={22} />
@@ -81,9 +84,13 @@ export default function VerifyEmail() {
           <XCircle size={22} />
         </div>
         <p className="text-sm text-slate-600">
-          {message || "This confirmation link is incomplete."} Log in and we'll show you how to get a new one.
+          {message || "This confirmation link is incomplete."} Log in and we'll
+          show you how to get a new one.
         </p>
-        <Link to="/login" className="text-sm font-semibold text-gold-dark hover:underline">
+        <Link
+          to="/login"
+          className="text-sm font-semibold text-gold-dark hover:underline"
+        >
           Go to log in
         </Link>
       </div>

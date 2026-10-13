@@ -3,7 +3,13 @@
 // Product/Fund options are NOT here — those are real master data fetched
 // from the backend (api.getSalesPackageCompanies/Products/Funds).
 
-export const CANADIAN_STATUSES = ["Canadian Citizen", "Permanent Resident", "Work Permit", "Study Permit", "Other"];
+export const CANADIAN_STATUSES = [
+  "Canadian Citizen",
+  "Permanent Resident",
+  "Work Permit",
+  "Study Permit",
+  "Other",
+];
 
 export const PROVINCES = [
   "Alberta",
@@ -21,13 +27,38 @@ export const PROVINCES = [
   "Yukon",
 ];
 
-export const MARITAL_STATUSES = ["Single", "Married", "Common-law", "Divorced", "Widowed"];
+export const MARITAL_STATUSES = [
+  "Single",
+  "Married",
+  "Common-law",
+  "Divorced",
+  "Widowed",
+];
 
-export const DEPENDANT_RELATIONSHIPS = ["Spouse", "Son", "Daughter", "Mother", "Father", "Brother", "Sister", "Other"];
+export const DEPENDANT_RELATIONSHIPS = [
+  "Spouse",
+  "Son",
+  "Daughter",
+  "Mother",
+  "Father",
+  "Brother",
+  "Sister",
+  "Other",
+];
 
 // Registered/non-registered account a Segregated Fund is held in — required
 // for every Segregated Fund product.
-export const ACCOUNT_TYPES = ["TFSA", "FHSA", "RSP", "Spousal RSP", "RIF", "Spousal RIF", "LIRA", "LIF", "Non-Registered"];
+export const ACCOUNT_TYPES = [
+  "TFSA",
+  "FHSA",
+  "RSP",
+  "Spousal RSP",
+  "RIF",
+  "Spousal RIF",
+  "LIRA",
+  "LIF",
+  "Non-Registered",
+];
 
 export const FREQUENCIES = [
   { value: "monthly", label: "Monthly" },
@@ -50,7 +81,13 @@ export const NEEDS = [
   "Key Person / Buy-Sell",
 ];
 
-export const RISK_TOLERANCES = ["Low", "Low-Medium", "Medium", "Medium-High", "High"];
+export const RISK_TOLERANCES = [
+  "Low",
+  "Low-Medium",
+  "Medium",
+  "Medium-High",
+  "High",
+];
 export const INVESTMENT_HORIZONS = ["Under 5", "5-10", "10-20", "20+ years"];
 export const INVESTMENT_OBJECTIVES = ["Income", "Balanced", "Growth"];
 export const SOURCES_OF_FUNDS = [
@@ -73,7 +110,10 @@ export const EXISTING_COVERAGE_TYPES = [
 
 // Product types that need a fund/investment-allocation panel — must match
 // backend's INVESTMENT_BEARING_TYPES exactly.
-export const INVESTMENT_BEARING_TYPES = new Set(["universal_life", "segregated_fund"]);
+export const INVESTMENT_BEARING_TYPES = new Set([
+  "universal_life",
+  "segregated_fund",
+]);
 
 // The documents required to complete a package — must match backend's
 // UPLOADED_DOCUMENTS exactly (key order = upload UI order).
@@ -104,7 +144,10 @@ export const LICENSED_PROVINCE_CODES = [
   ["QC", "Quebec"],
 ];
 
-export const QUEBEC_SECTORS = ["Insurance of persons", "Accident and sickness sector"];
+export const QUEBEC_SECTORS = [
+  "Insurance of persons",
+  "Accident and sickness sector",
+];
 
 export const COMPANIES_REPRESENTED_OPTIONS = [
   "Allianz Global",

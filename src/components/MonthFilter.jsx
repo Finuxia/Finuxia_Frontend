@@ -5,7 +5,13 @@ import { listRecentMonths } from "../lib/chartPipeline";
  * Month picker for charts/reports. `value` is a month key ("2026-08"); an empty
  * value means "All time". Defaults to the current month at the call site.
  */
-export default function MonthFilter({ value, onChange, months = 12, includeAll = false, className = "" }) {
+export default function MonthFilter({
+  value,
+  onChange,
+  months = 12,
+  includeAll = false,
+  className = "",
+}) {
   const options = listRecentMonths(months);
 
   return (

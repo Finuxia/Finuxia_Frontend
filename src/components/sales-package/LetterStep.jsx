@@ -10,7 +10,11 @@ function LetterPreview({ text }) {
     .map((l) => l.trim())
     .filter(Boolean);
   if (rawLines.length === 0) {
-    return <p className="text-sm text-slate-400">Click "Generate Draft" below to draft the letter.</p>;
+    return (
+      <p className="text-sm text-slate-400">
+        Click "Generate Draft" below to draft the letter.
+      </p>
+    );
   }
   // Group into blocks: a line with "____" blanks separated by 3+ spaces is a
   // row of side-by-side columns (signature / date lines) and must render as
@@ -50,13 +54,16 @@ function LetterPreview({ text }) {
           );
         if (b.type === "columns") {
           return (
-            <div key={i} className="mt-4 grid grid-cols-1 gap-x-8 gap-y-5 text-sm text-slate-700 sm:grid-cols-2">
+            <div
+              key={i}
+              className="mt-4 grid grid-cols-1 gap-x-8 gap-y-5 text-sm text-slate-700 sm:grid-cols-2"
+            >
               {b.rows.flatMap((row, r) =>
                 row.map((cell, c) => (
                   <p key={`${r}-${c}`} className="break-words">
                     {cell}
                   </p>
-                ))
+                )),
               )}
             </div>
           );
@@ -99,7 +106,11 @@ export default function LetterStep({
             className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
           >
             <Sparkles size={15} />
-            {letterDrafting ? "Drafting..." : data.reasonWhyLetterText ? "Regenerate Draft" : "Generate Draft"}
+            {letterDrafting
+              ? "Drafting..."
+              : data.reasonWhyLetterText
+                ? "Regenerate Draft"
+                : "Generate Draft"}
           </button>
           {data.reasonWhyLetterText && (
             <button
@@ -114,7 +125,12 @@ export default function LetterStep({
 
         <AiUsageInline usage={aiUsage} className="mb-3" />
         {letterBlocked && (
-          <AiBlockedNotice className="mb-3" message={letterBlocked.message} actions={letterBlocked.data?.actions} onDismiss={onDismissBlocked} />
+          <AiBlockedNotice
+            className="mb-3"
+            message={letterBlocked.message}
+            actions={letterBlocked.data?.actions}
+            onDismiss={onDismissBlocked}
+          />
         )}
 
         {editing ? (
@@ -122,7 +138,9 @@ export default function LetterStep({
             rows={16}
             value={data.reasonWhyLetterText}
             onChange={(e) => patch({ reasonWhyLetterText: e.target.value })}
-            placeholder={'Click "Generate Draft" above, then review/edit the letter here before saving.'}
+            placeholder={
+              'Click "Generate Draft" above, then review/edit the letter here before saving.'
+            }
             className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         ) : (
@@ -144,7 +162,9 @@ export default function LetterStep({
           {letterDoc?.generatedFileName && (
             <button
               type="button"
-              onClick={() => onDownload(letterDoc.key, "Reason Why Letter", true)}
+              onClick={() =>
+                onDownload(letterDoc.key, "Reason Why Letter", true)
+              }
               className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-navy transition hover:bg-slate-50"
             >
               <Download size={14} />

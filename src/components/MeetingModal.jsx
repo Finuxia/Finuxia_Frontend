@@ -19,8 +19,14 @@ const STATUS_OPTIONS = [
 export default function MeetingModal({ client, stage, onClose }) {
   const { updateStage, setStageGoogleEventId } = useClients();
   const { addToast } = useToast();
-  const { isConfigured, status: googleStatus, connect, createEvent, deleteEvent, checkAvailability } =
-    useGoogleCalendar();
+  const {
+    isConfigured,
+    status: googleStatus,
+    connect,
+    createEvent,
+    deleteEvent,
+    checkAvailability,
+  } = useGoogleCalendar();
   const stageState = client.stages[stage.id];
 
   const [date, setDate] = useState(stageState?.date ?? "");
@@ -45,7 +51,9 @@ export default function MeetingModal({ client, stage, onClose }) {
     if (googleStatus !== "connected") {
       try {
         await connect();
-        addToast("Google Calendar connected — click again to add this meeting.");
+        addToast(
+          "Google Calendar connected — click again to add this meeting.",
+        );
       } catch (err) {
         addToast(err.message || "Could not connect to Google Calendar");
       }
@@ -56,18 +64,27 @@ export default function MeetingModal({ client, stage, onClose }) {
     setSyncing(true);
     try {
       const start = new Date(`${date}T${time}`);
-      const end = new Date(start.getTime() + MEETING_DURATION_MINUTES * 60 * 1000);
+      const end = new Date(
+        start.getTime() + MEETING_DURATION_MINUTES * 60 * 1000,
+      );
 
       // Final guard: re-check just this slot right before booking, since the
       // dropdown's availability snapshot can go stale (someone else — or
       // another tab — books over it between selecting and submitting).
-      const stillBusy = await checkAvailability(start.toISOString(), end.toISOString()).catch(() => null);
+      const stillBusy = await checkAvailability(
+        start.toISOString(),
+        end.toISOString(),
+      ).catch(() => null);
       if (stillBusy === null) {
-        addToast("Couldn't confirm this time is still free — please try again.");
+        addToast(
+          "Couldn't confirm this time is still free — please try again.",
+        );
         return;
       }
       if (stillBusy.length > 0) {
-        addToast("This time is no longer available. Please select another time.");
+        addToast(
+          "This time is no longer available. Please select another time.",
+        );
         setTime(""); // force a fresh, re-checked pick
         return;
       }
@@ -132,7 +149,9 @@ export default function MeetingModal({ client, stage, onClose }) {
       >
         <div className="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Edit Meeting</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              Edit Meeting
+            </p>
             <h2 className="text-lg font-semibold text-navy">{stage.label}</h2>
           </div>
           <button
@@ -147,7 +166,9 @@ export default function MeetingModal({ client, stage, onClose }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-5">
           <div className="grid grid-cols-2 gap-4">
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Meeting Date</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Meeting Date
+              </span>
               <input
                 type="date"
                 value={date}
@@ -179,7 +200,11 @@ export default function MeetingModal({ client, stage, onClose }) {
               <button
                 type="button"
                 onClick={handleGoogleButton}
-                disabled={(googleStatus === "connected" && (!date || !time)) || syncing || googleStatus === "connecting"}
+                disabled={
+                  (googleStatus === "connected" && (!date || !time)) ||
+                  syncing ||
+                  googleStatus === "connecting"
+                }
                 className="flex items-center justify-center gap-1.5 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold-dark transition hover:bg-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <CalendarPlus size={14} />
@@ -189,9 +214,13 @@ export default function MeetingModal({ client, stage, onClose }) {
           )}
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Outcome</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Outcome
+            </span>
             <div className="flex items-center gap-2">
-              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${getStageStatusMeta(status).dot}`} />
+              <span
+                className={`h-2.5 w-2.5 shrink-0 rounded-full ${getStageStatusMeta(status).dot}`}
+              />
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -204,13 +233,18 @@ export default function MeetingModal({ client, stage, onClose }) {
                 ))}
               </select>
             </div>
-            {(status === "completed" || status === "skipped") && stage.id === client.currentStage && (
-              <span className="text-xs text-gold-dark">Pipeline will advance to the next stage on save.</span>
-            )}
+            {(status === "completed" || status === "skipped") &&
+              stage.id === client.currentStage && (
+                <span className="text-xs text-gold-dark">
+                  Pipeline will advance to the next stage on save.
+                </span>
+              )}
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Add Note</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Add Note
+            </span>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}

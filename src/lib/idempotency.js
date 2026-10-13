@@ -16,7 +16,9 @@ export function newIdempotencyKey() {
 /** True when the outcome of the request is unknown, i.e. the same key should be used to retry. */
 export function isRetryable(error) {
   const status = error?.status;
-  return status === undefined || status === 0 || status === 409 || status >= 500;
+  return (
+    status === undefined || status === 0 || status === 409 || status >= 500
+  );
 }
 
 /**

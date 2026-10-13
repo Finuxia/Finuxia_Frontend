@@ -7,11 +7,24 @@ import { emptyAllocation, emptyProduct } from "../lib/salesPackage/wizard";
  */
 export default function useProductRows({ draft, catalog }) {
   const { data, patch } = draft;
-  const { companies, productsByCompany, loadProductsFor, loadFundsFor } = catalog;
+  const { companies, productsByCompany, loadProductsFor, loadFundsFor } =
+    catalog;
 
-  const updateProduct = (id, fields) => patch({ products: data.products.map((p) => (p.id === id ? { ...p, ...fields } : p)) });
-  const addProduct = () => patch({ products: [...data.products, emptyProduct()] });
-  const removeProduct = (id) => patch({ products: data.products.length > 1 ? data.products.filter((p) => p.id !== id) : data.products });
+  const updateProduct = (id, fields) =>
+    patch({
+      products: data.products.map((p) =>
+        p.id === id ? { ...p, ...fields } : p,
+      ),
+    });
+  const addProduct = () =>
+    patch({ products: [...data.products, emptyProduct()] });
+  const removeProduct = (id) =>
+    patch({
+      products:
+        data.products.length > 1
+          ? data.products.filter((p) => p.id !== id)
+          : data.products,
+    });
 
   const changeCompany = (rowId, companyId) => {
     const company = companies.find((c) => String(c.id) === String(companyId));
@@ -45,16 +58,33 @@ export default function useProductRows({ draft, catalog }) {
 
   const addAllocation = (rowId) => {
     const row = data.products.find((p) => p.id === rowId);
-    updateProduct(rowId, { allocations: [...row.allocations, emptyAllocation()] });
+    updateProduct(rowId, {
+      allocations: [...row.allocations, emptyAllocation()],
+    });
   };
   const updateAllocation = (rowId, allocId, fields) => {
     const row = data.products.find((p) => p.id === rowId);
-    updateProduct(rowId, { allocations: row.allocations.map((a) => (a.id === allocId ? { ...a, ...fields } : a)) });
+    updateProduct(rowId, {
+      allocations: row.allocations.map((a) =>
+        a.id === allocId ? { ...a, ...fields } : a,
+      ),
+    });
   };
   const removeAllocation = (rowId, allocId) => {
     const row = data.products.find((p) => p.id === rowId);
-    updateProduct(rowId, { allocations: row.allocations.filter((a) => a.id !== allocId) });
+    updateProduct(rowId, {
+      allocations: row.allocations.filter((a) => a.id !== allocId),
+    });
   };
 
-  return { updateProduct, addProduct, removeProduct, changeCompany, changeProduct, addAllocation, updateAllocation, removeAllocation };
+  return {
+    updateProduct,
+    addProduct,
+    removeProduct,
+    changeCompany,
+    changeProduct,
+    addAllocation,
+    updateAllocation,
+    removeAllocation,
+  };
 }

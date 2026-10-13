@@ -1,8 +1,24 @@
 export const TICKET_STATUS_META = {
-  open: { label: "Open", badge: "bg-av-blue/10 text-av-blue", dot: "bg-av-blue" },
-  in_progress: { label: "In Progress", badge: "bg-av-amber/10 text-av-amber", dot: "bg-av-amber" },
-  resolved: { label: "Resolved", badge: "bg-av-green/10 text-av-green", dot: "bg-av-green" },
-  closed: { label: "Closed", badge: "bg-slate-100 text-slate-500", dot: "bg-slate-400" },
+  open: {
+    label: "Open",
+    badge: "bg-av-blue/10 text-av-blue",
+    dot: "bg-av-blue",
+  },
+  in_progress: {
+    label: "In Progress",
+    badge: "bg-av-amber/10 text-av-amber",
+    dot: "bg-av-amber",
+  },
+  resolved: {
+    label: "Resolved",
+    badge: "bg-av-green/10 text-av-green",
+    dot: "bg-av-green",
+  },
+  closed: {
+    label: "Closed",
+    badge: "bg-slate-100 text-slate-500",
+    dot: "bg-slate-400",
+  },
 };
 
 export function getTicketStatusMeta(status) {

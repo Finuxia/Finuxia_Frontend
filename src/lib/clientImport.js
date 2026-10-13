@@ -36,7 +36,8 @@ const text = (v) => (v == null ? "" : String(v).trim());
  * anything else goes through the normal date parsing.
  */
 function dateValue(v) {
-  if (typeof v === "string" && /^\d{5}(\.\d+)?$/.test(v.trim())) return Number(v);
+  if (typeof v === "string" && /^\d{5}(\.\d+)?$/.test(v.trim()))
+    return Number(v);
   return v;
 }
 
@@ -65,12 +66,18 @@ export function mapImportRows(rows, { colors, colorOffset = 0 }) {
     const last = parts.slice(1).join(" ");
 
     // Dates: Excel serials / Dates / strings → local ISO.
-    const followUpDate = toISODate(dateValue(row.nextFollowUp ?? row["Next Follow-up"]));
-    const lastContactDate = toISODate(dateValue(row.lastContact ?? row["Last Contact"]));
+    const followUpDate = toISODate(
+      dateValue(row.nextFollowUp ?? row["Next Follow-up"]),
+    );
+    const lastContactDate = toISODate(
+      dateValue(row.lastContact ?? row["Last Contact"]),
+    );
 
     const rawStage = text(row.stage || row.Stage).toLowerCase();
     const matchedStage =
-      PIPELINE_STAGES.find((s) => s.label.toLowerCase() === rawStage || s.id === rawStage)?.id || FIRST_STAGE_ID;
+      PIPELINE_STAGES.find(
+        (s) => s.label.toLowerCase() === rawStage || s.id === rawStage,
+      )?.id || FIRST_STAGE_ID;
 
     created.push({
       first,
@@ -86,7 +93,9 @@ export function mapImportRows(rows, { colors, colorOffset = 0 }) {
       followUpDate,
       nextFollowUp: followUpDate ? calcNextFollowUp(followUpDate) : "TBD",
       lastContactDate,
-      lastContact: lastContactDate ? `Last contact — ${lastContactDate}` : "Not yet contacted",
+      lastContact: lastContactDate
+        ? `Last contact — ${lastContactDate}`
+        : "Not yet contacted",
       interests: [],
       currentStage: matchedStage,
       stages: { [matchedStage]: { status: "pending", data: {}, files: [] } },

@@ -7,7 +7,11 @@ import usePagedList from "../hooks/usePagedList";
 import { getStage, PIPELINE_STAGES } from "../lib/pipeline";
 import { formatCanadianPhone } from "../lib/phone";
 
-const PRIORITY_DOT = { High: "bg-av-red", Medium: "bg-av-amber", Low: "bg-av-green" };
+const PRIORITY_DOT = {
+  High: "bg-av-red",
+  Medium: "bg-av-amber",
+  Low: "bg-av-green",
+};
 const FOLLOWUP_BADGE = {
   Overdue: "bg-av-red/10 text-av-red",
   Today: "bg-av-amber/10 text-av-amber",
@@ -43,7 +47,9 @@ export default function Clients() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
-  const [stageFilter, setStageFilter] = useState(searchParams.get("stage") || "all");
+  const [stageFilter, setStageFilter] = useState(
+    searchParams.get("stage") || "all",
+  );
   const [priorityFilter, setPriorityFilter] = useState("all");
 
   const search = useDebounced(query.trim(), SEARCH_DELAY_MS);
@@ -146,9 +152,13 @@ export default function Clients() {
                   <p className="truncate text-sm font-semibold text-navy">
                     {c.first} {c.last}
                   </p>
-                  <p className="truncate text-xs text-slate-400">{formatCanadianPhone(c.phone) || c.email || "—"}</p>
+                  <p className="truncate text-xs text-slate-400">
+                    {formatCanadianPhone(c.phone) || c.email || "—"}
+                  </p>
                 </div>
-                <span className={`hidden shrink-0 h-2.5 w-2.5 rounded-full sm:block ${PRIORITY_DOT[c.priority]}`} />
+                <span
+                  className={`hidden shrink-0 h-2.5 w-2.5 rounded-full sm:block ${PRIORITY_DOT[c.priority]}`}
+                />
                 <span className="hidden shrink-0 rounded-full bg-navy/5 px-2.5 py-0.5 text-xs font-medium text-navy/70 sm:block">
                   {stage?.short}
                 </span>
@@ -162,7 +172,12 @@ export default function Clients() {
               </button>
             );
           })}
-          <LoadMore hasMore={hasMore} loadingMore={loadingMore} error={shown.length > 0 ? error : null} onLoadMore={loadMore} />
+          <LoadMore
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            error={shown.length > 0 ? error : null}
+            onLoadMore={loadMore}
+          />
         </div>
       )}
     </div>

@@ -20,7 +20,14 @@ const TABS = [
 ];
 
 export default function Profile() {
-  const { user, updateProfile, changePassword, uploadAvatar, removeAvatar, logout } = useAuth();
+  const {
+    user,
+    updateProfile,
+    changePassword,
+    uploadAvatar,
+    removeAvatar,
+    logout,
+  } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [name, setName] = useState(user.name);
@@ -30,7 +37,11 @@ export default function Profile() {
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
   const [pwSaving, setPwSaving] = useState(false);
   const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState(TABS.some((t) => t.key === searchParams.get("tab")) ? searchParams.get("tab") : "account");
+  const [tab, setTab] = useState(
+    TABS.some((t) => t.key === searchParams.get("tab"))
+      ? searchParams.get("tab")
+      : "account",
+  );
   const [avatarBust, setAvatarBust] = useState(Date.now());
   const [avatarSaving, setAvatarSaving] = useState(false);
   const fileInputRef = useRef(null);
@@ -41,7 +52,11 @@ export default function Profile() {
     e.preventDefault();
     const newEmail = email.trim().toLowerCase();
     try {
-      await updateProfile({ name, email: newEmail, ...(emailChanged ? { currentPassword: emailPassword } : {}) });
+      await updateProfile({
+        name,
+        email: newEmail,
+        ...(emailChanged ? { currentPassword: emailPassword } : {}),
+      });
       setEmailPassword("");
       addToast("Profile updated");
     } catch (err) {
@@ -122,9 +137,13 @@ export default function Profile() {
             title="Change photo"
           >
             {user.hasAvatar ? (
-              <img src={`${api.avatarUrl(user.id)}?t=${avatarBust}`} alt="" className="h-full w-full object-cover" />
+              <img
+                src={`${api.avatarUrl(user.id)}?t=${avatarBust}`}
+                alt=""
+                className="h-full w-full object-cover"
+              />
             ) : (
-              user.name?.[0]?.toUpperCase() ?? <User size={24} />
+              (user.name?.[0]?.toUpperCase() ?? <User size={24} />)
             )}
           </button>
           <button
@@ -168,7 +187,9 @@ export default function Profile() {
             type="button"
             onClick={() => setTab(t.key)}
             className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition ${
-              tab === t.key ? "bg-navy text-white" : "text-slate-500 hover:bg-slate-50"
+              tab === t.key
+                ? "bg-navy text-white"
+                : "text-slate-500 hover:bg-slate-50"
             }`}
           >
             {t.label}
@@ -178,10 +199,14 @@ export default function Profile() {
 
       {tab === "account" && (
         <section className="rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-navy">Account details</h2>
+          <h2 className="mb-4 text-sm font-semibold text-navy">
+            Account details
+          </h2>
           <form onSubmit={handleSave} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Full Name</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Full Name
+              </span>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -189,7 +214,9 @@ export default function Profile() {
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Email</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Email
+              </span>
               <input
                 type="email"
                 value={email}
@@ -226,8 +253,12 @@ export default function Profile() {
 
       {tab === "account" && (
         <section className="rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="mb-1 text-sm font-semibold text-navy">Change password</h2>
-          <p className="mb-4 text-xs text-slate-500">At least 12 characters. Changing it signs out your other devices.</p>
+          <h2 className="mb-1 text-sm font-semibold text-navy">
+            Change password
+          </h2>
+          <p className="mb-4 text-xs text-slate-500">
+            At least 12 characters. Changing it signs out your other devices.
+          </p>
           <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
             {[
               ["current", "Current password", "current-password"],
@@ -235,13 +266,17 @@ export default function Profile() {
               ["confirm", "Confirm new password", "new-password"],
             ].map(([key, label, autoComplete]) => (
               <label key={key} className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</span>
+                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  {label}
+                </span>
                 <input
                   type="password"
                   autoComplete={autoComplete}
                   required
                   value={pw[key]}
-                  onChange={(e) => setPw((p) => ({ ...p, [key]: e.target.value }))}
+                  onChange={(e) =>
+                    setPw((p) => ({ ...p, [key]: e.target.value }))
+                  }
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
                 />
               </label>

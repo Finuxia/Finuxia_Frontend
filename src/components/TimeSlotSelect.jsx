@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Clock, ChevronDown, Lock, AlertTriangle, RefreshCcw } from "lucide-react";
+import {
+  Clock,
+  ChevronDown,
+  Lock,
+  AlertTriangle,
+  RefreshCcw,
+} from "lucide-react";
 import { useAvailability } from "../hooks/useAvailability";
 import { formatSlotLabel } from "../lib/timeSlots";
 
@@ -12,8 +18,18 @@ import { formatSlotLabel } from "../lib/timeSlots";
  * options are real disabled buttons, so keyboard/screen-reader users get the
  * same "can't select this" behavior for free.
  */
-export default function TimeSlotSelect({ date, durationMinutes = 30, value, onChange, label = "Time", disabled = false }) {
-  const { status, slots, error, retry } = useAvailability(date, durationMinutes);
+export default function TimeSlotSelect({
+  date,
+  durationMinutes = 30,
+  value,
+  onChange,
+  label = "Time",
+  disabled = false,
+}) {
+  const { status, slots, error, retry } = useAvailability(
+    date,
+    durationMinutes,
+  );
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -55,7 +71,11 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
 
   return (
     <div className="relative flex flex-col gap-1.5" ref={ref}>
-      {label && <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</span>}
+      {label && (
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {label}
+        </span>
+      )}
 
       <button
         type="button"
@@ -79,14 +99,21 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
           ) : (
             <Clock size={14} className="shrink-0 text-slate-400" />
           )}
-          <span className={`truncate ${!value && !isLoading && !isError ? "text-slate-400" : ""}`}>{triggerLabel}</span>
+          <span
+            className={`truncate ${!value && !isLoading && !isError ? "text-slate-400" : ""}`}
+          >
+            {triggerLabel}
+          </span>
           {selectedSlot && !selectedSlot.available && (
             <span className="shrink-0 rounded-full bg-av-red/10 px-1.5 py-0.5 text-[10px] font-semibold text-av-red">
               Busy
             </span>
           )}
         </span>
-        <ChevronDown size={15} className={`shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={15}
+          className={`shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {isError && (
@@ -104,7 +131,9 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
       )}
 
       {status === "unchecked" && date && (
-        <p className="text-xs text-slate-400">Connect Google Calendar to see busy times here.</p>
+        <p className="text-xs text-slate-400">
+          Connect Google Calendar to see busy times here.
+        </p>
       )}
 
       {open && !isTriggerDisabled && (
@@ -114,7 +143,9 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
           className="absolute top-full z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white p-1 shadow-xl"
         >
           {slots.length === 0 ? (
-            <p className="px-3 py-2 text-sm text-slate-400">No time slots available.</p>
+            <p className="px-3 py-2 text-sm text-slate-400">
+              No time slots available.
+            </p>
           ) : (
             slots.map((slot) => {
               const selected = slot.time === value;

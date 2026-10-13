@@ -35,12 +35,17 @@ export default function useSalesPackageActions({ packageId, draft, onAiUsed }) {
 
   const saveLetter = async () => {
     try {
-      const pkg = await api.saveReasonWhyLetter(packageId, draft.data.reasonWhyLetterText, draft.versionRef.current);
+      const pkg = await api.saveReasonWhyLetter(
+        packageId,
+        draft.data.reasonWhyLetterText,
+        draft.versionRef.current,
+      );
       // The letter is part of the package, so saving it advanced the package version.
       draft.acceptServerPackage(pkg);
       addToast("Reason Why Letter saved");
     } catch (err) {
-      if (!draft.handleConflict(err)) addToast(err.message || "Could not save the letter");
+      if (!draft.handleConflict(err))
+        addToast(err.message || "Could not save the letter");
     }
   };
 
@@ -60,7 +65,10 @@ export default function useSalesPackageActions({ packageId, draft, onAiUsed }) {
   const generateSupervisionForm = async () => {
     setSupervisionGenerating(true);
     try {
-      const pkg = await api.generateSupervisionForm(packageId, draft.data.supervisionConfirmations);
+      const pkg = await api.generateSupervisionForm(
+        packageId,
+        draft.data.supervisionConfirmations,
+      );
       draft.applyDocuments(pkg.documents);
       addToast("Supervision Form generated and attached");
     } catch (err) {
@@ -72,7 +80,12 @@ export default function useSalesPackageActions({ packageId, draft, onAiUsed }) {
 
   const downloadDocument = async (key, label, generated = false) => {
     try {
-      await api.downloadSalesPackageDocument(packageId, key, `${label.replace(/\s+/g, "_")}.pdf`, generated);
+      await api.downloadSalesPackageDocument(
+        packageId,
+        key,
+        `${label.replace(/\s+/g, "_")}.pdf`,
+        generated,
+      );
     } catch (err) {
       addToast(err.message || `Could not download ${label}`);
     }
@@ -93,8 +106,13 @@ export default function useSalesPackageActions({ packageId, draft, onAiUsed }) {
     setGenerating(true);
     try {
       await api.confirmSalesPackage(packageId);
-      const insured = (draft.data.insuredPerson || "Client").trim().replace(/\s+/g, "_");
-      await api.generateSalesPackage(packageId, `${insured}_DocuSeal_Package.pdf`);
+      const insured = (draft.data.insuredPerson || "Client")
+        .trim()
+        .replace(/\s+/g, "_");
+      await api.generateSalesPackage(
+        packageId,
+        `${insured}_DocuSeal_Package.pdf`,
+      );
       draft.setStatus("completed");
       addToast("Sales package generated");
     } catch (err) {

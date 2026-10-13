@@ -20,8 +20,16 @@ const SLOT_TIMES = generateSlotTimes(); // same candidate list for every day
  *  - "error"     the request failed — slots are NOT assumed available
  */
 export function useAvailability(date, durationMinutes = 30) {
-  const { isConfigured, status: googleStatus, checkAvailability } = useGoogleCalendar();
-  const [state, setState] = useState({ status: "idle", slots: [], error: null });
+  const {
+    isConfigured,
+    status: googleStatus,
+    checkAvailability,
+  } = useGoogleCalendar();
+  const [state, setState] = useState({
+    status: "idle",
+    slots: [],
+    error: null,
+  });
   const requestIdRef = useRef(0);
 
   const load = useCallback(() => {
@@ -35,7 +43,12 @@ export function useAvailability(date, durationMinutes = 30) {
       requestIdRef.current += 1;
       setState({
         status: "unchecked",
-        slots: buildTimeSlots({ date, times: SLOT_TIMES, durationMinutes, busyIntervals: [] }),
+        slots: buildTimeSlots({
+          date,
+          times: SLOT_TIMES,
+          durationMinutes,
+          busyIntervals: [],
+        }),
         error: null,
       });
       return;
@@ -50,7 +63,12 @@ export function useAvailability(date, durationMinutes = 30) {
         if (myRequestId !== requestIdRef.current) return; // a newer date/request superseded this one
         setState({
           status: "ready",
-          slots: buildTimeSlots({ date, times: SLOT_TIMES, durationMinutes, busyIntervals }),
+          slots: buildTimeSlots({
+            date,
+            times: SLOT_TIMES,
+            durationMinutes,
+            busyIntervals,
+          }),
           error: null,
         });
       })

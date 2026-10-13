@@ -1,6 +1,10 @@
 import { Plus, Trash2, CheckCircle2, AlertTriangle } from "lucide-react";
 import SearchableSelect from "../SearchableSelect";
-import { ACCOUNT_TYPES, FREQUENCIES, INVESTMENT_BEARING_TYPES } from "../../lib/salesPackageOptions";
+import {
+  ACCOUNT_TYPES,
+  FREQUENCIES,
+  INVESTMENT_BEARING_TYPES,
+} from "../../lib/salesPackageOptions";
 import { StepCard, CurrencyInput } from "./shared";
 
 export default function ProductsStep({
@@ -18,14 +22,20 @@ export default function ProductsStep({
   onRemoveAllocation,
 }) {
   return (
-    <StepCard title="Products Sold / Recommended" subtitle="Add all products for this client.">
+    <StepCard
+      title="Products Sold / Recommended"
+      subtitle="Add all products for this client."
+    >
       <div className="flex flex-col gap-3">
         {data.products.map((p) => {
           const products = productsByCompany[p.companyId] || [];
           const isInvestmentBearing = INVESTMENT_BEARING_TYPES.has(p.type);
           const fundKey = `${p.companyId}-${p.type}`;
           const funds = fundsByKey[fundKey] || [];
-          const total = p.allocations.reduce((sum, a) => sum + (parseFloat(a.allocationPct) || 0), 0);
+          const total = p.allocations.reduce(
+            (sum, a) => sum + (parseFloat(a.allocationPct) || 0),
+            0,
+          );
           return (
             <div key={p.id} className="rounded-xl border border-slate-200 p-3">
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-center">
@@ -47,7 +57,9 @@ export default function ProductsStep({
                   disabled={!p.companyId}
                   className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold disabled:bg-slate-50 disabled:text-slate-400 sm:col-span-3"
                 >
-                  <option value="">{p.companyId ? "Select Product" : "Pick a company first"}</option>
+                  <option value="">
+                    {p.companyId ? "Select Product" : "Pick a company first"}
+                  </option>
                   {products.map((prod) => (
                     <option key={prod.id} value={prod.id}>
                       {prod.name}
@@ -62,7 +74,9 @@ export default function ProductsStep({
                 />
                 <select
                   value={p.frequency}
-                  onChange={(e) => onFieldChange(p.id, { frequency: e.target.value })}
+                  onChange={(e) =>
+                    onFieldChange(p.id, { frequency: e.target.value })
+                  }
                   className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-2"
                 >
                   <option value="">Frequency</option>
@@ -99,7 +113,9 @@ export default function ProductsStep({
                   </span>
                   <select
                     value={p.accountType || ""}
-                    onChange={(e) => onFieldChange(p.id, { accountType: e.target.value })}
+                    onChange={(e) =>
+                      onFieldChange(p.id, { accountType: e.target.value })
+                    }
                     className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
                   >
                     <option value="">Select account type...</option>
@@ -115,29 +131,45 @@ export default function ProductsStep({
               {isInvestmentBearing && (
                 <div className="mt-3 rounded-lg bg-slate-50 p-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Fund Allocation — {p.productName}</span>
+                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Fund Allocation — {p.productName}
+                    </span>
                     <span
                       className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${Math.abs(total - 100) < 0.01 ? "bg-av-green/10 text-av-green" : "bg-av-red/10 text-av-red"}`}
                     >
-                      {Math.abs(total - 100) < 0.01 ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
+                      {Math.abs(total - 100) < 0.01 ? (
+                        <CheckCircle2 size={12} />
+                      ) : (
+                        <AlertTriangle size={12} />
+                      )}
                       {total}% allocated
                     </span>
                   </div>
 
                   <div className="flex flex-col gap-2">
                     {p.allocations.map((a) => (
-                      <div key={a.id} className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-center">
+                      <div
+                        key={a.id}
+                        className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-center"
+                      >
                         <SearchableSelect
                           className="sm:col-span-8"
                           placeholder="Select fund — type to search"
                           value={a.fundId}
                           options={funds.map((f) => ({
                             value: String(f.id),
-                            label: f.category ? `${f.category} — ${f.displayName}` : f.displayName,
+                            label: f.category
+                              ? `${f.category} — ${f.displayName}`
+                              : f.displayName,
                           }))}
                           onChange={(fundId) => {
-                            const fund = funds.find((f) => String(f.id) === String(fundId));
-                            onUpdateAllocation(p.id, a.id, { fundId, fundName: fund?.displayName || "" });
+                            const fund = funds.find(
+                              (f) => String(f.id) === String(fundId),
+                            );
+                            onUpdateAllocation(p.id, a.id, {
+                              fundId,
+                              fundName: fund?.displayName || "",
+                            });
                           }}
                         />
                         <div className="relative sm:col-span-3">
@@ -146,10 +178,16 @@ export default function ProductsStep({
                             min="0"
                             max="100"
                             value={a.allocationPct}
-                            onChange={(e) => onUpdateAllocation(p.id, a.id, { allocationPct: e.target.value })}
+                            onChange={(e) =>
+                              onUpdateAllocation(p.id, a.id, {
+                                allocationPct: e.target.value,
+                              })
+                            }
                             className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
                           />
-                          <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+                          <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+                            %
+                          </span>
                         </div>
                         <button
                           type="button"

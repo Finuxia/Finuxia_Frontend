@@ -25,8 +25,12 @@ function tagReconnect(err) {
  *    and a stale window, used by My Day for a single selected date.
  */
 export function useGoogleCalendarEvents(cacheKey) {
-  const [events, setEvents] = useState(() => readCachedEvents(cacheKey)?.events ?? []);
-  const [cachedAt, setCachedAt] = useState(() => readCachedEvents(cacheKey)?.cachedAt ?? null);
+  const [events, setEvents] = useState(
+    () => readCachedEvents(cacheKey)?.events ?? [],
+  );
+  const [cachedAt, setCachedAt] = useState(
+    () => readCachedEvents(cacheKey)?.cachedAt ?? null,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -65,23 +69,32 @@ export function useGoogleCalendarEvents(cacheKey) {
         if (!silent) setLoading(false);
       }
     },
-    [cacheKey]
+    [cacheKey],
   );
 
   // ---- per-day cache (My Day) ----------------------------------------
   const getDayState = useCallback(
-    (dateKey) => dayCacheRef.current[dateKey] || { events: [], status: "idle", error: null },
-    []
+    (dateKey) =>
+      dayCacheRef.current[dateKey] || {
+        events: [],
+        status: "idle",
+        error: null,
+      },
+    [],
   );
 
   const fetchDay = useCallback(
     async (dateKey, { force = false } = {}) => {
       if (!dateKey) return [];
       const entry = dayCacheRef.current[dateKey];
-      const fresh = entry && entry.status === "ready" && Date.now() - entry.fetchedAt < DAY_STALE_MS;
+      const fresh =
+        entry &&
+        entry.status === "ready" &&
+        Date.now() - entry.fetchedAt < DAY_STALE_MS;
       if (!force && fresh) return entry.events;
       // De-dupe simultaneous requests for the same day.
-      if (inFlightRef.current.has(dateKey)) return inFlightRef.current.get(dateKey);
+      if (inFlightRef.current.has(dateKey))
+        return inFlightRef.current.get(dateKey);
 
       dayCacheRef.current[dateKey] = {
         events: entry?.events || [],
@@ -95,7 +108,12 @@ export function useGoogleCalendarEvents(cacheKey) {
       const promise = api
         .getCalendarEvents({ timeMin, timeMax, maxResults: 50 })
         .then((items) => {
-          dayCacheRef.current[dateKey] = { events: items, status: "ready", error: null, fetchedAt: Date.now() };
+          dayCacheRef.current[dateKey] = {
+            events: items,
+            status: "ready",
+            error: null,
+            fetchedAt: Date.now(),
+          };
           return items;
         })
         .catch((err) => {
@@ -116,7 +134,7 @@ export function useGoogleCalendarEvents(cacheKey) {
       inFlightRef.current.set(dateKey, promise);
       return promise;
     },
-    [bumpDays]
+    [bumpDays],
   );
 
   const invalidateDays = useCallback(() => {
@@ -142,7 +160,7 @@ export function useGoogleCalendarEvents(cacheKey) {
       invalidateDays();
       return created;
     },
-    [cacheKey, invalidateDays]
+    [cacheKey, invalidateDays],
   );
 
   const update = useCallback(
@@ -154,14 +172,16 @@ export function useGoogleCalendarEvents(cacheKey) {
         throw tagReconnect(err);
       }
       setEvents((prev) => {
-        const next = prev.map((e) => (e.id === eventId ? updated : e)).sort(byStart);
+        const next = prev
+          .map((e) => (e.id === eventId ? updated : e))
+          .sort(byStart);
         writeCachedEvents(cacheKey, next);
         return next;
       });
       invalidateDays();
       return updated;
     },
-    [cacheKey, invalidateDays]
+    [cacheKey, invalidateDays],
   );
 
   const remove = useCallback(
@@ -178,14 +198,16 @@ export function useGoogleCalendarEvents(cacheKey) {
       });
       invalidateDays();
     },
-    [cacheKey, invalidateDays]
+    [cacheKey, invalidateDays],
   );
 
   // Historical range fetch (Reports) — does not touch shared lists/caches.
   const fetchRange = useCallback((startISO, endISO, maxResults = 250) => {
-    return api.getCalendarEvents({ timeMin: startISO, timeMax: endISO, maxResults }).catch((err) => {
-      throw tagReconnect(err);
-    });
+    return api
+      .getCalendarEvents({ timeMin: startISO, timeMax: endISO, maxResults })
+      .catch((err) => {
+        throw tagReconnect(err);
+      });
   }, []);
 
   // FreeBusy for the meeting-time dropdown's availability check — one call

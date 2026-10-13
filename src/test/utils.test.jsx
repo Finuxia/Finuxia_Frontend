@@ -12,11 +12,15 @@ describe("renderWithProviders", () => {
       const { addToast } = useToast();
       return (
         <p>
-          {user ? user.name : "no user"} / {loading ? "loading" : `${clients.length} clients`} / {typeof addToast}
+          {user ? user.name : "no user"} /{" "}
+          {loading ? "loading" : `${clients.length} clients`} /{" "}
+          {typeof addToast}
         </p>
       );
     }
     renderWithProviders(<Probe />);
-    expect(await screen.findByText("Test Advisor / 0 clients / function")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Test Advisor / 0 clients / function"),
+    ).toBeInTheDocument();
   });
 });

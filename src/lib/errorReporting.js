@@ -23,7 +23,12 @@ let reporter = null;
 let buffered = [];
 
 const consoleReporter = (error, context) => {
-  console.error("Unhandled UI error", context.errorId, error, context.componentStack || "");
+  console.error(
+    "Unhandled UI error",
+    context.errorId,
+    error,
+    context.componentStack || "",
+  );
 };
 
 export function setErrorReporter(fn) {

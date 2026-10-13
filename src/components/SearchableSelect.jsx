@@ -26,19 +26,28 @@ export default function SearchableSelect({
   const [highlight, setHighlight] = useState(0);
   const rootRef = useRef(null);
 
-  const selected = useMemo(() => options.find((o) => String(o.value) === String(value)), [options, value]);
+  const selected = useMemo(
+    () => options.find((o) => String(o.value) === String(value)),
+    [options, value],
+  );
   const text = freeText ? value || "" : open ? query : selected?.label || "";
   const needle = (freeText ? value || "" : query).trim().toLowerCase();
 
   const filtered = useMemo(
-    () => (needle ? options.filter((o) => (o.search || o.label).toLowerCase().includes(needle)) : options),
-    [options, needle]
+    () =>
+      needle
+        ? options.filter((o) =>
+            (o.search || o.label).toLowerCase().includes(needle),
+          )
+        : options,
+    [options, needle],
   );
 
   useEffect(() => {
     if (!open) return undefined;
     const onDown = (e) => {
-      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+      if (rootRef.current && !rootRef.current.contains(e.target))
+        setOpen(false);
     };
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
@@ -68,7 +77,8 @@ export default function SearchableSelect({
     }
   };
 
-  const clearable = !disabled && (freeText ? Boolean(value) : Boolean(selected));
+  const clearable =
+    !disabled && (freeText ? Boolean(value) : Boolean(selected));
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
@@ -107,7 +117,11 @@ export default function SearchableSelect({
       {open && !disabled && (
         <ul className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
           {filtered.length === 0 ? (
-            <li className="px-3 py-2 text-xs text-slate-400">{freeText ? "No saved match — keep typing to use this name." : emptyText}</li>
+            <li className="px-3 py-2 text-xs text-slate-400">
+              {freeText
+                ? "No saved match — keep typing to use this name."
+                : emptyText}
+            </li>
           ) : (
             filtered.map((o, i) => (
               <li key={o.value}>

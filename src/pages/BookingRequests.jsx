@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
-import { CalendarClock, Check, X, RefreshCcw, Clock, Mail, Phone, AlertTriangle } from "lucide-react";
+import {
+  CalendarClock,
+  Check,
+  X,
+  RefreshCcw,
+  Clock,
+  Mail,
+  Phone,
+  AlertTriangle,
+} from "lucide-react";
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
@@ -59,8 +68,13 @@ export default function BookingRequests() {
       if (calStatus === "connected" && !req.googleEventId) {
         try {
           const start = toISO(req.date, req.time);
-          const end = new Date(new Date(start).getTime() + req.durationMinutes * 60 * 1000).toISOString();
-          const attendees = [req.clientEmail, ...(req.guestEmails || [])].filter(Boolean);
+          const end = new Date(
+            new Date(start).getTime() + req.durationMinutes * 60 * 1000,
+          ).toISOString();
+          const attendees = [
+            req.clientEmail,
+            ...(req.guestEmails || []),
+          ].filter(Boolean);
           const created = await createEvent({
             summary: `Meeting with ${req.clientName}`,
             description: req.note || undefined,
@@ -70,10 +84,14 @@ export default function BookingRequests() {
           });
           await api.setBookingRequestGoogleEvent(req.id, created.id);
         } catch (err) {
-          addToast("Confirmed, but couldn't add it to Google Calendar — add it manually.");
+          addToast(
+            "Confirmed, but couldn't add it to Google Calendar — add it manually.",
+          );
         }
       } else if (calStatus !== "connected") {
-        addToast("Confirmed. Connect Google Calendar (Profile) to add these automatically.");
+        addToast(
+          "Confirmed. Connect Google Calendar (Profile) to add these automatically.",
+        );
       }
       addToast(`Confirmed meeting with ${req.clientName}`);
       load();
@@ -126,20 +144,23 @@ export default function BookingRequests() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-navy">Booking Requests</h1>
-          <p className="text-sm text-slate-500">Meetings clients requested through your booking link.</p>
+          <p className="text-sm text-slate-500">
+            Meetings clients requested through your booking link.
+          </p>
         </div>
       </div>
 
       {calStatus === "connected" ? (
         <div className="flex items-start gap-2 rounded-xl border border-dashed border-av-green/40 bg-av-green/5 px-4 py-3 text-sm text-av-green">
           <Check size={15} className="mt-0.5 shrink-0" />
-          Instant booking is on — new requests confirm and land on your calendar automatically, no approval needed.
+          Instant booking is on — new requests confirm and land on your calendar
+          automatically, no approval needed.
         </div>
       ) : (
         <div className="flex items-start gap-2 rounded-xl border border-dashed border-av-amber/40 bg-av-amber/5 px-4 py-3 text-sm text-av-amber">
           <AlertTriangle size={15} className="mt-0.5 shrink-0" />
-          Connect Google Calendar on your Profile page to skip the approval step entirely and add meetings
-          automatically.
+          Connect Google Calendar on your Profile page to skip the approval step
+          entirely and add meetings automatically.
         </div>
       )}
 
@@ -151,13 +172,17 @@ export default function BookingRequests() {
       ) : requests.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
           <CalendarClock size={24} className="text-slate-300" />
-          <p className="text-sm text-slate-400">No booking requests yet. Share your booking link to get started.</p>
+          <p className="text-sm text-slate-400">
+            No booking requests yet. Share your booking link to get started.
+          </p>
         </div>
       ) : (
         <>
           {pending.length > 0 && (
             <section>
-              <h2 className="mb-2.5 text-sm font-semibold text-navy">Needs your response</h2>
+              <h2 className="mb-2.5 text-sm font-semibold text-navy">
+                Needs your response
+              </h2>
               <div className="flex flex-col gap-2.5">
                 {pending.map((req) => (
                   <RequestCard
@@ -175,15 +200,25 @@ export default function BookingRequests() {
 
           {rest.length > 0 && (
             <section>
-              <h2 className="mb-2.5 text-sm font-semibold text-navy">All Requests</h2>
+              <h2 className="mb-2.5 text-sm font-semibold text-navy">
+                All Requests
+              </h2>
               <div className="flex flex-col gap-2.5">
                 {rest.map((req) => (
                   <RequestCard
                     key={req.id}
                     req={req}
                     busy={busyId === req.id}
-                    onCancel={req.status === "confirmed" ? () => handleCancel(req) : undefined}
-                    onReschedule={req.status === "confirmed" ? () => setRescheduling(req) : undefined}
+                    onCancel={
+                      req.status === "confirmed"
+                        ? () => handleCancel(req)
+                        : undefined
+                    }
+                    onReschedule={
+                      req.status === "confirmed"
+                        ? () => setRescheduling(req)
+                        : undefined
+                    }
                   />
                 ))}
               </div>
@@ -211,11 +246,16 @@ function RequestCard({ req, busy, onApprove, onCancel, onReschedule }) {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-navy">{req.clientName}</p>
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${meta.badge}`}>{meta.label}</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${meta.badge}`}
+            >
+              {meta.label}
+            </span>
           </div>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
             <Clock size={12} />
-            {req.date} at {formatTimeLabel(req.time)} · {req.durationMinutes} min
+            {req.date} at {formatTimeLabel(req.time)} · {req.durationMinutes}{" "}
+            min
           </p>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-400">
             <Mail size={11} />
@@ -228,18 +268,23 @@ function RequestCard({ req, busy, onApprove, onCancel, onReschedule }) {
             )}
           </p>
           {req.guestEmails?.length > 0 && (
-            <p className="mt-1 text-xs text-slate-400">Guests: {req.guestEmails.join(", ")}</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Guests: {req.guestEmails.join(", ")}
+            </p>
           )}
           {req.answers?.length > 0 && (
             <div className="mt-1.5 flex flex-col gap-0.5">
               {req.answers.map((a) => (
                 <p key={a.questionId} className="text-xs text-slate-500">
-                  <span className="text-slate-400">{a.label || "Answer"}:</span> {a.answer}
+                  <span className="text-slate-400">{a.label || "Answer"}:</span>{" "}
+                  {a.answer}
                 </p>
               ))}
             </div>
           )}
-          {req.note && <p className="mt-1.5 text-xs text-slate-500">"{req.note}"</p>}
+          {req.note && (
+            <p className="mt-1.5 text-xs text-slate-500">"{req.note}"</p>
+          )}
         </div>
 
         <div className="flex shrink-0 gap-1.5">
@@ -284,12 +329,22 @@ function RescheduleModal({ req, onClose, onConfirm }) {
   const [time, setTime] = useState(req.time);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
-        <h2 className="mb-4 text-lg font-semibold text-navy">Reschedule {req.clientName}</h2>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="mb-4 text-lg font-semibold text-navy">
+          Reschedule {req.clientName}
+        </h2>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Date</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Date
+            </span>
             <input
               type="date"
               value={date}
@@ -299,7 +354,10 @@ function RescheduleModal({ req, onClose, onConfirm }) {
           </label>
           <TimeInput label="Time" value={time} onChange={setTime} />
           <div className="mt-1 flex justify-end gap-3">
-            <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100">
+            <button
+              onClick={onClose}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+            >
               Cancel
             </button>
             <button

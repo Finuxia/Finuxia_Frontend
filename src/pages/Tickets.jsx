@@ -9,7 +9,14 @@ import NewTicketModal from "../components/NewTicketModal";
 
 export default function Tickets() {
   const navigate = useNavigate();
-  const { items: tickets, loading, loadingMore, hasMore, loadMore, error } = usePagedList("/api/tickets");
+  const {
+    items: tickets,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+    error,
+  } = usePagedList("/api/tickets");
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -21,7 +28,9 @@ export default function Tickets() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-navy">Support Tickets</h1>
-            <p className="text-sm text-slate-500">Report a bug or ask for a feature — we read every one.</p>
+            <p className="text-sm text-slate-500">
+              Report a bug or ask for a feature — we read every one.
+            </p>
           </div>
         </div>
         <button
@@ -45,7 +54,9 @@ export default function Tickets() {
       ) : tickets.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
           <LifeBuoy size={24} className="text-slate-300" />
-          <p className="text-sm text-slate-400">No tickets yet. Found a bug or have an idea? Let us know.</p>
+          <p className="text-sm text-slate-400">
+            No tickets yet. Found a bug or have an idea? Let us know.
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -59,11 +70,15 @@ export default function Tickets() {
                 onClick={() => navigate(`/tickets/${t.id}`)}
                 className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left shadow-sm transition hover:shadow-md"
               >
-                <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${typeMeta.badge}`}>
+                <div
+                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${typeMeta.badge}`}
+                >
                   <TypeIcon size={15} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-navy">{t.title}</p>
+                  <p className="truncate text-sm font-semibold text-navy">
+                    {t.title}
+                  </p>
                   <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-400">
                     <span>{formatDate(t.updatedAt || t.createdAt)}</span>
                     {t.commentCount > 0 && (
@@ -74,13 +89,20 @@ export default function Tickets() {
                     )}
                   </p>
                 </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusMeta.badge}`}>
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusMeta.badge}`}
+                >
                   {statusMeta.label}
                 </span>
               </button>
             );
           })}
-          <LoadMore hasMore={hasMore} loadingMore={loadingMore} error={tickets.length > 0 ? error : null} onLoadMore={loadMore} />
+          <LoadMore
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            error={tickets.length > 0 ? error : null}
+            onLoadMore={loadMore}
+          />
         </div>
       )}
 

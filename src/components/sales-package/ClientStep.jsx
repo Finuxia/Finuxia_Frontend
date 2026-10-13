@@ -2,7 +2,12 @@ import { Plus, Trash2 } from "lucide-react";
 import SearchableSelect from "../SearchableSelect";
 import { useClients } from "../../context/ClientsContext";
 import { birthDateError, MIN_BIRTH_DATE, todayISO } from "../../lib/dates";
-import { CANADIAN_STATUSES, PROVINCES, MARITAL_STATUSES, DEPENDANT_RELATIONSHIPS } from "../../lib/salesPackageOptions";
+import {
+  CANADIAN_STATUSES,
+  PROVINCES,
+  MARITAL_STATUSES,
+  DEPENDANT_RELATIONSHIPS,
+} from "../../lib/salesPackageOptions";
 import { emptyDependant } from "../../lib/salesPackage/wizard";
 import { StepCard, FormField, CurrencyField, inputClass } from "./shared";
 
@@ -11,16 +16,30 @@ export default function ClientStep({ data, patch }) {
   const clientOptions = clients
     .map((c) => {
       const name = `${c.first || ""} ${c.last || ""}`.trim();
-      return { value: String(c.id), label: name, search: `${name} ${c.email || ""} ${c.phone || ""}` };
+      return {
+        value: String(c.id),
+        label: name,
+        search: `${name} ${c.email || ""} ${c.phone || ""}`,
+      };
     })
     .filter((o) => o.label);
-  const updateDependant = (id, fields) => patch({ dependants: data.dependants.map((d) => (d.id === id ? { ...d, ...fields } : d)) });
-  const addDependant = () => patch({ dependants: [...data.dependants, emptyDependant()] });
-  const removeDependant = (id) => patch({ dependants: data.dependants.filter((d) => d.id !== id) });
+  const updateDependant = (id, fields) =>
+    patch({
+      dependants: data.dependants.map((d) =>
+        d.id === id ? { ...d, ...fields } : d,
+      ),
+    });
+  const addDependant = () =>
+    patch({ dependants: [...data.dependants, emptyDependant()] });
+  const removeDependant = (id) =>
+    patch({ dependants: data.dependants.filter((d) => d.id !== id) });
 
   return (
     <>
-      <StepCard title="Client Information" subtitle="Enter the basic details for this sales package.">
+      <StepCard
+        title="Client Information"
+        subtitle="Enter the basic details for this sales package."
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <FormField label="Policy Owner" required>
             <SearchableSelect
@@ -29,11 +48,14 @@ export default function ClientStep({ data, patch }) {
               value={data.policyOwner}
               options={clientOptions}
               onChange={(name, option) => {
-                const picked = option ? clients.find((c) => String(c.id) === option.value) : null;
+                const picked = option
+                  ? clients.find((c) => String(c.id) === option.value)
+                  : null;
                 if (!picked) return patch({ policyOwner: name });
                 // Pull in what's already on file for this client — but never
                 // overwrite something the advisor has already typed.
-                const fill = (current, incoming) => (current ? current : incoming || "");
+                const fill = (current, incoming) =>
+                  current ? current : incoming || "";
                 patch({
                   policyOwner: name,
                   insuredPerson: fill(data.insuredPerson, name),
@@ -45,10 +67,18 @@ export default function ClientStep({ data, patch }) {
             />
           </FormField>
           <FormField label="Insured Person" required>
-            <input className={inputClass} value={data.insuredPerson} onChange={(e) => patch({ insuredPerson: e.target.value })} />
+            <input
+              className={inputClass}
+              value={data.insuredPerson}
+              onChange={(e) => patch({ insuredPerson: e.target.value })}
+            />
           </FormField>
           <FormField label="Canadian Status" required>
-            <select className={inputClass} value={data.canadianStatus} onChange={(e) => patch({ canadianStatus: e.target.value })}>
+            <select
+              className={inputClass}
+              value={data.canadianStatus}
+              onChange={(e) => patch({ canadianStatus: e.target.value })}
+            >
               <option value="">Select...</option>
               {CANADIAN_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -58,7 +88,11 @@ export default function ClientStep({ data, patch }) {
             </select>
           </FormField>
           <FormField label="Province" required>
-            <select className={inputClass} value={data.province} onChange={(e) => patch({ province: e.target.value })}>
+            <select
+              className={inputClass}
+              value={data.province}
+              onChange={(e) => patch({ province: e.target.value })}
+            >
               <option value="">Select...</option>
               {PROVINCES.map((p) => (
                 <option key={p} value={p}>
@@ -76,10 +110,18 @@ export default function ClientStep({ data, patch }) {
               value={data.dateOfBirth}
               onChange={(e) => patch({ dateOfBirth: e.target.value })}
             />
-            {birthDateError(data.dateOfBirth) && <span className="text-xs text-av-red">{birthDateError(data.dateOfBirth)}</span>}
+            {birthDateError(data.dateOfBirth) && (
+              <span className="text-xs text-av-red">
+                {birthDateError(data.dateOfBirth)}
+              </span>
+            )}
           </FormField>
           <FormField label="Marital Status">
-            <select className={inputClass} value={data.maritalStatus} onChange={(e) => patch({ maritalStatus: e.target.value })}>
+            <select
+              className={inputClass}
+              value={data.maritalStatus}
+              onChange={(e) => patch({ maritalStatus: e.target.value })}
+            >
               <option value="">Select...</option>
               {MARITAL_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -89,7 +131,11 @@ export default function ClientStep({ data, patch }) {
             </select>
           </FormField>
           <FormField label="Occupation">
-            <input className={inputClass} value={data.occupation} onChange={(e) => patch({ occupation: e.target.value })} />
+            <input
+              className={inputClass}
+              value={data.occupation}
+              onChange={(e) => patch({ occupation: e.target.value })}
+            />
           </FormField>
           <CurrencyField
             label="Annual Income"
@@ -100,7 +146,10 @@ export default function ClientStep({ data, patch }) {
         </div>
       </StepCard>
 
-      <StepCard title="Financial Situation" subtitle="Mortgage and other debt obligations.">
+      <StepCard
+        title="Financial Situation"
+        subtitle="Mortgage and other debt obligations."
+      >
         <div className="mb-4 flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
           <span className="text-sm text-navy">Homeowner?</span>
           <label className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center">
@@ -123,13 +172,19 @@ export default function ClientStep({ data, patch }) {
               placeholder="$400,000"
             />
           )}
-          <CurrencyField label="Other Major Debt" value={data.otherMajorDebt} onChange={(v) => patch({ otherMajorDebt: v })} />
+          <CurrencyField
+            label="Other Major Debt"
+            value={data.otherMajorDebt}
+            onChange={(v) => patch({ otherMajorDebt: v })}
+          />
         </div>
       </StepCard>
 
       <StepCard title="Family" subtitle="Dependants for this client.">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Dependants</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Dependants
+          </span>
           <button
             type="button"
             onClick={addDependant}
@@ -141,22 +196,33 @@ export default function ClientStep({ data, patch }) {
         </div>
         <div className="mt-2 flex flex-col gap-3">
           {data.dependants.map((dep) => (
-            <div key={dep.id} className="rounded-xl border border-slate-200 p-3">
+            <div
+              key={dep.id}
+              className="rounded-xl border border-slate-200 p-3"
+            >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Full Name</span>
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                    Full Name
+                  </span>
                   <input
                     placeholder="Full name"
                     value={dep.fullName}
-                    onChange={(e) => updateDependant(dep.id, { fullName: e.target.value })}
+                    onChange={(e) =>
+                      updateDependant(dep.id, { fullName: e.target.value })
+                    }
                     className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
                   />
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Relationship</span>
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                    Relationship
+                  </span>
                   <select
                     value={dep.relationship}
-                    onChange={(e) => updateDependant(dep.id, { relationship: e.target.value })}
+                    onChange={(e) =>
+                      updateDependant(dep.id, { relationship: e.target.value })
+                    }
                     className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
                   >
                     <option value="">Select...</option>
@@ -169,26 +235,40 @@ export default function ClientStep({ data, patch }) {
                 </label>
                 {dep.relationship === "Other" && (
                   <label className="flex flex-col gap-1">
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Specify Relationship</span>
+                    <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                      Specify Relationship
+                    </span>
                     <input
                       placeholder="e.g. Grandchild"
                       value={dep.relationshipOther}
-                      onChange={(e) => updateDependant(dep.id, { relationshipOther: e.target.value })}
+                      onChange={(e) =>
+                        updateDependant(dep.id, {
+                          relationshipOther: e.target.value,
+                        })
+                      }
                       className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
                     />
                   </label>
                 )}
                 <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Date of Birth</span>
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                    Date of Birth
+                  </span>
                   <input
                     type="date"
                     min={MIN_BIRTH_DATE}
                     max={todayISO()}
                     value={dep.dateOfBirth}
-                    onChange={(e) => updateDependant(dep.id, { dateOfBirth: e.target.value })}
+                    onChange={(e) =>
+                      updateDependant(dep.id, { dateOfBirth: e.target.value })
+                    }
                     className={`rounded-lg border px-2.5 py-2 text-sm text-navy outline-none focus:border-gold ${birthDateError(dep.dateOfBirth) ? "border-av-red" : "border-slate-200"}`}
                   />
-                  {birthDateError(dep.dateOfBirth) && <span className="text-xs text-av-red">{birthDateError(dep.dateOfBirth)}</span>}
+                  {birthDateError(dep.dateOfBirth) && (
+                    <span className="text-xs text-av-red">
+                      {birthDateError(dep.dateOfBirth)}
+                    </span>
+                  )}
                 </label>
               </div>
               <button

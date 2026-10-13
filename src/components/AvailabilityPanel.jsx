@@ -57,7 +57,8 @@ export default function AvailabilityPanel() {
         // yet — once the advisor has a real value, a stale browser (or one
         // that's just briefly in a different place) should never silently
         // overwrite their actual working timezone on save.
-        const timezone = data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const timezone =
+          data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
         setAvailability({ ...data, timezone });
       })
       .catch(() => {})
@@ -76,7 +77,10 @@ export default function AvailabilityPanel() {
   const updateDayTime = (key, field, value) => {
     setAvailability((s) => ({
       ...s,
-      weeklyHours: { ...s.weeklyHours, [key]: [{ ...s.weeklyHours[key][0], [field]: value }] },
+      weeklyHours: {
+        ...s.weeklyHours,
+        [key]: [{ ...s.weeklyHours[key][0], [field]: value }],
+      },
     }));
   };
 
@@ -97,7 +101,10 @@ export default function AvailabilityPanel() {
   };
 
   const detectTimezone = () => {
-    setAvailability((s) => ({ ...s, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
+    setAvailability((s) => ({
+      ...s,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }));
   };
 
   if (loading) {
@@ -121,23 +128,30 @@ export default function AvailabilityPanel() {
         Availability
       </h2>
       <p className="mb-4 text-xs text-slate-400">
-        Your open hours — shared across every booking link you create (see Booking Links in the nav).
+        Your open hours — shared across every booking link you create (see
+        Booking Links in the nav).
       </p>
 
       <div className="mb-4 flex flex-col gap-1.5">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Timezone</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Timezone
+        </span>
         <p className="text-xs text-slate-400">
-          Hours below are in this timezone — clients see them converted to their own. Wrong? Pick the right one, or
-          re-detect it from this browser.
+          Hours below are in this timezone — clients see them converted to their
+          own. Wrong? Pick the right one, or re-detect it from this browser.
         </p>
         <div className="flex items-center gap-2">
           <select
             value={availability.timezone}
-            onChange={(e) => setAvailability((s) => ({ ...s, timezone: e.target.value }))}
+            onChange={(e) =>
+              setAvailability((s) => ({ ...s, timezone: e.target.value }))
+            }
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
           >
             {!TIMEZONES.includes(availability.timezone) && (
-              <option value={availability.timezone}>{availability.timezone}</option>
+              <option value={availability.timezone}>
+                {availability.timezone}
+              </option>
             )}
             {TIMEZONES.map((tz) => (
               <option key={tz} value={tz}>
@@ -170,7 +184,9 @@ export default function AvailabilityPanel() {
               >
                 {enabled && <Check size={11} className="text-white" />}
               </button>
-              <span className="w-9 text-xs font-medium text-navy">{day.label}</span>
+              <span className="w-9 text-xs font-medium text-navy">
+                {day.label}
+              </span>
               {enabled ? (
                 <>
                   <TimeInput

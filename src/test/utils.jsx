@@ -13,15 +13,24 @@ import { ToastProvider } from "../context/ToastContext";
  *
  * Pass `providers: ["router", "toast"]` to leave out the heavier ones (auth, calendar, clients) for a lightweight test.
  */
-export function renderWithProviders(ui, { route = "/", providers = ["router", "toast", "auth", "calendar", "clients"], ...options } = {}) {
+export function renderWithProviders(
+  ui,
+  {
+    route = "/",
+    providers = ["router", "toast", "auth", "calendar", "clients"],
+    ...options
+  } = {},
+) {
   const has = (name) => providers.includes(name);
   function Wrapper({ children }) {
     let tree = children;
     if (has("clients")) tree = <ClientsProvider>{tree}</ClientsProvider>;
-    if (has("calendar")) tree = <GoogleCalendarProvider>{tree}</GoogleCalendarProvider>;
+    if (has("calendar"))
+      tree = <GoogleCalendarProvider>{tree}</GoogleCalendarProvider>;
     if (has("auth")) tree = <AuthProvider>{tree}</AuthProvider>;
     if (has("toast")) tree = <ToastProvider>{tree}</ToastProvider>;
-    if (has("router")) tree = <MemoryRouter initialEntries={[route]}>{tree}</MemoryRouter>;
+    if (has("router"))
+      tree = <MemoryRouter initialEntries={[route]}>{tree}</MemoryRouter>;
     return tree;
   }
   return render(ui, { wrapper: Wrapper, ...options });

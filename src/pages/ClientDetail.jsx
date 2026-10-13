@@ -1,6 +1,29 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Sparkles, X, Phone, Mail, Send, CalendarDays, CalendarClock, Copy, Check, UserPlus, Pencil, Trash2, Briefcase, Cake, Instagram, BellPlus } from "lucide-react";
+import {
+  useParams,
+  useSearchParams,
+  useNavigate,
+  Link,
+} from "react-router-dom";
+import {
+  ArrowLeft,
+  Sparkles,
+  X,
+  Phone,
+  Mail,
+  Send,
+  CalendarDays,
+  CalendarClock,
+  Copy,
+  Check,
+  UserPlus,
+  Pencil,
+  Trash2,
+  Briefcase,
+  Cake,
+  Instagram,
+  BellPlus,
+} from "lucide-react";
 import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
 import { formatCanadianPhone } from "../lib/phone";
@@ -29,7 +52,8 @@ const AVATAR_BG = {
 
 export default function ClientDetail() {
   const { id } = useParams();
-  const { getClient, addNote, editNote, deleteNote, deleteClient } = useClients();
+  const { getClient, addNote, editNote, deleteNote, deleteClient } =
+    useClients();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,7 +69,10 @@ export default function ClientDetail() {
     return (
       <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
         <p className="text-sm text-slate-500">Client not found.</p>
-        <Link to="/clients" className="mt-3 inline-block text-sm font-semibold text-gold-dark">
+        <Link
+          to="/clients"
+          className="mt-3 inline-block text-sm font-semibold text-gold-dark"
+        >
           Back to Clients
         </Link>
       </div>
@@ -63,7 +90,10 @@ export default function ClientDetail() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link to="/clients" className="flex w-fit items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy">
+      <Link
+        to="/clients"
+        className="flex w-fit items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy"
+      >
         <ArrowLeft size={15} />
         Back to Clients
       </Link>
@@ -71,13 +101,17 @@ export default function ClientDetail() {
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white ${AVATAR_BG[client.color] ?? "bg-navy"}`}>
+            <div
+              className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white ${AVATAR_BG[client.color] ?? "bg-navy"}`}
+            >
               {client.first[0]}
               {client.last[0]}
             </div>
             <div>
               <h1 className="text-xl font-bold text-navy">{fullName}</h1>
-              <p className="text-sm text-slate-500">{client.priority} priority · Joined {formatDate(client.joined)}</p>
+              <p className="text-sm text-slate-500">
+                {client.priority} priority · Joined {formatDate(client.joined)}
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -96,7 +130,11 @@ export default function ClientDetail() {
               Delete
             </button>
             <OpenDriveFolderButton clientId={client.id} clientName={fullName} />
-            <UploadClientFileButton clientId={client.id} clientName={fullName} clientEmail={client.email} />
+            <UploadClientFileButton
+              clientId={client.id}
+              clientName={fullName}
+              clientEmail={client.email}
+            />
             <button
               onClick={() => setAddingFollowUp(true)}
               className="flex items-center gap-1.5 rounded-lg border border-av-blue/30 bg-av-blue/10 px-3 py-2 text-sm font-semibold text-av-blue transition hover:bg-av-blue/20"
@@ -115,18 +153,46 @@ export default function ClientDetail() {
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2 lg:grid-cols-3">
-          <InfoRow icon={Phone} label="Phone" value={formatCanadianPhone(client.phone) || "—"} />
+          <InfoRow
+            icon={Phone}
+            label="Phone"
+            value={formatCanadianPhone(client.phone) || "—"}
+          />
           <InfoRow icon={Mail} label="Email" value={client.email || "—"} />
-          <InfoRow icon={Send} label="Telegram" value={client.telegram || "—"} />
-          <InfoRow icon={UserPlus} label="Referred By" value={client.referredBy || "—"} />
-          <InfoRow icon={Instagram} label="Instagram" value={client.instagram || "—"} />
+          <InfoRow
+            icon={Send}
+            label="Telegram"
+            value={client.telegram || "—"}
+          />
+          <InfoRow
+            icon={UserPlus}
+            label="Referred By"
+            value={client.referredBy || "—"}
+          />
+          <InfoRow
+            icon={Instagram}
+            label="Instagram"
+            value={client.instagram || "—"}
+          />
           <InfoRow icon={Briefcase} label="Job" value={client.job || "—"} />
-          <InfoRow icon={Cake} label="Date of Birth" value={client.dateOfBirth ? formatDate(client.dateOfBirth) : "—"} />
-          <InfoRow icon={CalendarDays} label="Last Contact" value={daysAgoLabel(client.lastContactDate)} />
+          <InfoRow
+            icon={Cake}
+            label="Date of Birth"
+            value={client.dateOfBirth ? formatDate(client.dateOfBirth) : "—"}
+          />
+          <InfoRow
+            icon={CalendarDays}
+            label="Last Contact"
+            value={daysAgoLabel(client.lastContactDate)}
+          />
           <InfoRow
             icon={CalendarClock}
             label="Next Follow-up"
-            value={client.followUpDate ? `${formatDate(client.followUpDate)} · ${client.nextFollowUp}` : client.nextFollowUp || "TBD"}
+            value={
+              client.followUpDate
+                ? `${formatDate(client.followUpDate)} · ${client.nextFollowUp}`
+                : client.nextFollowUp || "TBD"
+            }
           />
         </div>
 
@@ -136,11 +202,18 @@ export default function ClientDetail() {
 
         <div className="mt-5 border-t border-slate-100 pt-5">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-navy">Current Stage Progress</h2>
-            <span className="text-sm font-semibold text-gold-dark">{progress}%</span>
+            <h2 className="text-sm font-semibold text-navy">
+              Current Stage Progress
+            </h2>
+            <span className="text-sm font-semibold text-gold-dark">
+              {progress}%
+            </span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-gold transition-all" style={{ width: `${progress}%` }} />
+            <div
+              className="h-full rounded-full bg-gold transition-all"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
       </section>
@@ -151,7 +224,10 @@ export default function ClientDetail() {
         <ReminderModal
           kind="followup"
           lockClient={client}
-          initial={{ title: `Follow up with ${fullName}`.trim(), dueDate: todayISO() }}
+          initial={{
+            title: `Follow up with ${fullName}`.trim(),
+            dueDate: todayISO(),
+          }}
           onClose={() => setAddingFollowUp(false)}
           onSubmit={async (payload) => {
             await api.createReminder(payload);
@@ -173,29 +249,46 @@ export default function ClientDetail() {
 
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-navy">Timeline</h2>
-        <Timeline client={client} onEditStage={(stage) => setEditingStageId(stage.id)} />
+        <Timeline
+          client={client}
+          onEditStage={(stage) => setEditingStageId(stage.id)}
+        />
       </section>
 
       {editingStageId && (
-        <MeetingModal client={client} stage={getStage(editingStageId)} onClose={() => setEditingStageId(null)} />
+        <MeetingModal
+          client={client}
+          stage={getStage(editingStageId)}
+          onClose={() => setEditingStageId(null)}
+        />
       )}
 
       {aiOpen && <AIMessagePanel client={client} onClose={closeAi} />}
 
-      <AddClientModal open={editOpen} onClose={() => setEditOpen(false)} client={client} />
+      <AddClientModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        client={client}
+      />
 
       {confirmDelete && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
           onClick={() => setConfirmDelete(false)}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-av-red/10 text-av-red">
               <Trash2 size={20} />
             </div>
-            <h2 className="text-lg font-semibold text-navy">Delete {fullName}?</h2>
+            <h2 className="text-lg font-semibold text-navy">
+              Delete {fullName}?
+            </h2>
             <p className="mt-1 text-sm text-slate-500">
-              This permanently removes the client and their notes from your pipeline. This can't be undone.
+              This permanently removes the client and their notes from your
+              pipeline. This can't be undone.
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <button
@@ -226,7 +319,9 @@ export default function ClientDetail() {
 function AIMessagePanel({ client, onClose }) {
   const { addToast } = useToast();
   const [tone, setTone] = useState("friendly");
-  const [message, setMessage] = useState(() => generateFollowUpMessage(client, "friendly"));
+  const [message, setMessage] = useState(() =>
+    generateFollowUpMessage(client, "friendly"),
+  );
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -246,7 +341,10 @@ function AIMessagePanel({ client, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
       <div
         className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl animate-slide-up"
         onClick={(e) => e.stopPropagation()}
@@ -265,8 +363,11 @@ function AIMessagePanel({ client, onClose }) {
         </div>
 
         <p className="text-sm text-slate-500">
-          Suggested follow-up for <span className="font-semibold text-navy">{client.first} {client.last}</span>.
-          Communication only — no product or investment recommendations.
+          Suggested follow-up for{" "}
+          <span className="font-semibold text-navy">
+            {client.first} {client.last}
+          </span>
+          . Communication only — no product or investment recommendations.
         </p>
 
         <div className="mt-4 flex gap-1.5 rounded-lg bg-slate-100 p-1">
@@ -275,7 +376,9 @@ function AIMessagePanel({ client, onClose }) {
               key={t.id}
               onClick={() => setTone(t.id)}
               className={`flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition ${
-                tone === t.id ? "bg-white text-navy shadow-sm" : "text-slate-500 hover:text-navy"
+                tone === t.id
+                  ? "bg-white text-navy shadow-sm"
+                  : "text-slate-500 hover:text-navy"
               }`}
             >
               {t.label}

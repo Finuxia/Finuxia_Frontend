@@ -35,7 +35,10 @@ export default function Login() {
       footer={
         <>
           Don't have an account?{" "}
-          <Link to="/register" className="font-semibold text-gold-dark hover:underline">
+          <Link
+            to="/register"
+            className="font-semibold text-gold-dark hover:underline"
+          >
             Register
           </Link>
         </>
@@ -65,7 +68,10 @@ export default function Login() {
         {error && <p className="text-xs text-av-red">{error}</p>}
 
         <div className="flex items-center justify-end">
-          <Link to="/forgot-password" className="text-xs font-medium text-slate-500 hover:text-navy">
+          <Link
+            to="/forgot-password"
+            className="text-xs font-medium text-slate-500 hover:text-navy"
+          >
             Forgot password?
           </Link>
         </div>

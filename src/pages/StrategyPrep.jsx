@@ -1,6 +1,17 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Sparkles, Target, Phone, Mail, Send, CalendarClock, UserPlus, ClipboardCheck, Copy, Check } from "lucide-react";
+import {
+  Sparkles,
+  Target,
+  Phone,
+  Mail,
+  Send,
+  CalendarClock,
+  UserPlus,
+  ClipboardCheck,
+  Copy,
+  Check,
+} from "lucide-react";
 import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
 import { formatCanadianPhone } from "../lib/phone";
@@ -10,15 +21,51 @@ import { formatDate, daysAgoLabel } from "../lib/followUp";
 // Process / relationship talking points per stage — communication and logistics
 // only, never investment or product advice.
 const STAGE_AGENDA = {
-  cp: ["Confirm contact details and preferred channel", "Understand their goals and priorities", "Agree on next-meeting timing"],
-  fc1: ["Recap what you learned in planning", "Listen and take notes on their situation", "Set expectations for the process"],
-  fc2: ["Review open questions from FC1", "Clarify priorities and timeline", "Confirm who else should be involved"],
-  fc3: ["Summarize everything gathered so far", "Confirm you understand their needs", "Schedule the strategy meeting"],
-  strategy_meeting: ["Walk through the prepared strategy at a high level", "Answer questions and note concerns", "Agree on follow-up actions"],
-  strategy_followup: ["Revisit any items they wanted to think over", "Address outstanding questions", "Confirm the closing timeline"],
-  closing: ["Review paperwork and next steps", "Confirm delivery expectations", "Thank them and set a check-in date"],
-  policy_delivery: ["Deliver documents and walk through them", "Confirm they know how to reach you", "Schedule the first review"],
-  client: ["Quarterly relationship check-in", "Ask about referrals", "Confirm details are up to date"],
+  cp: [
+    "Confirm contact details and preferred channel",
+    "Understand their goals and priorities",
+    "Agree on next-meeting timing",
+  ],
+  fc1: [
+    "Recap what you learned in planning",
+    "Listen and take notes on their situation",
+    "Set expectations for the process",
+  ],
+  fc2: [
+    "Review open questions from FC1",
+    "Clarify priorities and timeline",
+    "Confirm who else should be involved",
+  ],
+  fc3: [
+    "Summarize everything gathered so far",
+    "Confirm you understand their needs",
+    "Schedule the strategy meeting",
+  ],
+  strategy_meeting: [
+    "Walk through the prepared strategy at a high level",
+    "Answer questions and note concerns",
+    "Agree on follow-up actions",
+  ],
+  strategy_followup: [
+    "Revisit any items they wanted to think over",
+    "Address outstanding questions",
+    "Confirm the closing timeline",
+  ],
+  closing: [
+    "Review paperwork and next steps",
+    "Confirm delivery expectations",
+    "Thank them and set a check-in date",
+  ],
+  policy_delivery: [
+    "Deliver documents and walk through them",
+    "Confirm they know how to reach you",
+    "Schedule the first review",
+  ],
+  client: [
+    "Quarterly relationship check-in",
+    "Ask about referrals",
+    "Confirm details are up to date",
+  ],
 };
 
 export default function StrategyPrep() {
@@ -28,8 +75,12 @@ export default function StrategyPrep() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [copied, setCopied] = useState(false);
 
-  const selectedId = searchParams.get("client") || (clients[0] ? String(clients[0].id) : "");
-  const client = useMemo(() => clients.find((c) => String(c.id) === String(selectedId)), [clients, selectedId]);
+  const selectedId =
+    searchParams.get("client") || (clients[0] ? String(clients[0].id) : "");
+  const client = useMemo(
+    () => clients.find((c) => String(c.id) === String(selectedId)),
+    [clients, selectedId],
+  );
 
   const setSelected = (id) => {
     const next = new URLSearchParams(searchParams);
@@ -48,7 +99,9 @@ export default function StrategyPrep() {
         `Last contact: ${daysAgoLabel(client.lastContactDate)}`,
         `Next follow-up: ${client.followUpDate ? formatDate(client.followUpDate) : client.nextFollowUp}`,
         client.referredBy ? `Referred by: ${client.referredBy}` : null,
-        client.interests?.length ? `Interests: ${client.interests.join(", ")}` : null,
+        client.interests?.length
+          ? `Interests: ${client.interests.join(", ")}`
+          : null,
         "",
         "Agenda:",
         ...agenda.map((a) => `• ${a}`),
@@ -77,12 +130,16 @@ export default function StrategyPrep() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-navy">Strategy Prep</h1>
-          <p className="text-sm text-slate-500">Get meeting-ready for a client in seconds.</p>
+          <p className="text-sm text-slate-500">
+            Get meeting-ready for a client in seconds.
+          </p>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Client
+        </label>
         <select
           value={selectedId}
           onChange={(e) => setSelected(e.target.value)}
@@ -111,15 +168,35 @@ export default function StrategyPrep() {
               </span>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Row icon={Phone} label="Phone" value={formatCanadianPhone(client.phone) || "—"} />
+              <Row
+                icon={Phone}
+                label="Phone"
+                value={formatCanadianPhone(client.phone) || "—"}
+              />
               <Row icon={Mail} label="Email" value={client.email || "—"} />
-              <Row icon={Send} label="Telegram" value={client.telegram || "—"} />
-              <Row icon={UserPlus} label="Referred By" value={client.referredBy || "—"} />
-              <Row icon={CalendarClock} label="Last Contact" value={daysAgoLabel(client.lastContactDate)} />
+              <Row
+                icon={Send}
+                label="Telegram"
+                value={client.telegram || "—"}
+              />
+              <Row
+                icon={UserPlus}
+                label="Referred By"
+                value={client.referredBy || "—"}
+              />
+              <Row
+                icon={CalendarClock}
+                label="Last Contact"
+                value={daysAgoLabel(client.lastContactDate)}
+              />
               <Row
                 icon={CalendarClock}
                 label="Next Follow-up"
-                value={client.followUpDate ? `${formatDate(client.followUpDate)} · ${client.nextFollowUp}` : client.nextFollowUp}
+                value={
+                  client.followUpDate
+                    ? `${formatDate(client.followUpDate)} · ${client.nextFollowUp}`
+                    : client.nextFollowUp
+                }
               />
             </div>
           </section>
@@ -131,7 +208,10 @@ export default function StrategyPrep() {
             </h2>
             <ul className="flex flex-col gap-2">
               {agenda.map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                <li
+                  key={i}
+                  className="flex items-start gap-2.5 text-sm text-slate-600"
+                >
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
                   {item}
                 </li>
@@ -139,12 +219,17 @@ export default function StrategyPrep() {
             </ul>
             {client.notes?.[0] && (
               <div className="mt-4 rounded-lg bg-slate-50 px-4 py-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Latest note</p>
-                <p className="mt-1 text-sm text-slate-600">{client.notes[0].text}</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                  Latest note
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {client.notes[0].text}
+                </p>
               </div>
             )}
             <p className="mt-4 text-xs text-slate-400">
-              Talking points cover process and relationship only — not investment, product, or financial advice.
+              Talking points cover process and relationship only — not
+              investment, product, or financial advice.
             </p>
           </section>
 

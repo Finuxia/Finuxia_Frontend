@@ -24,7 +24,11 @@ import {
   scrubEvent,
   stripQuery,
 } from "./errorTracking";
-import { reportError, resetErrorReporting, setErrorReporter } from "./errorReporting";
+import {
+  reportError,
+  resetErrorReporting,
+  setErrorReporter,
+} from "./errorReporting";
 import { lastRequestId, resetLastRequestId } from "./api";
 
 // `api` is the exported object of endpoint functions; `lastRequestId` is a module-level getter.
@@ -36,14 +40,14 @@ beforeEach(() => {
 
 describe("stripQuery", () => {
   it("removes a password reset token from a URL", () => {
-    expect(stripQuery("https://finuxia.com/reset-password?uid=14&token=abc123")).toBe(
-      "https://finuxia.com/reset-password"
-    );
+    expect(
+      stripQuery("https://finuxia.com/reset-password?uid=14&token=abc123"),
+    ).toBe("https://finuxia.com/reset-password");
   });
 
   it("removes a fragment as well, because a token can be put there too", () => {
     expect(stripQuery("https://finuxia.com/verify-email#token=abc123")).toBe(
-      "https://finuxia.com/verify-email"
+      "https://finuxia.com/verify-email",
     );
   });
 
@@ -59,13 +63,18 @@ describe("stripQuery", () => {
 
 describe("scrubEvent: the request", () => {
   it("never sends a request body", () => {
-    const event = scrubEvent({ request: { method: "POST", data: { password: "hunter2" } } });
+    const event = scrubEvent({
+      request: { method: "POST", data: { password: "hunter2" } },
+    });
     expect(event.request.data).toBe(DROPPED_BODY);
   });
 
   it("cuts the query string off the request URL", () => {
     const event = scrubEvent({
-      request: { url: "https://api.finuxia.com/api/auth/reset?token=abc123", query_string: "token=abc123" },
+      request: {
+        url: "https://api.finuxia.com/api/auth/reset?token=abc123",
+        query_string: "token=abc123",
+      },
     });
     expect(event.request.url).toBe("https://api.finuxia.com/api/auth/reset");
     expect(event.request.query_string).toBeUndefined();
@@ -73,7 +82,10 @@ describe("scrubEvent: the request", () => {
 
   it("drops headers and cookies entirely", () => {
     const event = scrubEvent({
-      request: { headers: { Authorization: "Bearer secret" }, cookies: { fx_csrf: "secret" } },
+      request: {
+        headers: { Authorization: "Bearer secret" },
+        cookies: { fx_csrf: "secret" },
+      },
     });
     expect(event.request.headers).toBeUndefined();
     expect(event.request.cookies).toBeUndefined();
@@ -84,7 +96,12 @@ describe("scrubEvent: the request", () => {
 describe("scrubEvent: the user", () => {
   it("reduces the user to an internal id", () => {
     const event = scrubEvent({
-      user: { id: 14, email: "advisor@example.com", username: "advisor", ip_address: "203.0.113.4" },
+      user: {
+        id: 14,
+        email: "advisor@example.com",
+        username: "advisor",
+        ip_address: "203.0.113.4",
+      },
     });
     expect(event.user).toEqual({ id: 14 });
   });
@@ -98,7 +115,12 @@ describe("scrubEvent: the user", () => {
 describe("scrubEvent: our own attached data", () => {
   it("redacts sensitive keys and keeps useful ones", () => {
     const event = scrubEvent({
-      extra: { payment_id: 91, client_email: "jane@example.com", auth_token: "abc", attempt: 2 },
+      extra: {
+        payment_id: 91,
+        client_email: "jane@example.com",
+        auth_token: "abc",
+        attempt: 2,
+      },
     });
     expect(event.extra.payment_id).toBe(91);
     expect(event.extra.attempt).toBe(2);
@@ -107,7 +129,11 @@ describe("scrubEvent: our own attached data", () => {
   });
 
   it("reaches into nested structures", () => {
-    const event = scrubEvent({ extra: { payload: { clients: [{ full_name: "Jane Roe", stage: "New" }] } } });
+    const event = scrubEvent({
+      extra: {
+        payload: { clients: [{ full_name: "Jane Roe", stage: "New" }] },
+      },
+    });
     expect(event.extra.payload.clients[0].full_name).toBe(REDACTED);
     expect(event.extra.payload.clients[0].stage).toBe("New");
   });
@@ -125,7 +151,11 @@ describe("scrubEvent: our own attached data", () => {
   });
 
   it("cuts the page URL in contexts", () => {
-    const event = scrubEvent({ contexts: { page: { url: "https://finuxia.com/reset-password?token=abc" } } });
+    const event = scrubEvent({
+      contexts: {
+        page: { url: "https://finuxia.com/reset-password?token=abc" },
+      },
+    });
     expect(event.contexts.page.url).toBe("https://finuxia.com/reset-password");
   });
 });
@@ -134,7 +164,10 @@ describe("scrubBreadcrumb", () => {
   it("cuts the token out of a navigation breadcrumb", () => {
     const crumb = scrubBreadcrumb({
       category: "navigation",
-      data: { from: "/forgot-password", to: "/reset-password?uid=14&token=abc123" },
+      data: {
+        from: "/forgot-password",
+        to: "/reset-password?uid=14&token=abc123",
+      },
     });
     expect(crumb.data.to).toBe("/reset-password");
     expect(crumb.data.from).toBe("/forgot-password");
@@ -143,7 +176,11 @@ describe("scrubBreadcrumb", () => {
   it("cuts the token out of a fetch breadcrumb and keeps the useful parts", () => {
     const crumb = scrubBreadcrumb({
       category: "fetch",
-      data: { url: "https://api.finuxia.com/api/auth/reset?token=abc123", method: "POST", status_code: 500 },
+      data: {
+        url: "https://api.finuxia.com/api/auth/reset?token=abc123",
+        method: "POST",
+        status_code: 500,
+      },
     });
     expect(crumb.data.url).toBe("https://api.finuxia.com/api/auth/reset");
     expect(crumb.data.method).toBe("POST");
@@ -155,22 +192,30 @@ describe("scrubBreadcrumb", () => {
       category: "console",
       level: "error",
       message: "failed for client",
-      data: { arguments: [{ full_name: "Jane Roe", email: "jane@example.com" }] },
+      data: {
+        arguments: [{ full_name: "Jane Roe", email: "jane@example.com" }],
+      },
     });
     expect(crumb.data).toBeUndefined();
     expect(JSON.stringify(crumb)).not.toContain("jane@example.com");
   });
 
   it("survives a breadcrumb with no data", () => {
-    expect(scrubBreadcrumb({ category: "navigation" })).toEqual({ category: "navigation" });
+    expect(scrubBreadcrumb({ category: "navigation" })).toEqual({
+      category: "navigation",
+    });
     expect(scrubBreadcrumb(null)).toBeNull();
   });
 
   it("is applied to breadcrumbs carried on the event, in both shapes the SDK uses", () => {
-    const asArray = scrubEvent({ breadcrumbs: [{ data: { url: "/a?token=x" } }] });
+    const asArray = scrubEvent({
+      breadcrumbs: [{ data: { url: "/a?token=x" } }],
+    });
     expect(asArray.breadcrumbs[0].data.url).toBe("/a");
 
-    const asValues = scrubEvent({ breadcrumbs: { values: [{ data: { url: "/b?token=x" } }] } });
+    const asValues = scrubEvent({
+      breadcrumbs: { values: [{ data: { url: "/b?token=x" } }] },
+    });
     expect(asValues.breadcrumbs.values[0].data.url).toBe("/b");
   });
 });
@@ -192,21 +237,26 @@ describe("the request id ties the two halves together", () => {
   it("picks up X-Request-ID from a response and tags the event with it", async () => {
     server.use(
       http.get(`${API}/api/clients`, () =>
-        HttpResponse.json([], { headers: { "X-Request-ID": "abc123def456" } })
-      )
+        HttpResponse.json([], { headers: { "X-Request-ID": "abc123def456" } }),
+      ),
     );
 
     await api.getClients();
 
     expect(lastRequestId()).toBe("abc123def456");
-    expect(scrubEvent({ message: "boom" }).tags.request_id).toBe("abc123def456");
+    expect(scrubEvent({ message: "boom" }).tags.request_id).toBe(
+      "abc123def456",
+    );
   });
 
   it("picks the id up from a failed request too, which is the case that matters most", async () => {
     server.use(
       http.get(`${API}/api/clients`, () =>
-        HttpResponse.json({ error: "Nope." }, { status: 500, headers: { "X-Request-ID": "failed-req-9" } })
-      )
+        HttpResponse.json(
+          { error: "Nope." },
+          { status: 500, headers: { "X-Request-ID": "failed-req-9" } },
+        ),
+      ),
     );
 
     await api.getClients().catch(() => {});
@@ -220,7 +270,9 @@ describe("the request id ties the two halves together", () => {
 
   it("leaves the previous id in place when a response carries no header", async () => {
     server.use(
-      http.get(`${API}/api/clients`, () => HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } }))
+      http.get(`${API}/api/clients`, () =>
+        HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } }),
+      ),
     );
     await api.getClients();
 
@@ -232,7 +284,9 @@ describe("the request id ties the two halves together", () => {
 
   it("keeps other tags when it adds the request id", async () => {
     server.use(
-      http.get(`${API}/api/clients`, () => HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } }))
+      http.get(`${API}/api/clients`, () =>
+        HttpResponse.json([], { headers: { "X-Request-ID": "req-1" } }),
+      ),
     );
     await api.getClients();
 
@@ -264,7 +318,10 @@ describe("what gets attached to a reported error", () => {
   });
 
   it("cuts the query off the route tag too, because that is where reset tokens live", () => {
-    expect(reportPayload({ route: "/reset-password?uid=14&token=abc123" }).tags.route).toBe("/reset-password");
+    expect(
+      reportPayload({ route: "/reset-password?uid=14&token=abc123" }).tags
+        .route,
+    ).toBe("/reset-password");
   });
 
   it("carries the React component stack, truncated", () => {
@@ -279,7 +336,9 @@ describe("what gets attached to a reported error", () => {
   it("passes the error and the payload straight through to the sender", () => {
     const sent = [];
     const error = new Error("boom");
-    makeReporter((e, payload) => sent.push([e, payload]))(error, { errorId: "a1b2c3d4" });
+    makeReporter((e, payload) => sent.push([e, payload]))(error, {
+      errorId: "a1b2c3d4",
+    });
 
     expect(sent).toHaveLength(1);
     expect(sent[0][0]).toBe(error);
@@ -291,7 +350,9 @@ describe("errors thrown before the reporter is installed", () => {
   it("are buffered and flushed once it arrives", () => {
     // The window this covers is real: the SDK is a dynamic import, so an error in the very first
     // render happens before any reporter exists.
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const early = new Error("thrown during the first render");
     reportError(early, { boundary: "app" });
 
@@ -305,7 +366,9 @@ describe("errors thrown before the reporter is installed", () => {
   });
 
   it("are capped, so an app failing in a loop cannot grow the buffer without limit", () => {
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     for (let i = 0; i < 25; i += 1) reportError(new Error(`boom ${i}`), {});
 
     const seen = [];

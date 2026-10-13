@@ -27,9 +27,14 @@ export default function VerifyEmailNotice() {
     try {
       const res = await resendVerification();
       if (res?.alreadyVerified) await refreshUser();
-      else setMessage("A new link is on its way. It can take a minute to arrive — check your spam folder too.");
+      else
+        setMessage(
+          "A new link is on its way. It can take a minute to arrive — check your spam folder too.",
+        );
     } catch (err) {
-      setError(err.message || "Could not send the email. Try again in a little while.");
+      setError(
+        err.message || "Could not send the email. Try again in a little while.",
+      );
     } finally {
       setBusy(false);
     }
@@ -41,7 +46,8 @@ export default function VerifyEmailNotice() {
     setError("");
     try {
       const u = await refreshUser();
-      if (u?.emailVerified === false) setError("Not confirmed yet. Open the link in the email we sent you.");
+      if (u?.emailVerified === false)
+        setError("Not confirmed yet. Open the link in the email we sent you.");
     } catch (err) {
       setError(err.message || "Could not check right now.");
     } finally {
@@ -59,7 +65,10 @@ export default function VerifyEmailNotice() {
       title="Confirm your email"
       subtitle=""
       footer={
-        <button onClick={handleLogout} className="inline-flex items-center gap-1.5 font-semibold text-gold-dark hover:underline">
+        <button
+          onClick={handleLogout}
+          className="inline-flex items-center gap-1.5 font-semibold text-gold-dark hover:underline"
+        >
           <LogOut size={14} />
           Log out
         </button>
@@ -70,8 +79,9 @@ export default function VerifyEmailNotice() {
           <Mail size={22} />
         </div>
         <p className="text-sm text-slate-600">
-          We sent a confirmation link to <span className="font-semibold text-navy">{user?.email}</span>. Open it to start
-          your free trial and unlock the app.
+          We sent a confirmation link to{" "}
+          <span className="font-semibold text-navy">{user?.email}</span>. Open
+          it to start your free trial and unlock the app.
         </p>
         {message && <p className="text-xs text-av-green">{message}</p>}
         {error && <p className="text-xs text-av-red">{error}</p>}

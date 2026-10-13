@@ -14,15 +14,30 @@ export const PIPELINE_STAGES = [
   { id: "fc1", short: "FC1", label: "FC1", icon: MessageCircle },
   { id: "fc2", short: "FC2", label: "FC2", icon: MessageCircle },
   { id: "fc3", short: "FC3", label: "FC3", icon: MessagesSquare },
-  { id: "strategy_meeting", short: "Strategy", label: "Strategy Meeting", icon: Target },
-  { id: "strategy_followup", short: "Strategy FU", label: "Strategy Follow-up", icon: RefreshCcw },
+  {
+    id: "strategy_meeting",
+    short: "Strategy",
+    label: "Strategy Meeting",
+    icon: Target,
+  },
+  {
+    id: "strategy_followup",
+    short: "Strategy FU",
+    label: "Strategy Follow-up",
+    icon: RefreshCcw,
+  },
   { id: "closing", short: "Closing", label: "Closing", icon: CheckCircle2 },
-  { id: "policy_delivery", short: "Policy Delivery", label: "Policy Delivery", icon: ShieldCheck },
+  {
+    id: "policy_delivery",
+    short: "Policy Delivery",
+    label: "Policy Delivery",
+    icon: ShieldCheck,
+  },
   { id: "client", short: "Client", label: "Client", icon: Star },
 ];
 
 export const STAGE_INDEX = Object.fromEntries(
-  PIPELINE_STAGES.map((s, i) => [s.id, i])
+  PIPELINE_STAGES.map((s, i) => [s.id, i]),
 );
 
 export function getStage(stageId) {
