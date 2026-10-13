@@ -95,7 +95,10 @@ describe("login rate limiting", () => {
       http.get(`${API}/api/auth/me`, () => new HttpResponse(null, { status: 401 })),
       http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 })),
       http.post(`${API}/api/auth/login`, () =>
-        HttpResponse.json({ detail: "Request was throttled. Expected available in 2 seconds." }, { status: 429, headers: { "Retry-After": String(retryAfter) } })
+        HttpResponse.json(
+          { detail: "Request was throttled. Expected available in 2 seconds." },
+          { status: 429, headers: { "Retry-After": String(retryAfter) } }
+        )
       )
     );
 

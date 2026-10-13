@@ -68,11 +68,7 @@ export default function Login() {
           />
         </AuthField>
 
-        {lockout ? (
-          <ErrorNotice error={error} />
-        ) : (
-          error && <p className="text-xs text-av-red">{error.message}</p>
-        )}
+        {lockout ? <ErrorNotice error={error} /> : error && <p className="text-xs text-av-red">{error.message}</p>}
 
         <div className="flex items-center justify-end">
           <Link to="/forgot-password" className="text-xs font-medium text-slate-500 hover:text-navy">

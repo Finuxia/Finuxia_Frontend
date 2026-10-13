@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { canStateIntent } from "./continueIntent";
 
-const summary = (over = {}) => ({ status: "valid", warning: "none", endsAt: "2026-12-15T12:00:00", daysLeft: 60, valid: true, warnDays: 14, ...over });
-const billing = (over = {}, accessOver = {}) => ({ plan: { key: "professional", name: "Professional" }, access: summary(accessOver), ...over });
+const summary = (over = {}) => ({
+  status: "valid",
+  warning: "none",
+  endsAt: "2026-12-15T12:00:00",
+  daysLeft: 60,
+  valid: true,
+  warnDays: 14,
+  ...over,
+});
+const billing = (over = {}, accessOver = {}) => ({
+  plan: { key: "professional", name: "Professional" },
+  access: summary(accessOver),
+  ...over,
+});
 
 describe("canStateIntent", () => {
   it("is offered while access is running and has an end", () => {

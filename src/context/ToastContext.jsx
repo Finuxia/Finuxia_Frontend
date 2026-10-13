@@ -5,14 +5,26 @@ const ToastContext = createContext(null);
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
-  // `action` ({ label, onClick }) adds a button to the toast, and keeps it a little longer so it can be used.
-  const addToast = useCallback((message, { action } = {}) => {
-    const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, message, action }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, action ? 8000 : 3000);
-  }, []);
+  // The types go on the arrow itself, not on `addToast`: JSDoc above the `const` describes the variable,
+  // which here is whatever useCallback returns, so the parameters would stay unchecked.
+  const addToast = useCallback(
+    /**
+     * `action` adds a button to the toast, and keeps it a little longer so there is time to use it.
+     * @param {string} message
+     * @param {{ action?: { label: string, onClick: () => void } }} [options]
+     */
+    (message, { action } = {}) => {
+      const id = Date.now() + Math.random();
+      setToasts((prev) => [...prev, { id, message, action }]);
+      setTimeout(
+        () => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        },
+        action ? 8000 : 3000
+      );
+    },
+    []
+  );
   const dismiss = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
   return (

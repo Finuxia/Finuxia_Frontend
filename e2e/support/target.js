@@ -24,14 +24,7 @@ const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]", "::1"
  * Add to this list when an environment starts holding real data — that is cheaper than explaining
  * where the junk accounts came from.
  */
-const NEVER = [
-  "finuxia.ca",
-  "api.finuxia.ca",
-  "finuxia.com",
-  "api.finuxia.com",
-  "advisorpilot-api",
-  "advisorpilot-web",
-];
+const NEVER = ["finuxia.ca", "api.finuxia.ca", "finuxia.com", "api.finuxia.com", "advisorpilot-api", "advisorpilot-web"];
 
 export class UnsafeTarget extends Error {}
 

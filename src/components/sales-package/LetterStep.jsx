@@ -114,7 +114,12 @@ export default function LetterStep({
 
         <AiUsageInline usage={aiUsage} className="mb-3" />
         {letterBlocked && (
-          <AiBlockedNotice className="mb-3" message={letterBlocked.message} actions={letterBlocked.data?.actions} onDismiss={onDismissBlocked} />
+          <AiBlockedNotice
+            className="mb-3"
+            message={letterBlocked.message}
+            actions={letterBlocked.data?.actions}
+            onDismiss={onDismissBlocked}
+          />
         )}
 
         {editing ? (

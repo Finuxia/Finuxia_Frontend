@@ -40,10 +40,13 @@ describe("the document suggestion and the AI allowance", () => {
   });
 
   it("a suggestion the account cannot pay for names the limit and offers the way out, not a toast", async () => {
-    const message = "You've used all of the 100 AI credits included in your plan for this period, and your wallet balance ($0.00) is too low.";
+    const message =
+      "You've used all of the 100 AI credits included in your plan for this period, and your wallet balance ($0.00) is too low.";
     server.use(
       http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json(usage({ warning: null }))),
-      http.post(`${API}/api/documents/suggest`, () => HttpResponse.json({ error: message, code: "ai_credit_exhausted", actions: ["top_up", "upgrade"] }, { status: 402 }))
+      http.post(`${API}/api/documents/suggest`, () =>
+        HttpResponse.json({ error: message, code: "ai_credit_exhausted", actions: ["top_up", "upgrade"] }, { status: 402 })
+      )
     );
     await userEvent.click(await open());
     const alert = await screen.findByRole("alert");
@@ -59,7 +62,9 @@ describe("the document suggestion and the AI allowance", () => {
     server.use(
       http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json(usage({ warning: null }))),
       http.post(`${API}/api/documents/suggest`, () =>
-        allowed ? HttpResponse.json({ topic: "T", summary: "S", keywords: ["k"] }) : HttpResponse.json({ error: "Out of credit.", actions: ["top_up"] }, { status: 402 })
+        allowed
+          ? HttpResponse.json({ topic: "T", summary: "S", keywords: ["k"] })
+          : HttpResponse.json({ error: "Out of credit.", actions: ["top_up"] }, { status: 402 })
       )
     );
     const button = await open();

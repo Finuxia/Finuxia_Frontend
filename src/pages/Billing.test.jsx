@@ -39,7 +39,14 @@ describe("starting a purchase", () => {
 });
 
 describe("saying you do not plan to continue", () => {
-  const access = { status: "valid", warning: "none", endsAt: new Date(2026, 11, 15, 15, 30).toISOString(), daysLeft: 60, valid: true, warnDays: 14 };
+  const access = {
+    status: "valid",
+    warning: "none",
+    endsAt: new Date(2026, 11, 15, 15, 30).toISOString(),
+    daysLeft: 60,
+    valid: true,
+    warnDays: 14,
+  };
   const serveBilling = (over) =>
     server.use(
       http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans, stripeConfigured: true, purchasesOpen: true })),

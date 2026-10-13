@@ -284,7 +284,12 @@ describe("a conflict message", () => {
         loads += 1;
         return HttpResponse.json([serverClient(loads === 1 ? {} : { first: "Ada (latest)", version: 6, phone: "123" })]);
       }),
-      http.patch(`${API}/api/clients/c_1`, () => HttpResponse.json({ error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", version: 3 }) }, { status: 409 }))
+      http.patch(`${API}/api/clients/c_1`, () =>
+        HttpResponse.json(
+          { error: "Changed elsewhere", client: serverClient({ first: "Ada (edited elsewhere)", version: 3 }) },
+          { status: 409 }
+        )
+      )
     );
     render();
     await screen.findByText("Ada|");

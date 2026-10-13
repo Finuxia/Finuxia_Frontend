@@ -71,7 +71,9 @@ describe("messageForStatus", () => {
     });
 
     it("keeps a custom server sentence for a 429", () => {
-      expect(messageForStatus(429, "You've used too many AI requests this hour.", { retryAfter: 60 })).toBe("You've used too many AI requests this hour.");
+      expect(messageForStatus(429, "You've used too many AI requests this hour.", { retryAfter: 60 })).toBe(
+        "You've used too many AI requests this hour."
+      );
     });
 
     it("has a fallback with no Retry-After", () => {

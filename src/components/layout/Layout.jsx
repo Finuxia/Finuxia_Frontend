@@ -29,7 +29,6 @@ import {
 import Logo from "./Logo";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
-import { todayISO } from "../../lib/followUp";
 import GlobalSearch from "./GlobalSearch";
 import NotificationsDropdown from "./NotificationsDropdown";
 import AddClientModal from "../clients/AddClientModal";

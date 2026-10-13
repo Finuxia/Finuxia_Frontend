@@ -102,7 +102,9 @@ describe("the confirmation", () => {
     expect(statement).toHaveTextContent(/Your access still runs until December 15, 2026 at 3:30\s*PM/);
     expect(statement).toHaveTextContent("nothing more will be charged");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Your access" })).toHaveTextContent(/Professional: access until December 15, 2026 at 3:30\s*PM/);
+    expect(screen.getByRole("region", { name: "Your access" })).toHaveTextContent(
+      /Professional: access until December 15, 2026 at 3:30\s*PM/
+    );
     expect(screen.queryByRole("button", { name: "I don't plan to continue" })).not.toBeInTheDocument();
   });
 
@@ -137,7 +139,9 @@ describe("the confirmation", () => {
     await userEvent.click(dialog.parentElement); // the backdrop
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     await userEvent.click(await screen.findByRole("button", { name: "I don't plan to continue" }));
-    await userEvent.click(within(await screen.findByRole("dialog")).getByText("Nothing further will be charged: plans are paid for once and never renew.")); // inside the dialog: stays open
+    await userEvent.click(
+      within(await screen.findByRole("dialog")).getByText("Nothing further will be charged: plans are paid for once and never renew.")
+    ); // inside the dialog: stays open
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(calls).toEqual([]);
   });

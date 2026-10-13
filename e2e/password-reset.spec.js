@@ -31,7 +31,10 @@ test.describe("resetting a forgotten password", () => {
     await test.step("asking for a reset sends a link", async () => {
       await page.goto("/forgot-password");
       await page.getByLabel(/email/i).fill(email);
-      await page.getByRole("button", { name: /send|reset/i }).first().click();
+      await page
+        .getByRole("button", { name: /send|reset/i })
+        .first()
+        .click();
       link = await waitForLink(email, "/reset-password");
     });
 
@@ -41,8 +44,11 @@ test.describe("resetting a forgotten password", () => {
       const fields = page.locator('input[type="password"]');
       await expect(fields.first()).toBeVisible({ timeout: 15000 });
       await fields.nth(0).fill(NEW_PASSWORD);
-      if (await fields.count() > 1) await fields.nth(1).fill(NEW_PASSWORD);
-      await page.getByRole("button", { name: /reset|set|save|change/i }).first().click();
+      if ((await fields.count()) > 1) await fields.nth(1).fill(NEW_PASSWORD);
+      await page
+        .getByRole("button", { name: /reset|set|save|change/i })
+        .first()
+        .click();
       await expect(page.getByText(/password|sign in|log in/i).first()).toBeVisible({ timeout: 15000 });
     });
 
@@ -67,8 +73,11 @@ test.describe("resetting a forgotten password", () => {
       const fields = page.locator('input[type="password"]');
       if (await fields.count()) {
         await fields.nth(0).fill("e2e-Third-Passw0rd-2026");
-        if (await fields.count() > 1) await fields.nth(1).fill("e2e-Third-Passw0rd-2026");
-        await page.getByRole("button", { name: /reset|set|save|change/i }).first().click();
+        if ((await fields.count()) > 1) await fields.nth(1).fill("e2e-Third-Passw0rd-2026");
+        await page
+          .getByRole("button", { name: /reset|set|save|change/i })
+          .first()
+          .click();
       }
       await page.context().clearCookies();
       await signIn(page, { identifier: email, password: "e2e-Third-Passw0rd-2026" });

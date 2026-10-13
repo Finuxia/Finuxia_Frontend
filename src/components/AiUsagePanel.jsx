@@ -16,7 +16,14 @@ function ProgressBar({ percent, level }) {
   const shown = Math.min(Math.max(percent, 0), 100);
   const color = level === "exhausted" || level === "critical" ? "bg-av-red" : level === "warning" ? "bg-gold" : "bg-av-green";
   return (
-    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-label="AI credits used" aria-valuenow={shown} aria-valuemin={0} aria-valuemax={100}>
+    <div
+      className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100"
+      role="progressbar"
+      aria-label="AI credits used"
+      aria-valuenow={shown}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
       <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${shown}%` }} />
     </div>
   );
@@ -37,7 +44,10 @@ export default function AiUsagePanel() {
   const returned = searchParams.get("topup");
 
   useEffect(() => {
-    api.getBillingPlans().then((res) => setPurchasesOpen(res.purchasesOpen !== false)).catch(() => {});
+    api
+      .getBillingPlans()
+      .then((res) => setPurchasesOpen(res.purchasesOpen !== false))
+      .catch(() => {});
   }, []);
 
   const handleTopUp = async (cents) => {
@@ -60,8 +70,18 @@ export default function AiUsagePanel() {
     }
   };
 
-  if (error && !usage) return <Card><p className="text-sm text-slate-500">AI usage isn't available right now. Try again in a moment.</p></Card>;
-  if (!usage) return <Card><p className="text-sm text-slate-500">Loading your AI usage…</p></Card>;
+  if (error && !usage)
+    return (
+      <Card>
+        <p className="text-sm text-slate-500">AI usage isn't available right now. Try again in a moment.</p>
+      </Card>
+    );
+  if (!usage)
+    return (
+      <Card>
+        <p className="text-sm text-slate-500">Loading your AI usage…</p>
+      </Card>
+    );
 
   const { credits, mode } = usage;
   const resetDate = formatLongDate(usage.period?.end);
@@ -78,12 +98,16 @@ export default function AiUsagePanel() {
           <Sparkles size={16} className="text-gold-dark" />
           <h2 className="text-sm font-semibold uppercase tracking-wide">AI credits this period</h2>
         </div>
-        <p className="mb-4 text-xs text-slate-500">Credits are what AI features use each time you draft a letter, summarise a document or write a follow-up.</p>
+        <p className="mb-4 text-xs text-slate-500">
+          Credits are what AI features use each time you draft a letter, summarise a document or write a follow-up.
+        </p>
 
         {mode === "none" && (
           <p className="rounded-lg bg-slate-50 px-3 py-3 text-sm text-slate-600">
             Your plan doesn't include the AI features.{" "}
-            <Link to="/billing" className="font-semibold text-gold-dark underline">See plans</Link>
+            <Link to="/billing" className="font-semibold text-gold-dark underline">
+              See plans
+            </Link>
           </p>
         )}
 
@@ -103,17 +127,20 @@ export default function AiUsagePanel() {
           <>
             <div className="mb-2 flex items-end justify-between gap-3">
               <p className="text-2xl font-bold text-navy">
-                {credits.remaining.toLocaleString("en-US")} <span className="text-sm font-medium text-slate-500">of {credits.total.toLocaleString("en-US")} credits left</span>
+                {credits.remaining.toLocaleString("en-US")}{" "}
+                <span className="text-sm font-medium text-slate-500">of {credits.total.toLocaleString("en-US")} credits left</span>
               </p>
               {resetDate && <p className="text-right text-xs text-slate-500">Start again {resetDate}</p>}
             </div>
             <ProgressBar percent={usage.percentUsed ?? 0} level={usage.warning} />
             <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-slate-500">
               <span>
-                {credits.used.toLocaleString("en-US")} used{credits.inFlight ? ` · ${credits.inFlight.toLocaleString("en-US")} in progress` : ""}
+                {credits.used.toLocaleString("en-US")} used
+                {credits.inFlight ? ` · ${credits.inFlight.toLocaleString("en-US")} in progress` : ""}
               </span>
               <span>
-                {credits.included.toLocaleString("en-US")} included{credits.extra ? ` + ${credits.extra.toLocaleString("en-US")} extra` : ""}
+                {credits.included.toLocaleString("en-US")} included
+                {credits.extra ? ` + ${credits.extra.toLocaleString("en-US")} extra` : ""}
               </span>
             </div>
             <AiUsageInline usage={usage} className="mt-3" />

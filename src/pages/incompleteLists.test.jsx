@@ -11,18 +11,8 @@ import MyDay from "./MyDay";
 import SalesPackagePrep from "./SalesPackagePrep";
 
 /** A collection the server never finishes paging (the cap is reached), or one it pages normally. */
-const endless = (path) =>
-  server.use(
-    http.get(`${API}${path}`, () =>
-      HttpResponse.json({ results: [], nextCursor: "again" }),
-    ),
-  );
-const short = (path) =>
-  server.use(
-    http.get(`${API}${path}`, () =>
-      HttpResponse.json({ results: [], nextCursor: null }),
-    ),
-  );
+const endless = (path) => server.use(http.get(`${API}${path}`, () => HttpResponse.json({ results: [], nextCursor: "again" })));
+const short = (path) => server.use(http.get(`${API}${path}`, () => HttpResponse.json({ results: [], nextCursor: null })));
 const NOTICE = /list of .* is incomplete/i;
 
 let consoleError;
@@ -35,9 +25,7 @@ describe("a screen that reads a whole collection says when the list is incomplet
   it("Booking requests", async () => {
     endless("/api/booking/requests");
     renderWithProviders(<BookingRequests />);
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      /booking requests is incomplete/,
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(/booking requests is incomplete/);
   });
 
   it("Booking requests is quiet when the list is whole", async () => {
@@ -49,49 +37,34 @@ describe("a screen that reads a whole collection says when the list is incomplet
 
   it("Documents (the advisor's own submissions)", async () => {
     endless("/api/documents/mine");
-    server.use(
-      http.get(`${API}/api/documents`, () =>
-        HttpResponse.json({ results: [], nextCursor: null }),
-      ),
-    );
+    server.use(http.get(`${API}/api/documents`, () => HttpResponse.json({ results: [], nextCursor: null })));
     renderWithProviders(<Documents />);
-    expect(
-      await screen.findByText(/your submitted documents is incomplete/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/your submitted documents is incomplete/)).toBeInTheDocument();
   });
 
   it("Follow-ups", async () => {
     endless("/api/reminders");
     renderWithProviders(<FollowUps />);
-    expect(
-      await screen.findByText(/follow-ups is incomplete/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/follow-ups is incomplete/)).toBeInTheDocument();
   });
 
   it("My day (reminders)", async () => {
     endless("/api/reminders");
     renderWithProviders(<MyDay />);
-    expect(
-      await screen.findByText(/reminders is incomplete/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/reminders is incomplete/)).toBeInTheDocument();
   });
 
   it.each([
     ["reminders", "/api/reminders", "/api/booking/requests"],
     ["booking requests", "/api/booking/requests", "/api/reminders"],
-  ])(
-    "the notifications panel, when only the %s are cut off",
-    async (_name, cutOff, whole) => {
-      endless(cutOff);
-      short(whole);
-      renderWithProviders(<NotificationsDropdown />);
-      await vi.waitFor(() => expect(consoleError).toHaveBeenCalled());
-      (await screen.findByRole("button")).click();
-      expect(
-        await screen.findByText(/reminders or booking requests is incomplete/),
-      ).toBeInTheDocument();
-    },
-  );
+  ])("the notifications panel, when only the %s are cut off", async (_name, cutOff, whole) => {
+    endless(cutOff);
+    short(whole);
+    renderWithProviders(<NotificationsDropdown />);
+    await vi.waitFor(() => expect(consoleError).toHaveBeenCalled());
+    (await screen.findByRole("button")).click();
+    expect(await screen.findByText(/reminders or booking requests is incomplete/)).toBeInTheDocument();
+  });
 
   it("the notifications panel is quiet when both lists are whole", async () => {
     short("/api/reminders");
@@ -118,12 +91,10 @@ describe("a screen that reads a whole collection says when the list is incomplet
           ],
           nextCursor: "again",
         });
-      }),
+      })
     );
     renderWithProviders(<SalesPackagePrep />, { route: "/sales" });
-    expect(
-      await screen.findByText(/sales packages is incomplete/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/sales packages is incomplete/)).toBeInTheDocument();
     expect(screen.getByText("Person 1")).toBeInTheDocument();
   });
 
@@ -140,8 +111,8 @@ describe("a screen that reads a whole collection says when the list is incomplet
             },
           ],
           nextCursor: null,
-        }),
-      ),
+        })
+      )
     );
     renderWithProviders(<SalesPackagePrep />, { route: "/sales" });
     expect(await screen.findByText("Grace")).toBeInTheDocument();

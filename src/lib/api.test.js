@@ -146,7 +146,10 @@ describe("refusals the API layer now keeps intact", () => {
   it("a 429 carries the Retry-After wait and says how long to wait", async () => {
     server.use(
       http.get(`${API}/api/clients`, () =>
-        HttpResponse.json({ detail: "Request was throttled. Expected available in 25 seconds." }, { status: 429, headers: { "Retry-After": "25" } })
+        HttpResponse.json(
+          { detail: "Request was throttled. Expected available in 25 seconds." },
+          { status: 429, headers: { "Retry-After": "25" } }
+        )
       )
     );
     const err = await api.getClients().catch((e) => e);
@@ -154,7 +157,11 @@ describe("refusals the API layer now keeps intact", () => {
   });
 
   it("a login 429 reads as a lockout", async () => {
-    server.use(http.post(`${API}/api/auth/login`, () => HttpResponse.json({ detail: "Request was throttled." }, { status: 429, headers: { "Retry-After": "900" } })));
+    server.use(
+      http.post(`${API}/api/auth/login`, () =>
+        HttpResponse.json({ detail: "Request was throttled." }, { status: 429, headers: { "Retry-After": "900" } })
+      )
+    );
     const err = await api.login("a@b.c", "x").catch((e) => e);
     expect([err.retryAfter, err.message, err.path]).toEqual([900, "Too many attempts. Try again in 15 minutes.", "/api/auth/login"]);
   });
@@ -168,11 +175,19 @@ describe("refusals the API layer now keeps intact", () => {
   it("keeps the server's sentence and its code for a quota refusal", async () => {
     server.use(
       http.post(`${API}/api/sales-packages/packages/1/reason-why-letter`, () =>
-        HttpResponse.json({ error: "Your AI wallet balance is too low for this. Top up in Profile.", code: "ai_credit_exhausted", actions: ["top_up"] }, { status: 402 })
+        HttpResponse.json(
+          { error: "Your AI wallet balance is too low for this. Top up in Profile.", code: "ai_credit_exhausted", actions: ["top_up"] },
+          { status: 402 }
+        )
       )
     );
     const err = await api.draftReasonWhyLetter(1).catch((e) => e);
-    expect([err.status, err.code, err.message, err.data.actions]).toEqual([402, "ai_credit_exhausted", "Your AI wallet balance is too low for this. Top up in Profile.", ["top_up"]]);
+    expect([err.status, err.code, err.message, err.data.actions]).toEqual([
+      402,
+      "ai_credit_exhausted",
+      "Your AI wallet balance is too low for this. Top up in Profile.",
+      ["top_up"],
+    ]);
   });
 
   it("uses a friendly fallback, not 'Request failed (N)', when the server sent no message", async () => {

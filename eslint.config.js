@@ -48,4 +48,10 @@ export default [
     files: ["scripts/**/*.mjs", "*.config.js"],
     languageOptions: { ecmaVersion: "latest", sourceType: "module", globals: { ...globals.node } },
   },
+  {
+    // The browser suite (TEST-06) drives a real browser but the test code itself runs in Node: it reads
+    // process.env for the target, decodes mail files with Buffer, and polls with setTimeout.
+    files: ["e2e/**/*.js"],
+    languageOptions: { ecmaVersion: "latest", sourceType: "module", globals: { ...globals.node } },
+  },
 ];

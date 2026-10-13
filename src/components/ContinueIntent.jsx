@@ -60,15 +60,24 @@ export default function ContinueIntent() {
       {billing.notContinuingSince ? (
         <div data-testid="not-continuing" className="mt-3 flex flex-col gap-2 rounded-lg bg-slate-50 px-3 py-2 text-slate-600">
           <p>
-            {since ? `On ${since} you told us` : "You told us"} you don't plan to continue. Your access still runs until {endsAt}, and nothing more
-            will be charged.
+            {since ? `On ${since} you told us` : "You told us"} you don't plan to continue. Your access still runs until {endsAt}, and
+            nothing more will be charged.
           </p>
-          <button type="button" disabled={busy} onClick={() => say(true)} className="self-start text-xs font-semibold text-navy underline disabled:opacity-60">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => say(true)}
+            className="self-start text-xs font-semibold text-navy underline disabled:opacity-60"
+          >
             {busy ? "Saving..." : "I've changed my mind"}
           </button>
         </div>
       ) : (
-        <button type="button" onClick={() => setConfirming(true)} className="mt-3 text-xs font-semibold text-slate-500 underline hover:text-navy">
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="mt-3 text-xs font-semibold text-slate-500 underline hover:text-navy"
+        >
           I don't plan to continue
         </button>
       )}

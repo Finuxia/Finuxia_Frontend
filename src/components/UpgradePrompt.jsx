@@ -10,8 +10,12 @@ export default function UpgradePrompt({ moduleName, message }) {
         <Lock size={24} />
       </div>
       <div>
-        <p className="text-lg font-semibold text-navy">{moduleName ? `${moduleName} isn't included in your current plan` : message || "This isn't included in your current plan"}</p>
-        <p className="mt-1 max-w-sm text-sm text-slate-500">Upgrade to a plan that includes {what === "This feature" ? "it" : moduleName} to use this page.</p>
+        <p className="text-lg font-semibold text-navy">
+          {moduleName ? `${moduleName} isn't included in your current plan` : message || "This isn't included in your current plan"}
+        </p>
+        <p className="mt-1 max-w-sm text-sm text-slate-500">
+          Upgrade to a plan that includes {what === "This feature" ? "it" : moduleName} to use this page.
+        </p>
       </div>
       <Link
         to="/billing"
