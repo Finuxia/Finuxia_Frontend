@@ -100,4 +100,32 @@ describe("useAsync", () => {
     await act(() => result.current.reload());
     expect(result.current.data).toBe("b");
   });
+
+  it("the very first render is already loading, so a page never flashes its empty state before the request starts", () => {
+    const seen = [];
+    renderHook(() => {
+      const r = useAsync(() => new Promise(() => {}), []);
+      seen.push(r.loading);
+      return r;
+    });
+    expect(seen[0]).toBe(true);
+  });
+
+  it("a failure of a request that was replaced is ignored too", async () => {
+    const first = deferred();
+    const second = deferred();
+    const { result, rerender } = renderHook(({ id }) => useAsync(() => (id === 1 ? first.promise : second.promise), [id]), {
+      initialProps: { id: 1 },
+    });
+    rerender({ id: 2 });
+    await act(async () => {
+      second.resolve("two");
+    });
+    await waitFor(() => expect(result.current.data).toBe("two"));
+    await act(async () => {
+      first.reject(new Error("old failure"));
+    });
+    expect(result.current.error).toBeNull();
+    expect(result.current.data).toBe("two");
+  });
 });

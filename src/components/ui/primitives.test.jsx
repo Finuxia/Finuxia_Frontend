@@ -161,6 +161,7 @@ describe("Table", () => {
     render(<Table caption="Usage" columns={columns} rows={[{ id: 1, name: "Letter", credits: 5 }]} />);
     expect(screen.getByRole("table", { name: "Usage" })).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Feature", "Credits"]);
+    for (const header of screen.getAllByRole("columnheader")) expect(header).toHaveAttribute("scope", "col");
     expect(screen.getByRole("cell", { name: "5 cr" })).toBeInTheDocument();
   });
 
