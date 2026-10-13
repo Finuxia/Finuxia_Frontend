@@ -72,6 +72,8 @@ const payment = (over = {}) => ({
   receiptAvailable: true,
   ...over,
 });
+// A customer whose access has ended is coming back: they simply buy (a customer whose access is running changes plan through the change dialog).
+const lapsed = { access: access({ status: "lapsed", warning: "ended", daysLeft: 0, valid: false }) };
 const history = (results, nextCursor = null) => http.get(`${API}/api/billing/payments`, () => HttpResponse.json({ results, nextCursor }));
 
 const realLocation = window.location;
@@ -181,7 +183,7 @@ describe("the plans", () => {
   });
 
   it("the plan you are on is marked, and buying it again is offered as such", async () => {
-    server.use(catalogue(), me({ plan: { key: "professional", name: "Professional", priceCents: 4900 } }));
+    server.use(catalogue(), me({ plan: { key: "professional", name: "Professional", priceCents: 4900 }, ...lapsed }));
     show();
     expect(await screen.findByText("Current plan")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Buy again" })).toBeInTheDocument();
@@ -189,11 +191,40 @@ describe("the plans", () => {
     expect(screen.getByRole("button", { name: "Choose" })).toBeInTheDocument(); // the free plan
   });
 
+  it("while access is running, a dearer plan says Upgrade, a cheaper one Downgrade, and the current plan Buy again", async () => {
+    server.use(catalogue(), me({ plan: { key: "professional", name: "Professional", priceCents: 4900 } }));
+    show();
+    expect(await screen.findByRole("button", { name: "Upgrade" })).toBeEnabled(); // Elite
+    expect(screen.getByRole("button", { name: "Downgrade" })).toBeEnabled(); // Starter
+    expect(screen.getByRole("button", { name: "Buy again" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Buy" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Choose" })).not.toBeInTheDocument();
+  });
+
+  it("a plan with the same price as yours is a Switch", async () => {
+    const same = [...plans, { ...plans[0], id: 9, key: "pro-too", name: "Pro Too", logoUrl: null, descriptionHtml: undefined }];
+    server.use(
+      http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans: same, stripeConfigured: true, purchasesOpen: true })),
+      me()
+    );
+    show();
+    expect(await screen.findByRole("button", { name: "Switch plan" })).toBeEnabled();
+  });
+
+  it("when paid purchases are not open, the change buttons say so instead of offering a paid plan", async () => {
+    server.use(catalogue({ purchasesOpen: false }), me());
+    show();
+    await screen.findByRole("heading", { name: "Elite" });
+    expect(screen.queryByRole("button", { name: "Upgrade" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Not available yet" }).length).toBeGreaterThan(0);
+  });
+
   it("offers nothing to cancel, change or manage at the provider: plans are one-time purchases", async () => {
     server.use(catalogue(), me({ plan: { key: "professional", name: "Professional", priceCents: 4900 } }), history([payment()]));
     show();
     await screen.findByRole("heading", { name: "Professional" });
-    for (const gone of [/cancel/i, /upgrade/i, /downgrade/i, /manage payment/i, /update card/i, /reactivate/i, /renews on/i, /invoice/i]) {
+    // (Moving between plans is the local plan change (BIL-11), with its own Upgrade / Downgrade buttons: not a subscription at the provider.)
+    for (const gone of [/cancel/i, /manage payment/i, /update card/i, /reactivate/i, /renews on/i, /invoice/i]) {
       expect(screen.queryByText(gone)).not.toBeInTheDocument();
     }
   });
@@ -204,7 +235,7 @@ describe("starting a purchase", () => {
     let body;
     server.use(
       catalogue(),
-      me(),
+      me(lapsed),
       http.post(`${API}/api/billing/purchase`, async ({ request }) => {
         body = await request.json();
         return HttpResponse.json({ mock: false, checkoutUrl: "https://checkout.example/session" });
@@ -221,7 +252,7 @@ describe("starting a purchase", () => {
   it("a failure is a message and the plans can be tried again", async () => {
     server.use(
       catalogue(),
-      me(),
+      me(lapsed),
       http.post(`${API}/api/billing/purchase`, () =>
         HttpResponse.json({ error: "The payment service is not available right now." }, { status: 503 })
       )
@@ -238,7 +269,7 @@ describe("starting a purchase", () => {
   it("in demo mode a purchase takes effect at once and says it was a test", async () => {
     server.use(
       catalogue({ stripeConfigured: false }),
-      me(),
+      me(lapsed),
       http.post(`${API}/api/billing/purchase`, () => HttpResponse.json({ mock: true }))
     );
     show();
@@ -247,14 +278,14 @@ describe("starting a purchase", () => {
   });
 
   it("when purchases are not open, paid plans say so and cannot be bought", async () => {
-    server.use(catalogue({ purchasesOpen: false, stripeConfigured: false }), me());
+    server.use(catalogue({ purchasesOpen: false, stripeConfigured: false }), me(lapsed));
     show();
     expect(await screen.findByText(/Plan purchases aren't open yet/)).toBeInTheDocument();
     screen.getAllByRole("button", { name: "Not available yet" }).forEach((b) => expect(b).toBeDisabled());
   });
 
   it("a free plan can still be chosen when paid purchases are not open", async () => {
-    server.use(catalogue({ purchasesOpen: false, stripeConfigured: false }), me());
+    server.use(catalogue({ purchasesOpen: false, stripeConfigured: false }), me(lapsed));
     show();
     expect(await screen.findByRole("button", { name: "Choose" })).toBeEnabled();
   });
@@ -386,5 +417,59 @@ describe("receipts", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Download receipt R-00000021" }));
     await waitFor(() => expect(document.querySelector("[role=status][aria-live]")?.textContent).toMatch(/not found/i));
     expect(screen.getByRole("button", { name: "Download receipt R-00000021" })).toBeEnabled();
+  });
+});
+
+describe("changing plan from the plan cards", () => {
+  it("Upgrade opens the dialog with the server's quote and does not buy anything by itself", async () => {
+    let purchased = false;
+    server.use(
+      catalogue(),
+      me(),
+      http.post(`${API}/api/billing/purchase`, () => {
+        purchased = true;
+        return HttpResponse.json({ mock: true });
+      }),
+      http.get(`${API}/api/billing/plan-change/preview`, ({ request }) => {
+        expect(new URL(request.url).searchParams.get("planId")).toBe("2");
+        return HttpResponse.json({
+          kind: "upgrade",
+          canChange: true,
+          blockers: [],
+          fromPlan: { id: 1, key: "professional", name: "Professional", priceCents: 4900, currency: "usd" },
+          toPlan: { id: 2, key: "elite", name: "Elite", priceCents: 49900, currency: "usd" },
+          amountDueCents: 49900,
+          currency: "usd",
+          currentAccessEndsAt: "2026-12-15T12:00:00",
+          newAccessEndsAt: "2027-10-13T12:00:00",
+          addsTime: true,
+          lost: [],
+          overLimits: [],
+        });
+      })
+    );
+    show();
+    await userEvent.click(await screen.findByRole("button", { name: "Upgrade" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByText("$499.00")).toBeInTheDocument();
+    expect(purchased).toBe(false);
+    await userEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("an account whose access has ended buys instead of changing: no dialog", async () => {
+    let bought = false;
+    server.use(
+      catalogue(),
+      me(lapsed),
+      http.post(`${API}/api/billing/purchase`, () => {
+        bought = true;
+        return HttpResponse.json({ mock: true });
+      })
+    );
+    show();
+    await userEvent.click((await screen.findAllByRole("button", { name: "Buy" }))[0]);
+    await waitFor(() => expect(bought).toBe(true));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

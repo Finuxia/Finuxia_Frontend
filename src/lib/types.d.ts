@@ -277,3 +277,21 @@ export interface Page<T> {
   results: T[];
   nextCursor: string | null;
 }
+
+/** What a plan change would do (GET /api/billing/plan-change/preview): worked out by the server, the same assessment the change itself makes. */
+export interface PlanChangeQuote {
+  kind: "upgrade" | "downgrade";
+  canChange: boolean;
+  blockers: { code: string; message: string }[];
+  fromPlan: { id: number; key: string; name: string; priceCents: number; currency: string } | null;
+  toPlan: { id: number; key: string; name: string; priceCents: number; currency: string };
+  /** Whole cents, from the server's own plan price. 0 means nothing is due. */
+  amountDueCents: number;
+  currency: string;
+  currentAccessEndsAt: ISODateTime | null;
+  newAccessEndsAt: ISODateTime | null;
+  /** False when what the account already has lasts longer than the new plan's window would: the change buys features, not extra time. */
+  addsTime: boolean;
+  lost: { kind: string; key: string; label: string; was: string; becomes: string }[];
+  overLimits: { key: string; label: string; limit: number; used: number }[];
+}

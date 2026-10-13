@@ -156,12 +156,12 @@ async function apiErrorFromResponse(res, path) {
 
 /**
  * @param {string} path
- * @param {{ method?: string, body?: unknown, auth?: boolean }} [options] `auth` is accepted for the public endpoints but
+ * @param {{ method?: string, body?: unknown, auth?: boolean, headers?: Record<string, string> }} [options] `auth` is accepted for the public endpoints but
  *   unused: the session cookie is always sent.
  * @returns {Promise<any>} the parsed JSON body (null for a 204); the public methods below narrow it with their own return types.
  */
-async function request(path, { method = "GET", body } = {}) {
-  const headers = { "Content-Type": "application/json" };
+async function request(path, { method = "GET", body, headers: extraHeaders } = {}) {
+  const headers = { "Content-Type": "application/json", ...extraHeaders };
 
   let res;
   try {
@@ -561,6 +561,18 @@ export const api = {
   // The provider sends the customer back to pages of ours, which the server chooses (built from its own configuration): nothing about
   // where to return, and nothing about the amount, is sent from here. The amount charged is always the plan's price on the server.
   /** @param {number} planId @returns {Promise<import("./types").PurchaseResponse>} */
+  // What changing to this plan would do, worked out by the server from its own prices before anything happens (BIL-11): the kind, the amount due
+  // now, the new access end, what would be lost, which limits the account is over, and whether the change is allowed at all.
+  /** @param {number} planId @returns {Promise<import("./types").PlanChangeQuote>} */
+  previewPlanChange: (planId) => request(`/api/billing/plan-change/preview?planId=${encodeURIComponent(planId)}`),
+  // Makes the change the customer saw and confirmed. The amount they were shown is sent back and checked by the server (a changed price is a 409
+  // `quote_changed` with the new quote); the key makes a double click or a retry after a slow reply act once.
+  changePlan: (planId, { expectedAmountCents, expectedCurrency }, idempotencyKey) =>
+    request("/api/billing/plan-change", {
+      method: "POST",
+      body: { planId, expectedAmountCents, expectedCurrency },
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    }),
   purchasePlan: (planId) => request("/api/billing/purchase", { method: "POST", body: { planId } }),
   // The receipt (a PDF made by the server) of one of the customer's own payments that succeeded; saved through the browser's download.
   /** @param {number} paymentId @param {string} [fallbackName] */
