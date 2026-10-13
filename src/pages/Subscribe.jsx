@@ -2,17 +2,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { CalendarClock, Lock, LogOut, LifeBuoy } from "lucide-react";
 import Logo from "../components/layout/Logo";
+import PaymentHistory from "../components/billing/PaymentHistory";
 import PlanCards from "../components/billing/PlanCards";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
-import { rememberPlanBeforeCheckout } from "../lib/checkout";
-import { daysLeft, formatLongDate } from "../lib/dates";
+import { formatLongDate } from "../lib/dates";
 import { createAttemptKeys, isRetryable } from "../lib/idempotency";
 
 /**
- * Where an account goes when its free trial is running out or over: the plans, with the real checkout. Only paid plans are offered here (a free
- * plan would not restore access). When plans cannot be bought online yet, the way forward is the support contact, which comes from
+ * Where an account goes when its access is running out or over: the plans, with the real checkout, and (for an account that has paid before) its
+ * payments with their receipts, which stay available after access ends. Only paid plans are offered here (a free plan would not restore access). When plans cannot be bought online yet, the way forward is the support contact, which comes from
  * configuration (served with the plans), never from this file.
  */
 export default function Subscribe() {
@@ -41,8 +41,10 @@ export default function Subscribe() {
   }, []);
 
   const active = user?.subscriptionActive !== false;
-  const endsOn = formatLongDate(user?.subscriptionUntil);
-  const left = daysLeft(user?.subscriptionUntil);
+  // When access ends is the server's own record (billing.access); the user record's date is only the fallback while it loads.
+  const endsOn = formatLongDate(billing?.access?.endsAt ?? user?.subscriptionUntil);
+  const left = billing?.access?.daysLeft ?? null;
+  const paidBefore = billing?.plan?.priceCents > 0;
 
   const plans = (data?.plans || []).filter((p) => p.priceCents > 0);
   const purchasesOpen = data?.purchasesOpen !== false;
@@ -62,7 +64,6 @@ export default function Subscribe() {
       const result = await api.purchasePlan(plan.id, attemptKeys.current.keyFor(plan.id));
       attemptKeys.current.settle(plan.id);
       if (result.checkoutUrl) {
-        rememberPlanBeforeCheckout(billing?.plan?.key);
         window.location.href = result.checkoutUrl; // the page stays "busy" while the browser leaves
         return;
       }
@@ -85,13 +86,7 @@ export default function Subscribe() {
     onClick: () => buy(plan),
     disabled: purchasingId !== null || !purchasesOpen,
     label:
-      purchasingId === plan.id
-        ? "Processing..."
-        : !purchasesOpen
-          ? "Not available yet"
-          : stripeConfigured
-            ? "Subscribe"
-            : "Get this plan (test)",
+      purchasingId === plan.id ? "Processing..." : !purchasesOpen ? "Not available yet" : stripeConfigured ? "Buy" : "Get this plan (test)",
   });
 
   return (
@@ -111,17 +106,17 @@ export default function Subscribe() {
 
           {active ? (
             <>
-              <h1 className="text-xl font-bold text-navy">You're on the free trial</h1>
+              <h1 className="text-xl font-bold text-navy">{paidBefore ? "Your access" : "You're on the free trial"}</h1>
               <p className="mt-1 text-sm text-slate-500">
                 {endsOn ? (
                   <>
-                    Your free access runs until <span className="font-semibold text-navy">{endsOn}</span>
-                    <> ({left === 1 ? "1 day" : `${left} days`} left)</>.
+                    Your access runs until <span className="font-semibold text-navy">{endsOn}</span>
+                    {left !== null && <> ({left === 1 ? "1 day" : `${left} days`} left)</>}.
                   </>
                 ) : (
-                  <>Your free access has no end date yet.</>
+                  <>Your access has no end date.</>
                 )}{" "}
-                Subscribe any time to keep everything after that, with nothing lost.
+                Buy a plan any time to keep going after that, with nothing lost. Nothing renews by itself.
               </p>
               <button
                 type="button"
@@ -133,12 +128,15 @@ export default function Subscribe() {
             </>
           ) : (
             <>
-              <h1 className="text-xl font-bold text-navy">Your free trial has ended</h1>
+              <h1 className="text-xl font-bold text-navy">{paidBefore ? "Your access has ended" : "Your free trial has ended"}</h1>
               <p className="mt-1 text-sm text-slate-500">
                 {endsOn ? <>It ended on {endsOn}. </> : null}
                 Access to your clients, meetings, follow-ups and the rest of the app is paused. Nothing you added has been deleted.
               </p>
-              <p className="mt-2 text-sm text-slate-500">Choose a plan below and everything switches back on right away.</p>
+              <p className="mt-2 text-sm text-slate-500">
+                Your plans don't renew by themselves. Buy a plan below and everything switches back on right away. Receipts for what you
+                paid are further down.
+              </p>
             </>
           )}
         </div>
@@ -196,6 +194,10 @@ export default function Subscribe() {
           {data && plans.length > 0 && (
             <PlanCards plans={plans} currentPlanKey={billing?.status === "active" ? billing?.plan?.key : undefined} actionFor={actionFor} />
           )}
+        </div>
+
+        <div className="mx-auto mt-8 max-w-3xl">
+          <PaymentHistory title="Your payments and receipts" />
         </div>
 
         <button

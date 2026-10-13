@@ -35,8 +35,8 @@ import NotificationsDropdown from "./NotificationsDropdown";
 import AddClientModal from "../clients/AddClientModal";
 import ReconnectModal from "../integrations/ReconnectModal";
 import ConnectNudgeModal from "../integrations/ConnectNudgeModal";
+import AccessBanner from "../billing/AccessBanner";
 import Footer from "./Footer";
-import TrialBanner from "../TrialBanner";
 import VerifyEmailNotice from "../account/VerifyEmailNotice";
 import PageSpinner from "../ui/PageSpinner";
 import RouteErrorBoundary from "./RouteErrorBoundary";
@@ -93,7 +93,7 @@ const NAV_MENUS = [
 
 export default function Layout() {
   const [modalOpen, setModalOpen] = useState(false);
-  const { user, billing } = useAuth();
+  const { user } = useAuth();
 
   // Email gate: an unverified account can sign in but sees only the "confirm your email"
   // screen — no trial has started and AI credit can't be spent until the link is used.
@@ -163,7 +163,7 @@ export default function Layout() {
         </div>
       </header>
 
-      <TrialBanner user={user} billing={billing} />
+      <AccessBanner />
 
       <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 outline-none sm:px-6">
         <RouteErrorBoundary>
