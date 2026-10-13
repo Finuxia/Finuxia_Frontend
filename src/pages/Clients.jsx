@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
-import LoadMore from "../components/LoadMore";
+import LoadMore from "../components/ui/LoadMore";
 import { useClients } from "../context/ClientsContext";
 import usePagedList from "../hooks/usePagedList";
 import { getStage, PIPELINE_STAGES } from "../lib/pipeline";

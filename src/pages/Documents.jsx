@@ -3,8 +3,8 @@ import { FileStack, Plus, Download, FileText, Clock, CheckCircle2, XCircle } fro
 import usePagedList from "../hooks/usePagedList";
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
-import LoadMore from "../components/LoadMore";
-import SubmitDocumentModal from "../components/SubmitDocumentModal";
+import LoadMore from "../components/ui/LoadMore";
+import SubmitDocumentModal from "../components/documents/SubmitDocumentModal";
 
 const STATUS_META = {
   pending: { label: "Pending review", badge: "bg-av-amber/10 text-av-amber", icon: Clock },

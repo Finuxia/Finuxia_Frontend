@@ -26,15 +26,15 @@ import { pipelineProgress, getStage } from "../lib/pipeline";
 import { formatDate, daysAgoLabel, todayISO } from "../lib/followUp";
 import { generateFollowUpMessage, MESSAGE_TONES } from "../lib/ai";
 import { api } from "../lib/api";
-import MeetingModal from "../components/MeetingModal";
-import Timeline from "../components/Timeline";
-import NotesSection from "../components/NotesSection";
-import AddClientModal from "../components/AddClientModal";
-import OpenDriveFolderButton from "../components/OpenDriveFolderButton";
-import UploadClientFileButton from "../components/UploadClientFileButton";
-import ClientGroupsPicker from "../components/ClientGroupsPicker";
-import FollowUpAutomationPanel from "../components/FollowUpAutomationPanel";
-import ReminderModal from "../components/ReminderModal";
+import MeetingModal from "../components/clients/MeetingModal";
+import Timeline from "../components/clients/Timeline";
+import NotesSection from "../components/clients/NotesSection";
+import AddClientModal from "../components/clients/AddClientModal";
+import OpenDriveFolderButton from "../components/integrations/OpenDriveFolderButton";
+import UploadClientFileButton from "../components/clients/UploadClientFileButton";
+import ClientGroupsPicker from "../components/clients/ClientGroupsPicker";
+import FollowUpAutomationPanel from "../components/clients/FollowUpAutomationPanel";
+import ReminderModal from "../components/clients/ReminderModal";
 
 const AVATAR_BG = {
   "av-blue": "bg-av-blue",

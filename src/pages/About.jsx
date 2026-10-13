@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { CalendarClock, Users, Sparkles, ShieldCheck } from "lucide-react";
-import Logo from "../components/Logo";
+import Logo from "../components/layout/Logo";
 
 const POINTS = [
   {

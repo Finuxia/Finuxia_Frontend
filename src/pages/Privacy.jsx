@@ -1,5 +1,5 @@
-import Logo from "../components/Logo";
-import Footer from "../components/Footer";
+import Logo from "../components/layout/Logo";
+import Footer from "../components/layout/Footer";
 
 export default function Privacy() {
   return (

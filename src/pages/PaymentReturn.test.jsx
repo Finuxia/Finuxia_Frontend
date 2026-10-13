@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it } from "vitest";
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "../components/layout/ProtectedRoute";
 import { purchaseConfirmed, rememberPlanBeforeCheckout } from "../lib/checkout";
 import { API, testBilling, testUser } from "../test/handlers";
 import { server } from "../test/server";

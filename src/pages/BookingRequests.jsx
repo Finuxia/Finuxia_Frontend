@@ -3,7 +3,7 @@ import { CalendarClock, Check, X, RefreshCcw, Clock, Mail, Phone, AlertTriangle 
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
-import TimeInput from "../components/TimeInput";
+import TimeInput from "../components/ui/TimeInput";
 
 const STATUS_META = {
   pending: { label: "Pending", badge: "bg-av-amber/10 text-av-amber" },

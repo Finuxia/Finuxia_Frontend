@@ -4,8 +4,8 @@ import { LifeBuoy, Plus, MessageSquare, Bug, Sparkles } from "lucide-react";
 import usePagedList from "../hooks/usePagedList";
 import { formatDate } from "../lib/followUp";
 import { getTicketStatusMeta, getTicketTypeMeta } from "../lib/ticketMeta";
-import LoadMore from "../components/LoadMore";
-import NewTicketModal from "../components/NewTicketModal";
+import LoadMore from "../components/ui/LoadMore";
+import NewTicketModal from "../components/tickets/NewTicketModal";
 
 export default function Tickets() {
   const navigate = useNavigate();

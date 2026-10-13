@@ -7,11 +7,11 @@ import { todayLong, todayISO, addDays, formatDate } from "../lib/followUp";
 import { formatTime } from "../lib/notifications";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
-import ClientCard from "../components/ClientCard";
-import RescheduleModal from "../components/RescheduleModal";
-import GoogleMeetingsSection from "../components/GoogleMeetingsSection";
-import RemindersSection from "../components/RemindersSection";
-import ReminderModal from "../components/ReminderModal";
+import ClientCard from "../components/clients/ClientCard";
+import RescheduleModal from "../components/clients/RescheduleModal";
+import GoogleMeetingsSection from "../components/integrations/GoogleMeetingsSection";
+import RemindersSection from "../components/clients/RemindersSection";
+import ReminderModal from "../components/clients/ReminderModal";
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 

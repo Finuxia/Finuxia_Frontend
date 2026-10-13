@@ -7,9 +7,9 @@ import { isLead } from "../lib/pipeline";
 import { formatTime } from "../lib/notifications";
 import { todayISO, todayLong } from "../lib/followUp";
 import { runPipeline, filterByMonth, clientActivityDate, currentMonthKey, monthLabel } from "../lib/chartPipeline";
-import PipelineBarChart from "../components/PipelineBarChart";
-import FollowUpDonutChart from "../components/FollowUpDonutChart";
-import MonthFilter from "../components/MonthFilter";
+import PipelineBarChart from "../components/clients/PipelineBarChart";
+import FollowUpDonutChart from "../components/clients/FollowUpDonutChart";
+import MonthFilter from "../components/ui/MonthFilter";
 
 export default function Dashboard() {
   const { clients } = useClients();

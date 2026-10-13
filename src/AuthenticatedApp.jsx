@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import Layout from "./components/Layout";
-import ModuleGate from "./components/ModuleGate";
-import PageSpinner from "./components/PageSpinner";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/layout/Layout";
+import ModuleGate from "./components/billing/ModuleGate";
+import PageSpinner from "./components/ui/PageSpinner";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 // Everything an advisor uses once signed in. It is its own chunk (see App.jsx), so the public pages (booking link,

@@ -1,11 +1,11 @@
 import { Plus, Trash2 } from "lucide-react";
-import SearchableSelect from "../SearchableSelect";
+import SearchableSelect from "../ui/SearchableSelect";
 import { useClients } from "../../context/ClientsContext";
 import { birthDateError, MIN_BIRTH_DATE, todayISO } from "../../lib/dates";
 import { CANADIAN_STATUSES, PROVINCES, MARITAL_STATUSES, DEPENDANT_RELATIONSHIPS } from "../../lib/salesPackageOptions";
 import { emptyDependant } from "../../lib/salesPackage/wizard";
 import { StepCard, FormField, CurrencyField, inputClass } from "./shared";
-import Switch from "../Switch";
+import Switch from "../ui/Switch";
 
 export default function ClientStep({ data, patch }) {
   const { clients } = useClients();

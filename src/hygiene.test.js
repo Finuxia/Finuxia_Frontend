@@ -54,7 +54,7 @@ describe("removed dead code stays removed", () => {
   });
 
   it("the layout uses no utility class that Tailwind has no definition for (scrollbar-none)", () => {
-    expect(read("src/components/Layout.jsx")).not.toContain("scrollbar-none");
+    expect(read("src/components/layout/Layout.jsx")).not.toContain("scrollbar-none");
   });
 
   it("the cancel-subscription API helper with no caller is gone", () => {

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import { createAttemptKeys, isRetryable } from "../lib/idempotency";
-import PlanCards from "../components/PlanCards";
+import PlanCards from "../components/billing/PlanCards";
 
 export default function Billing() {
   const { billing, refreshBilling } = useAuth();

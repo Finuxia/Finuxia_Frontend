@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { CalendarClock, Lock, LogOut, LifeBuoy } from "lucide-react";
-import Logo from "../components/Logo";
-import PlanCards from "../components/PlanCards";
+import Logo from "../components/layout/Logo";
+import PlanCards from "../components/billing/PlanCards";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";

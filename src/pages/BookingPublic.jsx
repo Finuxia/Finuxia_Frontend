@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CalendarDays, Clock, ChevronLeft, ChevronRight, CheckCircle2, AlertTriangle, Video, X, Plus, User, Globe } from "lucide-react";
-import Logo from "../components/Logo";
-import Footer from "../components/Footer";
+import Logo from "../components/layout/Logo";
+import Footer from "../components/layout/Footer";
 import { api, ApiError } from "../lib/api";
 import { formatCanadianPhone } from "../lib/phone";
 

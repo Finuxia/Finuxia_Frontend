@@ -18,8 +18,8 @@ import { useToast } from "../context/ToastContext";
 import { getStage, getMissedStage } from "../lib/pipeline";
 import { daysAgoLabel, daysUntil, formatDate, todayISO } from "../lib/followUp";
 import { api } from "../lib/api";
-import ReminderModal from "../components/ReminderModal";
-import FollowUpRuleModal from "../components/FollowUpRuleModal";
+import ReminderModal from "../components/clients/ReminderModal";
+import FollowUpRuleModal from "../components/clients/FollowUpRuleModal";
 
 const PRIORITY_BADGE = {
   High: "bg-av-red/10 text-av-red",

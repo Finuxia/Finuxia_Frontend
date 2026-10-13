@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, UsersRound, Pencil } from "lucide-react";
 import { useClients } from "../context/ClientsContext";
-import GroupModal from "../components/GroupModal";
+import GroupModal from "../components/clients/GroupModal";
 
 const AVATAR_BG = {
   "av-blue": "bg-av-blue",
