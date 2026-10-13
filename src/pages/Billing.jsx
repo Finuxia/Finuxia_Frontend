@@ -8,6 +8,8 @@ import AccessCard from "../components/billing/AccessCard";
 import ContinueIntent from "../components/ContinueIntent";
 import PaymentHistory from "../components/billing/PaymentHistory";
 import PlanCards from "../components/billing/PlanCards";
+import PlanChangeDialog from "../components/billing/PlanChangeDialog";
+import { changeButtonLabel } from "../lib/planChange";
 
 /**
  * Plans & Billing. Every plan is a single payment that buys a stretch of access (nothing renews), so this page is about three things: when
@@ -21,6 +23,7 @@ export default function Billing() {
   // False in production until payments are connected: paid plans can't be bought yet.
   const [purchasesOpen, setPurchasesOpen] = useState(true);
   const [purchasingId, setPurchasingId] = useState(null);
+  const [changing, setChanging] = useState(null); // the plan whose change dialog is open
 
   useEffect(() => {
     api
@@ -72,9 +75,21 @@ export default function Billing() {
    * stretch of access, so buying the same one again is how access is extended (the server keeps whichever end date is later). Every button is
    * disabled while any purchase is in flight, so a second plan cannot be started on top of the first.
    */
+  // A customer whose access is running moves between plans through the change dialog, which shows what it does before anything happens; someone whose
+  // access has ended is coming back, and simply buys.
+  const currentPlan = (plans || []).find((p) => p.key === currentPlanKey);
+  const hasAccessNow = billing?.access?.valid === true && Boolean(currentPlan) && !isLegacy;
+
   const actionFor = (plan) => {
     const paid = plan.priceCents > 0;
     const closed = paid && !purchasesOpen;
+    if (hasAccessNow && plan.key !== currentPlanKey) {
+      return {
+        onClick: () => setChanging(plan),
+        disabled: purchasingId !== null || closed,
+        label: closed ? "Not available yet" : changeButtonLabel(currentPlan.priceCents, plan),
+      };
+    }
     return {
       onClick: () => handlePurchase(plan),
       disabled: purchasingId !== null || isLegacy || closed,
@@ -131,6 +146,8 @@ export default function Billing() {
       </section>
 
       <PaymentHistory />
+
+      {changing && <PlanChangeDialog plan={changing} onClose={() => setChanging(null)} />}
     </div>
   );
 }
