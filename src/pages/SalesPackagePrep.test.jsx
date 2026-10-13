@@ -238,7 +238,10 @@ describe("saving and the version", () => {
     server.use(
       http.put(`${P}/packages/:id`, () =>
         HttpResponse.json(
-          { error: "Upstream trouble", package: { ...server_pkg, version: 9, data: validData({ policyOwner: "Somebody Else", insuredPerson: "Somebody Else" }) } },
+          {
+            error: "Upstream trouble",
+            package: { ...server_pkg, version: 9, data: validData({ policyOwner: "Somebody Else", insuredPerson: "Somebody Else" }) },
+          },
           { status: 502 }
         )
       )
@@ -847,7 +850,6 @@ describe("details the split must keep", () => {
     await userEvent.click(stepper("review"));
     expect(await screen.findByRole("button", { name: "Generate Package" })).toBeInTheDocument();
   });
-
 
   it("only the letter's file chooser accepts a Word file", async () => {
     renderWizard();

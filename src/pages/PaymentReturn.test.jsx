@@ -26,8 +26,22 @@ function billingSequence(...answers) {
 function App(props) {
   return (
     <Routes>
-      <Route path="/billing/success" element={<ProtectedRoute><PaymentReturn outcome="success" intervalMs={20} maxAttempts={4} {...props} /></ProtectedRoute>} />
-      <Route path="/billing/cancel" element={<ProtectedRoute><PaymentReturn outcome="cancel" /></ProtectedRoute>} />
+      <Route
+        path="/billing/success"
+        element={
+          <ProtectedRoute>
+            <PaymentReturn outcome="success" intervalMs={20} maxAttempts={4} {...props} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing/cancel"
+        element={
+          <ProtectedRoute>
+            <PaymentReturn outcome="cancel" />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/billing" element={<p>plans page</p>} />
       <Route path="/dashboard" element={<p>dashboard page</p>} />
     </Routes>

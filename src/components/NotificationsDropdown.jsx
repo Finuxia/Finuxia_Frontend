@@ -32,20 +32,20 @@ export default function NotificationsDropdown() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.getReminders().then(setReminders).catch(() => {});
-    api.getBookingRequests().then(setBookingRequests).catch(() => {});
+    api
+      .getReminders()
+      .then(setReminders)
+      .catch(() => {});
+    api
+      .getBookingRequests()
+      .then(setBookingRequests)
+      .catch(() => {});
   }, []);
 
-  const notifications = useMemo(
-    () => buildNotifications(clients, reminders, bookingRequests),
-    [clients, reminders, bookingRequests]
-  );
+  const notifications = useMemo(() => buildNotifications(clients, reminders, bookingRequests), [clients, reminders, bookingRequests]);
   // The badge counts only notifications the user hasn't seen yet, so opening
   // the panel (or acting on one) makes the number go down.
-  const unseenCount = useMemo(
-    () => notifications.filter((n) => !seen.has(n.id)).length,
-    [notifications, seen]
-  );
+  const unseenCount = useMemo(() => notifications.filter((n) => !seen.has(n.id)).length, [notifications, seen]);
 
   useEffect(() => {
     function onClick(e) {

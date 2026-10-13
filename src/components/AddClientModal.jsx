@@ -118,11 +118,13 @@ export default function AddClientModal({ open, onClose, client = null, initialVa
   };
 
   return (
-    <div role="presentation"
+    <div
+      role="presentation"
       className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={handleClose}
     >
-      <div role="presentation"
+      <div
+        role="presentation"
         className="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-lg sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -140,21 +142,10 @@ export default function AddClientModal({ open, onClose, client = null, initialVa
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-5">
           <div className="grid grid-cols-2 gap-4">
             <Field label="First Name" required error={errors.first}>
-              <input
-                autoFocus
-                value={form.first}
-                onChange={update("first")}
-                className={inputClass(errors.first)}
-                placeholder="Jane"
-              />
+              <input autoFocus value={form.first} onChange={update("first")} className={inputClass(errors.first)} placeholder="Jane" />
             </Field>
             <Field label="Last Name">
-              <input
-                value={form.last}
-                onChange={update("last")}
-                className={inputClass()}
-                placeholder="Doe"
-              />
+              <input value={form.last} onChange={update("last")} className={inputClass()} placeholder="Doe" />
             </Field>
           </div>
 
@@ -179,40 +170,19 @@ export default function AddClientModal({ open, onClose, client = null, initialVa
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Email">
-              <input
-                type="email"
-                value={form.email}
-                onChange={update("email")}
-                className={inputClass()}
-                placeholder="jane.doe@email.com"
-              />
+              <input type="email" value={form.email} onChange={update("email")} className={inputClass()} placeholder="jane.doe@email.com" />
             </Field>
             <Field label="Telegram Username">
-              <input
-                value={form.telegram}
-                onChange={update("telegram")}
-                className={inputClass()}
-                placeholder="@janedoe"
-              />
+              <input value={form.telegram} onChange={update("telegram")} className={inputClass()} placeholder="@janedoe" />
             </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Job">
-              <input
-                value={form.job}
-                onChange={update("job")}
-                className={inputClass()}
-                placeholder="Occupation"
-              />
+              <input value={form.job} onChange={update("job")} className={inputClass()} placeholder="Occupation" />
             </Field>
             <Field label="Instagram Username">
-              <input
-                value={form.instagram}
-                onChange={update("instagram")}
-                className={inputClass()}
-                placeholder="@janedoe"
-              />
+              <input value={form.instagram} onChange={update("instagram")} className={inputClass()} placeholder="@janedoe" />
             </Field>
           </div>
 
@@ -231,7 +201,9 @@ export default function AddClientModal({ open, onClose, client = null, initialVa
               <select value={form.province} onChange={update("province")} className={inputClass()}>
                 <option value="">Select...</option>
                 {PROVINCES.map((p) => (
-                  <option key={p} value={p}>{p}</option>
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
                 ))}
               </select>
             </Field>
@@ -256,20 +228,10 @@ export default function AddClientModal({ open, onClose, client = null, initialVa
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Last Contact Date">
-              <input
-                type="date"
-                value={form.lastContactDate}
-                onChange={update("lastContactDate")}
-                className={inputClass()}
-              />
+              <input type="date" value={form.lastContactDate} onChange={update("lastContactDate")} className={inputClass()} />
             </Field>
             <Field label="Next Follow-up Date">
-              <input
-                type="date"
-                value={form.nextFollowUpDate}
-                onChange={update("nextFollowUpDate")}
-                className={inputClass()}
-              />
+              <input type="date" value={form.nextFollowUpDate} onChange={update("nextFollowUpDate")} className={inputClass()} />
             </Field>
           </div>
 

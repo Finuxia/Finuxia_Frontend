@@ -74,7 +74,12 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
             <p className="text-xs text-slate-400">AI drafts and sends a check-in on its own, on this schedule.</p>
           </div>
         </div>
-        <Switch label="Automated follow-ups" checked={rule.enabled} onChange={(e) => save({ enabled: e.target.checked })} disabled={saving} />
+        <Switch
+          label="Automated follow-ups"
+          checked={rule.enabled}
+          onChange={(e) => save({ enabled: e.target.checked })}
+          disabled={saving}
+        />
       </div>
 
       {rule.enabled && (

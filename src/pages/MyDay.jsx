@@ -16,8 +16,7 @@ import ReminderModal from "../components/ReminderModal";
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export default function MyDay() {
-  const { clients, isTaskDoneToday, toggleDailyTask, snooze, rescheduleFollowUp, rescheduleMeeting, toggleFileStatus } =
-    useClients();
+  const { clients, isTaskDoneToday, toggleDailyTask, snooze, rescheduleFollowUp, rescheduleMeeting, toggleFileStatus } = useClients();
   const { status, fetchDay, getDayState } = useGoogleCalendar();
   const { addToast } = useToast();
   const [rescheduleTarget, setRescheduleTarget] = useState(null);
@@ -47,24 +46,12 @@ export default function MyDay() {
   };
 
   // --- application data for the selected date ---
-  const dueClients = useMemo(
-    () => clients.filter((c) => c.followUpDate === selectedDate),
-    [clients, selectedDate]
-  );
-  const meetings = useMemo(
-    () => clients.filter((c) => c.meeting?.date === selectedDate),
-    [clients, selectedDate]
-  );
+  const dueClients = useMemo(() => clients.filter((c) => c.followUpDate === selectedDate), [clients, selectedDate]);
+  const meetings = useMemo(() => clients.filter((c) => c.meeting?.date === selectedDate), [clients, selectedDate]);
   const meetingIds = useMemo(() => new Set(meetings.map((c) => c.id)), [meetings]);
 
-  const highPriority = useMemo(
-    () => dueClients.filter((c) => c.priority === "High" && !meetingIds.has(c.id)),
-    [dueClients, meetingIds]
-  );
-  const calls = useMemo(
-    () => dueClients.filter((c) => c.priority !== "High" && !meetingIds.has(c.id)),
-    [dueClients, meetingIds]
-  );
+  const highPriority = useMemo(() => dueClients.filter((c) => c.priority === "High" && !meetingIds.has(c.id)), [dueClients, meetingIds]);
+  const calls = useMemo(() => dueClients.filter((c) => c.priority !== "High" && !meetingIds.has(c.id)), [dueClients, meetingIds]);
   // Files aren't date-bound; only surface them on today's view.
   const pendingFiles = useMemo(() => {
     if (!isToday) return [];
@@ -102,7 +89,13 @@ export default function MyDay() {
   // Reminders are counted here (My Day's own daily progress) but never in
   // Reports/analytics — those pages never query the reminders endpoint.
   const totalItems =
-    highPriority.length + calls.length + meetings.length + pendingFiles.length + googleEvents.length + pendingReminders.length + completedRemindersForDate.length;
+    highPriority.length +
+    calls.length +
+    meetings.length +
+    pendingFiles.length +
+    googleEvents.length +
+    pendingReminders.length +
+    completedRemindersForDate.length;
   const doneCount =
     highPriority.filter((c) => isTaskDoneToday(c.id, "high", selectedDate)).length +
     calls.filter((c) => isTaskDoneToday(c.id, "call", selectedDate)).length +
@@ -117,9 +110,7 @@ export default function MyDay() {
     <div className="flex flex-col gap-6">
       <section className="overflow-hidden rounded-2xl bg-navy px-6 py-7 text-white shadow-lg sm:px-8">
         <div className="flex flex-col gap-3">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            {isToday ? "Your day, at a glance." : "That day, at a glance."}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{isToday ? "Your day, at a glance." : "That day, at a glance."}</h1>
 
           {/* Date navigator */}
           <div className="flex flex-wrap items-center gap-2">
@@ -301,9 +292,7 @@ export default function MyDay() {
       {rescheduleTarget && (
         <RescheduleModal
           title={rescheduleTarget.type === "meeting" ? "Reschedule Meeting" : "Reschedule Follow-up"}
-          currentDate={
-            rescheduleTarget.type === "meeting" ? rescheduleTarget.client.meeting?.date : rescheduleTarget.client.followUpDate
-          }
+          currentDate={rescheduleTarget.type === "meeting" ? rescheduleTarget.client.meeting?.date : rescheduleTarget.client.followUpDate}
           onClose={() => setRescheduleTarget(null)}
           onSave={(newDate) => {
             const c = rescheduleTarget.client;

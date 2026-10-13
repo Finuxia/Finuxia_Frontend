@@ -1,6 +1,24 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Sparkles, X, Phone, Mail, Send, CalendarDays, CalendarClock, Copy, Check, UserPlus, Pencil, Trash2, Briefcase, Cake, Instagram, BellPlus } from "lucide-react";
+import {
+  ArrowLeft,
+  Sparkles,
+  X,
+  Phone,
+  Mail,
+  Send,
+  CalendarDays,
+  CalendarClock,
+  Copy,
+  Check,
+  UserPlus,
+  Pencil,
+  Trash2,
+  Briefcase,
+  Cake,
+  Instagram,
+  BellPlus,
+} from "lucide-react";
 import { useClients } from "../context/ClientsContext";
 import { useToast } from "../context/ToastContext";
 import { formatCanadianPhone } from "../lib/phone";
@@ -71,13 +89,17 @@ export default function ClientDetail() {
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white ${AVATAR_BG[client.color] ?? "bg-navy"}`}>
+            <div
+              className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white ${AVATAR_BG[client.color] ?? "bg-navy"}`}
+            >
               {client.first[0]}
               {client.last[0]}
             </div>
             <div>
               <h1 className="text-xl font-bold text-navy">{fullName}</h1>
-              <p className="text-sm text-slate-500">{client.priority} priority · Joined {formatDate(client.joined)}</p>
+              <p className="text-sm text-slate-500">
+                {client.priority} priority · Joined {formatDate(client.joined)}
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -176,20 +198,23 @@ export default function ClientDetail() {
         <Timeline client={client} onEditStage={(stage) => setEditingStageId(stage.id)} />
       </section>
 
-      {editingStageId && (
-        <MeetingModal client={client} stage={getStage(editingStageId)} onClose={() => setEditingStageId(null)} />
-      )}
+      {editingStageId && <MeetingModal client={client} stage={getStage(editingStageId)} onClose={() => setEditingStageId(null)} />}
 
       {aiOpen && <AIMessagePanel client={client} onClose={closeAi} />}
 
       <AddClientModal open={editOpen} onClose={() => setEditOpen(false)} client={client} />
 
       {confirmDelete && (
-        <div role="presentation"
+        <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
           onClick={() => setConfirmDelete(false)}
         >
-          <div role="presentation" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div
+            role="presentation"
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-av-red/10 text-av-red">
               <Trash2 size={20} />
             </div>
@@ -232,7 +257,7 @@ function AIMessagePanel({ client, onClose }) {
   useEffect(() => {
     setMessage(generateFollowUpMessage(client, tone));
     setCopied(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- redrafts when the tone or the client (by id) changes, not on every edit of the same client, which would overwrite what was typed
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- redrafts when the tone or the client (by id) changes, not on every edit of the same client, which would overwrite what was typed
   }, [tone, client.id]);
 
   const handleCopy = async () => {
@@ -248,7 +273,8 @@ function AIMessagePanel({ client, onClose }) {
 
   return (
     <div role="presentation" className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div role="presentation"
+      <div
+        role="presentation"
         className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
@@ -257,17 +283,17 @@ function AIMessagePanel({ client, onClose }) {
             <Sparkles size={17} className="text-gold-dark" />
             Draft Message
           </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-          >
+          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy">
             <X size={20} />
           </button>
         </div>
 
         <p className="text-sm text-slate-500">
-          Suggested follow-up for <span className="font-semibold text-navy">{client.first} {client.last}</span>.
-          Communication only — no product or investment recommendations.
+          Suggested follow-up for{" "}
+          <span className="font-semibold text-navy">
+            {client.first} {client.last}
+          </span>
+          . Communication only — no product or investment recommendations.
         </p>
 
         <div className="mt-4 flex gap-1.5 rounded-lg bg-slate-100 p-1">

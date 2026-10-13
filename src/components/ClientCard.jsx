@@ -60,40 +60,21 @@ export default function ClientCard({ client, done, onToggleDone, onSnooze, onRes
 
         <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${PRIORITY_DOT[client.priority]}`} />
 
-        <button
-          onClick={() => setExpanded((e) => !e)}
-          className="flex flex-1 items-center justify-between gap-2 text-left"
-        >
+        <button onClick={() => setExpanded((e) => !e)} className="flex flex-1 items-center justify-between gap-2 text-left">
           <span className="min-w-0">
-            <span
-              className={`block truncate text-sm font-semibold ${
-                done ? "text-slate-400 line-through" : "text-navy"
-              }`}
-            >
-              {fullName}
-            </span>
+            <span className={`block truncate text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-navy"}`}>{fullName}</span>
             {subtitle && <span className="block truncate text-xs text-slate-400">{subtitle}</span>}
           </span>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_BADGE[client.priority]}`}>
-              {client.priority}
-            </span>
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                FOLLOWUP_BADGE[client.nextFollowUp] ?? FOLLOWUP_BADGE.TBD
-              }`}
-            >
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_BADGE[client.priority]}`}>{client.priority}</span>
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${FOLLOWUP_BADGE[client.nextFollowUp] ?? FOLLOWUP_BADGE.TBD}`}>
               {client.nextFollowUp}
             </span>
           </div>
         </button>
 
         <div className="flex shrink-0 items-center gap-2 sm:hidden">
-          <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-              FOLLOWUP_BADGE[client.nextFollowUp] ?? FOLLOWUP_BADGE.TBD
-            }`}
-          >
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${FOLLOWUP_BADGE[client.nextFollowUp] ?? FOLLOWUP_BADGE.TBD}`}>
             {client.nextFollowUp}
           </span>
         </div>
@@ -103,10 +84,7 @@ export default function ClientCard({ client, done, onToggleDone, onSnooze, onRes
           aria-label={expanded ? "Collapse" : "Expand"}
           className="shrink-0 rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
         >
-          <ChevronDown
-            size={18}
-            className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
-          />
+          <ChevronDown size={18} className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
         </button>
       </div>
 
@@ -122,11 +100,7 @@ export default function ClientCard({ client, done, onToggleDone, onSnooze, onRes
         </div>
       )}
 
-      <div
-        className={`grid transition-all duration-200 ease-out ${
-          expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
+      <div className={`grid transition-all duration-200 ease-out ${expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
         <div className="overflow-hidden">
           <div className="space-y-3 border-t border-slate-100 px-4 py-4">
             <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
@@ -142,16 +116,11 @@ export default function ClientCard({ client, done, onToggleDone, onSnooze, onRes
 
             <div>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium uppercase tracking-wide text-slate-400">
-                  {stage?.label ?? client.currentStage}
-                </span>
+                <span className="font-medium uppercase tracking-wide text-slate-400">{stage?.label ?? client.currentStage}</span>
                 <span className="font-semibold text-navy">{progress}%</span>
               </div>
               <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-gold transition-all"
-                  style={{ width: `${progress}%` }}
-                />
+                <div className="h-full rounded-full bg-gold transition-all" style={{ width: `${progress}%` }} />
               </div>
             </div>
 

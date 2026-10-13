@@ -32,9 +32,7 @@ export default function GroupModal({ group, initialMemberIds, onClose, onDelete 
 
   const toggleMember = (clientId) => {
     setMemberIds((prev) =>
-      prev.some((id) => String(id) === String(clientId))
-        ? prev.filter((id) => String(id) !== String(clientId))
-        : [...prev, clientId]
+      prev.some((id) => String(id) === String(clientId)) ? prev.filter((id) => String(id) !== String(clientId)) : [...prev, clientId]
     );
   };
 
@@ -57,17 +55,23 @@ export default function GroupModal({ group, initialMemberIds, onClose, onDelete 
   };
 
   return (
-    <div role="presentation"
+    <div
+      role="presentation"
       className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
-      <div role="presentation"
+      <div
+        role="presentation"
         className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-md sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <h2 className="text-lg font-semibold text-navy">{isEdit ? "Edit Group" : "New Group"}</h2>
-          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
+            aria-label="Close"
+          >
             <X size={20} />
           </button>
         </div>

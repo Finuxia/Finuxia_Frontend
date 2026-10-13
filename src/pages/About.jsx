@@ -36,8 +36,7 @@ export default function About() {
           </span>
         </div>
         <p className="mx-auto mt-4 max-w-xl text-sm text-slate-300 sm:text-base">
-          The day-to-day operating system for financial advisors — clients, meetings, and follow-ups, all in one
-          place.
+          The day-to-day operating system for financial advisors — clients, meetings, and follow-ups, all in one place.
         </p>
       </div>
 

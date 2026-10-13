@@ -122,7 +122,7 @@ export default function Profile() {
             {user.hasAvatar ? (
               <img src={`${api.avatarUrl(user.id)}?t=${avatarBust}`} alt="" className="h-full w-full object-cover" />
             ) : (
-              user.name?.[0]?.toUpperCase() ?? <User size={24} />
+              (user.name?.[0]?.toUpperCase() ?? <User size={24} />)
             )}
           </button>
           <button

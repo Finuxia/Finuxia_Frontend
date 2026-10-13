@@ -70,14 +70,7 @@ export default function PipelineBarChart({ clients, onSelectStage }) {
                   className="transition-all duration-300"
                 />
               )}
-              <text
-                x={trackX + Math.max(barW, 6) + 8}
-                y={i * ROW_H + ROW_H / 2}
-                dy={3.5}
-                fontSize="11"
-                fontWeight="600"
-                fill="#0f1c2e"
-              >
+              <text x={trackX + Math.max(barW, 6) + 8} y={i * ROW_H + ROW_H / 2} dy={3.5} fontSize="11" fontWeight="600" fill="#0f1c2e">
                 {count}
               </text>
             </g>

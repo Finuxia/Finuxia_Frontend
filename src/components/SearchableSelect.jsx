@@ -109,9 +109,15 @@ export default function SearchableSelect({
         <ChevronDown size={14} className="pointer-events-none" />
       </div>
       {open && !disabled && (
-        <ul id={listId} role="listbox" className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+        <ul
+          id={listId}
+          role="listbox"
+          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+        >
           {filtered.length === 0 ? (
-            <li role="presentation" className="px-3 py-2 text-xs text-slate-400">{freeText ? "No saved match — keep typing to use this name." : emptyText}</li>
+            <li role="presentation" className="px-3 py-2 text-xs text-slate-400">
+              {freeText ? "No saved match — keep typing to use this name." : emptyText}
+            </li>
           ) : (
             filtered.map((o, i) => (
               <li key={o.value} role="presentation">

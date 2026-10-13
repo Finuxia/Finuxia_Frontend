@@ -160,7 +160,12 @@ export default function Documents() {
                     </div>
                   </div>
                 ))}
-                <LoadMore hasMore={hasMore} loadingMore={loadingMore} error={documents.length > 0 ? library.error : null} onLoadMore={loadMore} />
+                <LoadMore
+                  hasMore={hasMore}
+                  loadingMore={loadingMore}
+                  error={documents.length > 0 ? library.error : null}
+                  onLoadMore={loadMore}
+                />
               </div>
             )}
           </section>

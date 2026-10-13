@@ -14,7 +14,11 @@ const STAGE_AGENDA = {
   fc1: ["Recap what you learned in planning", "Listen and take notes on their situation", "Set expectations for the process"],
   fc2: ["Review open questions from FC1", "Clarify priorities and timeline", "Confirm who else should be involved"],
   fc3: ["Summarize everything gathered so far", "Confirm you understand their needs", "Schedule the strategy meeting"],
-  strategy_meeting: ["Walk through the prepared strategy at a high level", "Answer questions and note concerns", "Agree on follow-up actions"],
+  strategy_meeting: [
+    "Walk through the prepared strategy at a high level",
+    "Answer questions and note concerns",
+    "Agree on follow-up actions",
+  ],
   strategy_followup: ["Revisit any items they wanted to think over", "Address outstanding questions", "Confirm the closing timeline"],
   closing: ["Review paperwork and next steps", "Confirm delivery expectations", "Thank them and set a check-in date"],
   policy_delivery: ["Deliver documents and walk through them", "Confirm they know how to reach you", "Schedule the first review"],
@@ -82,7 +86,9 @@ export default function StrategyPrep() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="strategy-client" className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</label>
+        <label htmlFor="strategy-client" className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Client
+        </label>
         <select
           id="strategy-client"
           value={selectedId}

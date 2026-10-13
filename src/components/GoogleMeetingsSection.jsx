@@ -33,9 +33,7 @@ export default function GoogleMeetingsSection({ date, events = [], loading = fal
         <Header count={null} />
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-slate-200 bg-white px-4 py-4">
           <div className="flex items-start gap-2">
-            {(status === "expired" || status === "revoked") && (
-              <AlertTriangle size={15} className="mt-0.5 shrink-0 text-av-red" />
-            )}
+            {(status === "expired" || status === "revoked") && <AlertTriangle size={15} className="mt-0.5 shrink-0 text-av-red" />}
             <p className="text-sm text-slate-500">
               {status === "expired" || status === "revoked"
                 ? "Your Google Calendar access expired — reconnect to see meetings."
@@ -107,9 +105,7 @@ export default function GoogleMeetingsSection({ date, events = [], loading = fal
         </button>
       </div>
 
-      {error && (
-        <p className="mb-2 text-xs text-av-red">{error.message || "Couldn't load calendar."}</p>
-      )}
+      {error && <p className="mb-2 text-xs text-av-red">{error.message || "Couldn't load calendar."}</p>}
 
       {loading && events.length === 0 ? (
         <p className="text-sm text-slate-400">Loading calendar…</p>

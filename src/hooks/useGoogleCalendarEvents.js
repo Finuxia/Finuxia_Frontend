@@ -69,10 +69,7 @@ export function useGoogleCalendarEvents(cacheKey) {
   );
 
   // ---- per-day cache (My Day) ----------------------------------------
-  const getDayState = useCallback(
-    (dateKey) => dayCacheRef.current[dateKey] || { events: [], status: "idle", error: null },
-    []
-  );
+  const getDayState = useCallback((dateKey) => dayCacheRef.current[dateKey] || { events: [], status: "idle", error: null }, []);
 
   const fetchDay = useCallback(
     async (dateKey, { force = false } = {}) => {

@@ -70,8 +70,8 @@ export default function VerifyEmailNotice() {
           <Mail size={22} />
         </div>
         <p className="text-sm text-slate-600">
-          We sent a confirmation link to <span className="font-semibold text-navy">{user?.email}</span>. Open it to start
-          your free trial and unlock the app.
+          We sent a confirmation link to <span className="font-semibold text-navy">{user?.email}</span>. Open it to start your free trial
+          and unlock the app.
         </p>
         {message && <p className="text-xs text-av-green">{message}</p>}
         {error && <p className="text-xs text-av-red">{error}</p>}
@@ -82,11 +82,7 @@ export default function VerifyEmailNotice() {
         >
           I've confirmed it
         </button>
-        <button
-          onClick={resend}
-          disabled={busy}
-          className="text-sm font-semibold text-gold-dark hover:underline disabled:opacity-60"
-        >
+        <button onClick={resend} disabled={busy} className="text-sm font-semibold text-gold-dark hover:underline disabled:opacity-60">
           Send the email again
         </button>
       </div>

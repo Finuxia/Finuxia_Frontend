@@ -16,21 +16,14 @@ export default function Timeline({ client, onEditStage }) {
         return (
           <li key={stage.id} className="relative flex gap-4 pb-8 last:pb-0">
             {!isLast && (
-              <span
-                className={`absolute left-[15px] top-8 h-full w-0.5 ${
-                  status === "completed" ? "bg-av-green" : "bg-slate-200"
-                }`}
-              />
+              <span className={`absolute left-[15px] top-8 h-full w-0.5 ${status === "completed" ? "bg-av-green" : "bg-slate-200"}`} />
             )}
             <span
               className={`z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold text-white ${meta.dot} ${meta.border}`}
             >
               {status === "completed" ? <Check size={14} /> : idx + 1}
             </span>
-            <button
-              onClick={() => onEditStage?.(stage)}
-              className="flex-1 rounded-xl px-3 py-1.5 text-left transition hover:bg-slate-50"
-            >
+            <button onClick={() => onEditStage?.(stage)} className="flex-1 rounded-xl px-3 py-1.5 text-left transition hover:bg-slate-50">
               <p className={`text-sm font-semibold ${isCurrent ? "text-navy" : "text-slate-600"}`}>
                 {stage.label} <span className={`font-medium ${meta.text}`}>({meta.label})</span>
                 {isCurrent && (

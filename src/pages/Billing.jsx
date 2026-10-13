@@ -81,7 +81,9 @@ export default function Billing() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">Plans &amp; Billing</h1>
-        <p className="text-sm text-slate-500">Pick a plan to unlock its modules. Each plan below only affects what your own account can use.</p>
+        <p className="text-sm text-slate-500">
+          Pick a plan to unlock its modules. Each plan below only affects what your own account can use.
+        </p>
       </div>
 
       {isLegacy && (

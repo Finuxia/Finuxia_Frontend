@@ -15,13 +15,7 @@ function linkifyText(text) {
   // odd indices are always the matched URLs.
   return text.split(URL_RE).map((part, i) =>
     i % 2 === 1 ? (
-      <a
-        key={i}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="break-all text-av-blue underline hover:text-navy"
-      >
+      <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="break-all text-av-blue underline hover:text-navy">
         {part}
       </a>
     ) : (
@@ -286,9 +280,7 @@ export default function BookingPublic() {
         <div className="border-b border-slate-100 px-6 py-5">
           <h1 className="text-lg font-bold text-navy">{info ? info.title : "Book a meeting"}</h1>
           {info?.advisorName && <p className="text-sm text-slate-500">with {info.advisorName}</p>}
-          {info?.description && (
-            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{linkifyText(info.description)}</p>
-          )}
+          {info?.description && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{linkifyText(info.description)}</p>}
           <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
             <Clock size={12} />
             {info?.durationMinutes} minutes · times shown in {VIEWER_TZ}
@@ -406,9 +398,16 @@ export default function BookingPublic() {
                 {guestEmails.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {guestEmails.map((email) => (
-                      <span key={email} className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy">
+                      <span
+                        key={email}
+                        className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-navy"
+                      >
                         {email}
-                        <button type="button" onClick={() => setGuestEmails((g) => g.filter((e) => e !== email))} className="text-slate-400 hover:text-av-red">
+                        <button
+                          type="button"
+                          onClick={() => setGuestEmails((g) => g.filter((e) => e !== email))}
+                          className="text-slate-400 hover:text-av-red"
+                        >
                           <X size={11} />
                         </button>
                       </span>

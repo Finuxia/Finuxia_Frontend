@@ -81,9 +81,7 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
           )}
           <span className={`truncate ${!value && !isLoading && !isError ? "text-slate-400" : ""}`}>{triggerLabel}</span>
           {selectedSlot && !selectedSlot.available && (
-            <span className="shrink-0 rounded-full bg-av-red/10 px-1.5 py-0.5 text-[10px] font-semibold text-av-red">
-              Busy
-            </span>
+            <span className="shrink-0 rounded-full bg-av-red/10 px-1.5 py-0.5 text-[10px] font-semibold text-av-red">Busy</span>
           )}
         </span>
         <ChevronDown size={15} className={`shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
@@ -103,9 +101,7 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
         </div>
       )}
 
-      {status === "unchecked" && date && (
-        <p className="text-xs text-slate-400">Connect Google Calendar to see busy times here.</p>
-      )}
+      {status === "unchecked" && date && <p className="text-xs text-slate-400">Connect Google Calendar to see busy times here.</p>}
 
       {open && !isTriggerDisabled && (
         <div

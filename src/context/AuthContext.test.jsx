@@ -54,7 +54,7 @@ describe("AuthProvider", () => {
   });
 
   it("logging out clears the cached client data, so the next person at a shared computer cannot read it", async () => {
-    localStorage.setItem("advisorpilot.clients.advisor@example.com", "[{\"id\":1}]");
+    localStorage.setItem("advisorpilot.clients.advisor@example.com", '[{"id":1}]');
     renderWithProviders(<Probe />, { providers: ["router", "toast", "auth"] });
     await screen.findByText("signed in as Test Advisor");
     await userEvent.click(screen.getByText("log out"));
@@ -63,7 +63,10 @@ describe("AuthProvider", () => {
   });
 
   it("a session that can no longer be refreshed signs the user out and wipes the cache", async () => {
-    server.use(http.get(`${API}/api/billing/me`, () => new HttpResponse(null, { status: 401 })), http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 })));
+    server.use(
+      http.get(`${API}/api/billing/me`, () => new HttpResponse(null, { status: 401 })),
+      http.post(`${API}/api/auth/refresh`, () => new HttpResponse(null, { status: 401 }))
+    );
     localStorage.setItem("advisorpilot.clients.advisor@example.com", "[]");
     renderWithProviders(<Probe />, { providers: ["router", "toast", "auth"] });
     expect(await screen.findByText("signed out")).toBeInTheDocument();

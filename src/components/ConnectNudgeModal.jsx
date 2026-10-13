@@ -71,8 +71,8 @@ export default function ConnectNudgeModal() {
           </button>
         </div>
         <p className="mb-4 text-sm text-slate-500">
-          For the best experience, connect Google Drive and Google Calendar — client folders, meetings, and booking
-          links all depend on them.
+          For the best experience, connect Google Drive and Google Calendar — client folders, meetings, and booking links all depend on
+          them.
         </p>
 
         <div className="flex flex-col gap-2.5">
@@ -86,9 +86,7 @@ export default function ConnectNudgeModal() {
                 <HardDrive size={15} className="text-gold-dark" />
                 Google Drive
               </span>
-              <span className="text-xs font-medium text-gold-dark">
-                {connecting === "drive" ? "Connecting..." : "Connect"}
-              </span>
+              <span className="text-xs font-medium text-gold-dark">{connecting === "drive" ? "Connecting..." : "Connect"}</span>
             </button>
           )}
           {calendarNeeded && (
@@ -101,9 +99,7 @@ export default function ConnectNudgeModal() {
                 <CalendarClock size={15} className="text-gold-dark" />
                 Google Calendar
               </span>
-              <span className="text-xs font-medium text-gold-dark">
-                {connecting === "calendar" ? "Connecting..." : "Connect"}
-              </span>
+              <span className="text-xs font-medium text-gold-dark">{connecting === "calendar" ? "Connecting..." : "Connect"}</span>
             </button>
           )}
         </div>

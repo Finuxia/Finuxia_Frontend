@@ -104,17 +104,23 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
   };
 
   return (
-    <div role="presentation"
+    <div
+      role="presentation"
       className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
-      <div role="presentation"
+      <div
+        role="presentation"
         className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-lg sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <h2 className="text-lg font-semibold text-navy">{isEdit ? "Edit Booking Link" : "New Booking Link"}</h2>
-          <button onClick={onClose} className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
+            aria-label="Close"
+          >
             <X size={20} />
           </button>
         </div>
@@ -125,8 +131,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
               <div className="flex items-start gap-2">
                 <CalendarClock size={15} className="mt-0.5 shrink-0 text-av-amber" />
                 <p className="text-xs text-slate-600">
-                  Connect Google Calendar so bookings through this link confirm instantly with a Google Meet link,
-                  no approval needed.
+                  Connect Google Calendar so bookings through this link confirm instantly with a Google Meet link, no approval needed.
                 </p>
               </div>
               <button
@@ -210,14 +215,12 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           </label>
           {locationType === "zoom" && (
             <p className="-mt-2 text-xs text-slate-400">
-              Needs a connected Zoom account (Profile → Zoom) — without one, bookings still work but land pending
-              for you to add the link yourself.
+              Needs a connected Zoom account (Profile → Zoom) — without one, bookings still work but land pending for you to add the link
+              yourself.
             </p>
           )}
           {locationType === "ask_invitee" && (
-            <p className="-mt-2 text-xs text-slate-400">
-              The client will be asked where they'd like to meet when they book.
-            </p>
+            <p className="-mt-2 text-xs text-slate-400">The client will be asked where they'd like to meet when they book.</p>
           )}
           {LOCATION_VALUE_FIELD[locationType] && (
             <label className="-mt-2 flex flex-col gap-1.5">
@@ -238,9 +241,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
             <Switch label="Allow guests" checked={guestsAllowed} onChange={(e) => setGuestsAllowed(e.target.checked)} />
           </div>
           {guestsAllowed && (
-            <p className="-mt-2 text-xs text-slate-400">
-              Clients will see a field to add guest emails when booking through this link.
-            </p>
+            <p className="-mt-2 text-xs text-slate-400">Clients will see a field to add guest emails when booking through this link.</p>
           )}
 
           <div className="flex flex-col gap-2">
@@ -316,7 +317,11 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
               <span />
             )}
             <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+              >
                 Cancel
               </button>
               <button

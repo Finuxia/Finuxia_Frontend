@@ -127,8 +127,8 @@ export default function AvailabilityPanel() {
       <div className="mb-4 flex flex-col gap-1.5">
         <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Timezone</span>
         <p className="text-xs text-slate-400">
-          Hours below are in this timezone — clients see them converted to their own. Wrong? Pick the right one, or
-          re-detect it from this browser.
+          Hours below are in this timezone — clients see them converted to their own. Wrong? Pick the right one, or re-detect it from this
+          browser.
         </p>
         <div className="flex items-center gap-2">
           <select
@@ -136,9 +136,7 @@ export default function AvailabilityPanel() {
             onChange={(e) => setAvailability((s) => ({ ...s, timezone: e.target.value }))}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
           >
-            {!TIMEZONES.includes(availability.timezone) && (
-              <option value={availability.timezone}>{availability.timezone}</option>
-            )}
+            {!TIMEZONES.includes(availability.timezone) && <option value={availability.timezone}>{availability.timezone}</option>}
             {TIMEZONES.map((tz) => (
               <option key={tz} value={tz}>
                 {tz}
@@ -173,17 +171,9 @@ export default function AvailabilityPanel() {
               <span className="w-9 text-xs font-medium text-navy">{day.label}</span>
               {enabled ? (
                 <>
-                  <TimeInput
-                    value={window.start}
-                    onChange={(time) => updateDayTime(day.key, "start", time)}
-                    className="w-32"
-                  />
+                  <TimeInput value={window.start} onChange={(time) => updateDayTime(day.key, "start", time)} className="w-32" />
                   <span className="text-xs text-slate-400">to</span>
-                  <TimeInput
-                    value={window.end}
-                    onChange={(time) => updateDayTime(day.key, "end", time)}
-                    className="w-32"
-                  />
+                  <TimeInput value={window.end} onChange={(time) => updateDayTime(day.key, "end", time)} className="w-32" />
                 </>
               ) : (
                 <span className="text-xs text-slate-400">Unavailable</span>

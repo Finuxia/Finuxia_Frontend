@@ -138,8 +138,7 @@ export default function BookingRequests() {
       ) : (
         <div className="flex items-start gap-2 rounded-xl border border-dashed border-av-amber/40 bg-av-amber/5 px-4 py-3 text-sm text-av-amber">
           <AlertTriangle size={15} className="mt-0.5 shrink-0" />
-          Connect Google Calendar on your Profile page to skip the approval step entirely and add meetings
-          automatically.
+          Connect Google Calendar on your Profile page to skip the approval step entirely and add meetings automatically.
         </div>
       )}
 
@@ -227,9 +226,7 @@ function RequestCard({ req, busy, onApprove, onCancel, onReschedule }) {
               </>
             )}
           </p>
-          {req.guestEmails?.length > 0 && (
-            <p className="mt-1 text-xs text-slate-400">Guests: {req.guestEmails.join(", ")}</p>
-          )}
+          {req.guestEmails?.length > 0 && <p className="mt-1 text-xs text-slate-400">Guests: {req.guestEmails.join(", ")}</p>}
           {req.answers?.length > 0 && (
             <div className="mt-1.5 flex flex-col gap-0.5">
               {req.answers.map((a) => (
@@ -284,8 +281,16 @@ function RescheduleModal({ req, onClose, onConfirm }) {
   const [time, setTime] = useState(req.time);
 
   return (
-    <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div role="presentation" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        role="presentation"
+        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="mb-4 text-lg font-semibold text-navy">Reschedule {req.clientName}</h2>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">

@@ -72,23 +72,15 @@ export default function Guide() {
                       className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
                       aria-expanded={open}
                     >
-                      <span className={`text-sm font-semibold ${open ? "text-navy" : "text-slate-700"}`}>
-                        {item.question}
-                      </span>
+                      <span className={`text-sm font-semibold ${open ? "text-navy" : "text-slate-700"}`}>{item.question}</span>
                       <ChevronDown
                         size={18}
                         className={`shrink-0 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                       />
                     </button>
-                    <div
-                      className={`grid transition-all duration-200 ease-out ${
-                        open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                      }`}
-                    >
+                    <div className={`grid transition-all duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                       <div className="overflow-hidden">
-                        <p className="whitespace-pre-line px-5 pb-4 text-sm leading-relaxed text-slate-600">
-                          {item.answer}
-                        </p>
+                        <p className="whitespace-pre-line px-5 pb-4 text-sm leading-relaxed text-slate-600">{item.answer}</p>
                       </div>
                     </div>
                   </div>

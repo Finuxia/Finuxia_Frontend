@@ -96,8 +96,8 @@ export default function GoogleCalendarPanel() {
         <h2 className="mb-1 text-sm font-semibold text-navy">Google Calendar</h2>
         <p className="text-sm text-slate-500">
           Not configured yet — add a Google OAuth client as{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_CALENDAR_CLIENT_ID</code> on
-          the backend to enable this.
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_CALENDAR_CLIENT_ID</code> on the backend to enable
+          this.
         </p>
       </section>
     );

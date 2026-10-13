@@ -15,12 +15,14 @@ const ClientsContext = createContext(null);
 // Ids for things that live *inside* a client (notes) or user state (groups):
 // unique per call, no timestamps.
 const newLocalId = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
 
 function normalize(clients) {
   return clients.map((c) => ({
     ...c,
-    nextFollowUp: c.followUpDate ? calcNextFollowUp(c.followUpDate) : c.nextFollowUp ?? "TBD",
+    nextFollowUp: c.followUpDate ? calcNextFollowUp(c.followUpDate) : (c.nextFollowUp ?? "TBD"),
     telegram: c.telegram ?? "",
     referredBy: c.referredBy ?? "",
     preferredContact: c.preferredContact ?? "phone",
@@ -390,28 +392,18 @@ export function ClientsProvider({ children }) {
   const addNote = (clientId, text) => {
     if (!text?.trim()) return;
     setClients((prev) =>
-      prev.map((c) =>
-        c.id === clientId
-          ? { ...c, notes: [{ id: newLocalId(), text: text.trim(), date: todayISO() }, ...c.notes] }
-          : c
-      )
+      prev.map((c) => (c.id === clientId ? { ...c, notes: [{ id: newLocalId(), text: text.trim(), date: todayISO() }, ...c.notes] } : c))
     );
   };
 
   const editNote = (clientId, noteId, text) => {
     setClients((prev) =>
-      prev.map((c) =>
-        c.id === clientId
-          ? { ...c, notes: c.notes.map((n) => (n.id === noteId ? { ...n, text } : n)) }
-          : c
-      )
+      prev.map((c) => (c.id === clientId ? { ...c, notes: c.notes.map((n) => (n.id === noteId ? { ...n, text } : n)) } : c))
     );
   };
 
   const deleteNote = (clientId, noteId) => {
-    setClients((prev) =>
-      prev.map((c) => (c.id === clientId ? { ...c, notes: c.notes.filter((n) => n.id !== noteId) } : c))
-    );
+    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, notes: c.notes.filter((n) => n.id !== noteId) } : c)));
   };
 
   /**
@@ -440,9 +432,7 @@ export function ClientsProvider({ children }) {
           }
         }
 
-        const notes = note?.trim()
-          ? [{ id: newLocalId(), text: note.trim(), date: todayISO(), stage: stageId }, ...c.notes]
-          : c.notes;
+        const notes = note?.trim() ? [{ id: newLocalId(), text: note.trim(), date: todayISO(), stage: stageId }, ...c.notes] : c.notes;
 
         const lastContact = date
           ? `${status === "completed" ? "Met" : status === "skipped" ? "Skipped meeting" : "Scheduled"} — ${date}`
@@ -499,17 +489,13 @@ export function ClientsProvider({ children }) {
 
   const rescheduleFollowUp = (clientId, newDate) => {
     setClients((prev) =>
-      prev.map((c) =>
-        c.id === clientId ? { ...c, followUpDate: newDate, nextFollowUp: calcNextFollowUp(newDate) } : c
-      )
+      prev.map((c) => (c.id === clientId ? { ...c, followUpDate: newDate, nextFollowUp: calcNextFollowUp(newDate) } : c))
     );
   };
 
   const rescheduleMeeting = (clientId, newDate, time) => {
     setClients((prev) =>
-      prev.map((c) =>
-        c.id === clientId ? { ...c, meeting: { ...(c.meeting || {}), date: newDate, time: time || c.meeting?.time } } : c
-      )
+      prev.map((c) => (c.id === clientId ? { ...c, meeting: { ...(c.meeting || {}), date: newDate, time: time || c.meeting?.time } } : c))
     );
   };
 
@@ -519,9 +505,7 @@ export function ClientsProvider({ children }) {
         c.id === clientId
           ? {
               ...c,
-              files: c.files.map((f) =>
-                f.id === fileId ? { ...f, status: f.status === "pending" ? "done" : "pending" } : f
-              ),
+              files: c.files.map((f) => (f.id === fileId ? { ...f, status: f.status === "pending" ? "done" : "pending" } : f)),
             }
           : c
       )
@@ -530,8 +514,7 @@ export function ClientsProvider({ children }) {
 
   // Done-state is per (client, taskType, day) so My Day can track completion
   // for any selected date, not just today. `dateKey` defaults to today.
-  const isTaskDoneToday = (clientId, taskType, dateKey = todayISO()) =>
-    Boolean(doneTasks[`${clientId}:${taskType}:${dateKey}`]);
+  const isTaskDoneToday = (clientId, taskType, dateKey = todayISO()) => Boolean(doneTasks[`${clientId}:${taskType}:${dateKey}`]);
 
   const toggleDailyTask = (clientId, taskType, dateKey = todayISO()) => {
     const key = `${clientId}:${taskType}:${dateKey}`;
@@ -595,16 +578,13 @@ export function ClientsProvider({ children }) {
         const has = g.memberIds.some((id) => String(id) === String(clientId));
         return {
           ...g,
-          memberIds: has
-            ? g.memberIds.filter((id) => String(id) !== String(clientId))
-            : [...g.memberIds, clientId],
+          memberIds: has ? g.memberIds.filter((id) => String(id) !== String(clientId)) : [...g.memberIds, clientId],
         };
       })
     );
   };
 
-  const getGroupsForClient = (clientId) =>
-    groups.filter((g) => g.memberIds.some((id) => String(id) === String(clientId)));
+  const getGroupsForClient = (clientId) => groups.filter((g) => g.memberIds.some((id) => String(id) === String(clientId)));
 
   const value = useMemo(
     () => ({

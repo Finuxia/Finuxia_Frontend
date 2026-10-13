@@ -32,10 +32,7 @@ export function readCachedEvents(userEmail) {
 
 export function writeCachedEvents(userEmail, events) {
   try {
-    localStorage.setItem(
-      keyFor(userEmail),
-      JSON.stringify({ version: VERSION, cachedAt: Date.now(), events })
-    );
+    localStorage.setItem(keyFor(userEmail), JSON.stringify({ version: VERSION, cachedAt: Date.now(), events }));
   } catch {
     // Quota or serialization failure is non-fatal — the live list still works.
   }

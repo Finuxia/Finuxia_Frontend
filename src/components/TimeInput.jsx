@@ -21,14 +21,7 @@ const OPTIONS = [...ALL_TIMES.slice(ROTATE_AT), ...ALL_TIMES.slice(0, ROTATE_AT)
  * the dropdown offers every 5-minute mark, matching TimeSlotSelect's look.
  * Value/onChange stay "HH:MM" 24-hour, same as before — a drop-in swap.
  */
-export default function TimeInput({
-  value,
-  onChange,
-  label,
-  disabled = false,
-  placeholder = "Select time...",
-  className = "",
-}) {
+export default function TimeInput({ value, onChange, label, disabled = false, placeholder = "Select time...", className = "" }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(value ? formatSlotLabel(value) : "");
   const ref = useRef(null);

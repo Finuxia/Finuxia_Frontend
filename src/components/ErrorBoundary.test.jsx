@@ -248,10 +248,26 @@ describe("RouteErrorBoundary", () => {
       const [ok, setOk] = useState(false);
       return (
         <>
-          <Link to="/b" onClick={() => setOk(true)}>go to b</Link>
+          <Link to="/b" onClick={() => setOk(true)}>
+            go to b
+          </Link>
           <Routes>
-            <Route path="/a" element={<RouteErrorBoundary><Page ok={ok} /></RouteErrorBoundary>} />
-            <Route path="/b" element={<RouteErrorBoundary><Page ok={ok} /></RouteErrorBoundary>} />
+            <Route
+              path="/a"
+              element={
+                <RouteErrorBoundary>
+                  <Page ok={ok} />
+                </RouteErrorBoundary>
+              }
+            />
+            <Route
+              path="/b"
+              element={
+                <RouteErrorBoundary>
+                  <Page ok={ok} />
+                </RouteErrorBoundary>
+              }
+            />
           </Routes>
         </>
       );

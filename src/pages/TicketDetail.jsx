@@ -102,9 +102,7 @@ export default function TicketDetail() {
               </p>
             </div>
           </div>
-          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badge}`}>
-            {statusMeta.label}
-          </span>
+          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badge}`}>{statusMeta.label}</span>
         </div>
         <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600">{ticket.description}</p>
       </section>
@@ -128,9 +126,7 @@ export default function TicketDetail() {
                 <div className={`mb-1 flex items-center gap-1.5 text-xs font-semibold ${c.isAdmin ? "text-gold" : "text-slate-500"}`}>
                   {c.isAdmin && <ShieldCheck size={12} />}
                   {c.authorName}
-                  <span className={`font-normal ${c.isAdmin ? "text-slate-300" : "text-slate-400"}`}>
-                    · {formatDateTime(c.createdAt)}
-                  </span>
+                  <span className={`font-normal ${c.isAdmin ? "text-slate-300" : "text-slate-400"}`}>· {formatDateTime(c.createdAt)}</span>
                 </div>
                 <p className="whitespace-pre-line text-sm leading-relaxed">{c.message}</p>
               </div>

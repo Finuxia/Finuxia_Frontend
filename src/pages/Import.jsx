@@ -86,25 +86,15 @@ export default function Import() {
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="mb-4 text-sm text-slate-500">
           Expected columns:{" "}
-          <span className="font-medium text-navy">
-            Name, Phone, Email, Telegram, Referred By, Stage, Last Contact, Next Follow-up
-          </span>
-          . Only <span className="font-medium text-navy">Name</span> is required.
+          <span className="font-medium text-navy">Name, Phone, Email, Telegram, Referred By, Stage, Last Contact, Next Follow-up</span>.
+          Only <span className="font-medium text-navy">Name</span> is required.
         </p>
 
         <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 px-6 py-10 text-center transition hover:border-gold hover:bg-gold/5">
           <UploadCloud size={28} className="text-slate-400" />
-          <span className="text-sm font-semibold text-navy">
-            {fileName || "Click to choose a .xlsx or .csv file"}
-          </span>
+          <span className="text-sm font-semibold text-navy">{fileName || "Click to choose a .xlsx or .csv file"}</span>
           <span className="text-xs text-slate-400">or drag and drop</span>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".xlsx,.csv"
-            className="hidden"
-            onChange={(e) => handleFile(e.target.files?.[0])}
-          />
+          <input ref={fileRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
         </label>
 
         {parsing && <p className="mt-3 text-sm text-slate-500">Reading file...</p>}
@@ -117,10 +107,7 @@ export default function Import() {
               {parsedRows.length} row{parsedRows.length === 1 ? "" : "s"} detected in {fileName}
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={reset}
-                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-200"
-              >
+              <button onClick={reset} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-200">
                 Cancel
               </button>
               <button

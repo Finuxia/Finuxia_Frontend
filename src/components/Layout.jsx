@@ -1,7 +1,31 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { Plus, LayoutGrid, CalendarDays, Users, Clock, Upload, BarChart3, BookOpen, Sparkles, Target, Presentation, ChevronDown, User as UserIcon, LogOut, LifeBuoy, UsersRound, FolderCog, FileStack, CalendarClock, Link2, Info, Package, CreditCard } from "lucide-react";
+import {
+  Plus,
+  LayoutGrid,
+  CalendarDays,
+  Users,
+  Clock,
+  Upload,
+  BarChart3,
+  BookOpen,
+  Sparkles,
+  Target,
+  Presentation,
+  ChevronDown,
+  User as UserIcon,
+  LogOut,
+  LifeBuoy,
+  UsersRound,
+  FolderCog,
+  FileStack,
+  CalendarClock,
+  Link2,
+  Info,
+  Package,
+  CreditCard,
+} from "lucide-react";
 import Logo from "./Logo";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
@@ -309,7 +333,7 @@ function UserMenu({ user }) {
         {user?.hasAvatar ? (
           <img src={api.avatarUrl(user.id)} alt="" className="h-full w-full object-cover" />
         ) : (
-          user?.name?.[0]?.toUpperCase() ?? "?"
+          (user?.name?.[0]?.toUpperCase() ?? "?")
         )}
       </button>
       {open &&

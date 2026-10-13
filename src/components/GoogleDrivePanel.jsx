@@ -125,8 +125,8 @@ export default function GoogleDrivePanel() {
         <p className="text-sm text-slate-500">
           Not configured yet — an admin needs to add a Google OAuth client as{" "}
           <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_DRIVE_CLIENT_ID</code> /{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_DRIVE_CLIENT_SECRET</code> on
-          the backend to enable this.
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_DRIVE_CLIENT_SECRET</code> on the backend to enable
+          this.
         </p>
       </section>
     );
@@ -174,7 +174,11 @@ export default function GoogleDrivePanel() {
             className="flex items-center gap-1.5 rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-navy-light disabled:opacity-60"
           >
             <Link2 size={13} />
-            {connecting ? "Redirecting..." : status === "expired" || status === "revoked" ? "Reconnect Google Drive" : "Connect Google Drive"}
+            {connecting
+              ? "Redirecting..."
+              : status === "expired" || status === "revoked"
+                ? "Reconnect Google Drive"
+                : "Connect Google Drive"}
           </button>
         )}
       </div>
@@ -197,9 +201,7 @@ export default function GoogleDrivePanel() {
                   {rootFolder.name}
                   <ExternalLink size={11} className="shrink-0" />
                 </a>
-                <p className="text-xs text-slate-400">
-                  {rootFolder.isCustom ? "Your existing folder" : "Auto-created by Finuxia"}
-                </p>
+                <p className="text-xs text-slate-400">{rootFolder.isCustom ? "Your existing folder" : "Auto-created by Finuxia"}</p>
               </div>
               {rootFolder.isCustom && (
                 <button
@@ -213,8 +215,8 @@ export default function GoogleDrivePanel() {
             </div>
           ) : (
             <p className="mb-3 text-xs text-slate-400">
-              Not set yet — client folders will be created under a new "Finuxia CRM Clients" folder unless you
-              point this at one of your own below.
+              Not set yet — client folders will be created under a new "Finuxia CRM Clients" folder unless you point this at one of your own
+              below.
             </p>
           )}
           <form onSubmit={handleSaveFolder} className="flex gap-2">

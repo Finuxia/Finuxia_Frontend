@@ -210,10 +210,7 @@ async function request(path, { method = "GET", body, headers: extraHeaders } = {
       const header = res.headers.get("Retry-After");
       throw new ApiError(throttledMessage(header), { status: 429, data, retryAfter: parseInt(header ?? "", 10) || undefined });
     }
-    const message =
-      data?.error ||
-      firstErrorMessage(data) ||
-      `Request failed (${res.status})`;
+    const message = data?.error || firstErrorMessage(data) || `Request failed (${res.status})`;
     throw new ApiError(String(message), { status: res.status, data });
   }
 
@@ -244,10 +241,7 @@ async function requestMultipart(path, formData) {
       const header = res.headers.get("Retry-After");
       throw new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header ?? "", 10) || undefined });
     }
-    const message =
-      data?.error ||
-      firstErrorMessage(data) ||
-      `Request failed (${res.status})`;
+    const message = data?.error || firstErrorMessage(data) || `Request failed (${res.status})`;
     throw new ApiError(String(message), { status: res.status });
   }
   return data;
@@ -448,8 +442,7 @@ export const api = {
   /** @returns {Promise<import("./types").SessionResponse>} */
   register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
   /** @returns {Promise<import("./types").SessionResponse>} */
-  login: (identifier, password) =>
-    request("/api/auth/login", { method: "POST", body: { identifier, password } }),
+  login: (identifier, password) => request("/api/auth/login", { method: "POST", body: { identifier, password } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
   /** @returns {Promise<import("./types").SessionResponse>} */
   me: () => request("/api/auth/me"),
@@ -462,10 +455,8 @@ export const api = {
   },
   deleteAvatar: () => request("/api/auth/me/avatar", { method: "DELETE" }),
   avatarUrl: (userId) => `${BASE_URL}/api/auth/avatar/${userId}`,
-  forgotPassword: (email) =>
-    request("/api/auth/forgot-password", { method: "POST", body: { email } }),
-  resetPassword: (uid, token, password) =>
-    request("/api/auth/reset-password", { method: "POST", body: { uid, token, password } }),
+  forgotPassword: (email) => request("/api/auth/forgot-password", { method: "POST", body: { email } }),
+  resetPassword: (uid, token, password) => request("/api/auth/reset-password", { method: "POST", body: { uid, token, password } }),
   changePassword: (currentPassword, newPassword) =>
     request("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
   verifyEmail: (uid, token) => request("/api/auth/verify-email", { method: "POST", body: { uid, token } }),
@@ -491,8 +482,7 @@ export const api = {
   // advisor presentations (metadata; PDFs uploaded via admin)
   getPresentations: () => request("/api/presentations"),
   // Authenticated downloads (cookie + silent refresh); the PDFs are part of a paid plan.
-  downloadPresentationPdf: (slug, fallbackName) =>
-    downloadFile(`/api/presentations/${encodeURIComponent(slug)}/pdf`, fallbackName),
+  downloadPresentationPdf: (slug, fallbackName) => downloadFile(`/api/presentations/${encodeURIComponent(slug)}/pdf`, fallbackName),
   downloadPresentationVariantPdf: (slug, variantId, fallbackName) =>
     downloadFile(`/api/presentations/${encodeURIComponent(slug)}/variants/${encodeURIComponent(variantId)}/pdf`, fallbackName),
 
@@ -529,8 +519,7 @@ export const api = {
     request(`/api/followups/rules/${encodeURIComponent(clientRef)}`, { method: "PUT", body: payload }),
 
   // Google Drive (server-held OAuth) — per-advisor connect status + client folders
-  getDriveConnectUrl: (nextPath) =>
-    request(`/api/drive/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
+  getDriveConnectUrl: (nextPath) => request(`/api/drive/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
   getDriveStatus: () => request("/api/drive/status"),
   disconnectDrive: () => request("/api/drive/disconnect", { method: "POST" }),
   setDriveRootFolder: (folder) => request("/api/drive/root-folder", { method: "PUT", body: { folder } }),
@@ -640,16 +629,14 @@ export const api = {
   getBookingRequests: () => api.getAllPages("/api/booking/requests"),
   approveBookingRequest: (id) => request(`/api/booking/requests/${id}/approve`, { method: "POST" }),
   cancelBookingRequest: (id) => request(`/api/booking/requests/${id}/cancel`, { method: "POST" }),
-  rescheduleBookingRequest: (id, date, time) =>
-    request(`/api/booking/requests/${id}/reschedule`, { method: "POST", body: { date, time } }),
+  rescheduleBookingRequest: (id, date, time) => request(`/api/booking/requests/${id}/reschedule`, { method: "POST", body: { date, time } }),
   setBookingRequestGoogleEvent: (id, googleEventId) =>
     request(`/api/booking/requests/${id}/google-event`, { method: "PUT", body: { googleEventId } }),
 
   // Server-side Calendar connection (see src.calendar_connect) — separate
   // from the browser-held one; this is what lets a booking auto-confirm and
   // land on the advisor's calendar instantly, no one logged in required.
-  getCalendarConnectUrl: (nextPath) =>
-    request(`/api/calendar-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
+  getCalendarConnectUrl: (nextPath) => request(`/api/calendar-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
   getCalendarConnectStatus: () => request("/api/calendar-connect/status"),
   disconnectCalendarConnect: () => request("/api/calendar-connect/disconnect", { method: "POST" }),
 
@@ -671,16 +658,13 @@ export const api = {
     }),
   updateCalendarEvent: (eventId, patch) =>
     request(`/api/calendar-connect/events/${encodeURIComponent(eventId)}`, { method: "PATCH", body: patch }),
-  deleteCalendarEvent: (eventId) =>
-    request(`/api/calendar-connect/events/${encodeURIComponent(eventId)}`, { method: "DELETE" }),
-  queryCalendarFreeBusy: (timeMin, timeMax) =>
-    request("/api/calendar-connect/freebusy", { method: "POST", body: { timeMin, timeMax } }),
+  deleteCalendarEvent: (eventId) => request(`/api/calendar-connect/events/${encodeURIComponent(eventId)}`, { method: "DELETE" }),
+  queryCalendarFreeBusy: (timeMin, timeMax) => request("/api/calendar-connect/freebusy", { method: "POST", body: { timeMin, timeMax } }),
 
   // Server-side Zoom connection (see src.zoom_connect) — same shape as the
   // Calendar connection above; only needed when a booking link's location
   // is set to Zoom.
-  getZoomConnectUrl: (nextPath) =>
-    request(`/api/zoom-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
+  getZoomConnectUrl: (nextPath) => request(`/api/zoom-connect/connect${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`),
   getZoomStatus: () => request("/api/zoom-connect/status"),
   disconnectZoom: () => request("/api/zoom-connect/disconnect", { method: "POST" }),
 
@@ -692,8 +676,7 @@ export const api = {
       }`,
       { auth: false }
     ),
-  requestBooking: (slug, payload) =>
-    request(`/api/booking/public/${encodeURIComponent(slug)}/request`, { method: "POST", body: payload }),
+  requestBooking: (slug, payload) => request(`/api/booking/public/${encodeURIComponent(slug)}/request`, { method: "POST", body: payload }),
 };
 
 // The full shareable link for an advisor's booking page.

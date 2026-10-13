@@ -19,8 +19,7 @@ const STATUS_OPTIONS = [
 export default function MeetingModal({ client, stage, onClose }) {
   const { updateStage, setStageGoogleEventId } = useClients();
   const { addToast } = useToast();
-  const { isConfigured, status: googleStatus, connect, createEvent, deleteEvent, checkAvailability } =
-    useGoogleCalendar();
+  const { isConfigured, status: googleStatus, connect, createEvent, deleteEvent, checkAvailability } = useGoogleCalendar();
   const stageState = client.stages[stage.id];
 
   const [date, setDate] = useState(stageState?.date ?? "");
@@ -122,11 +121,13 @@ export default function MeetingModal({ client, stage, onClose }) {
           : "Connect Google Calendar";
 
   return (
-    <div role="presentation"
+    <div
+      role="presentation"
       className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
-      <div role="presentation"
+      <div
+        role="presentation"
         className="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-md sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -156,12 +157,7 @@ export default function MeetingModal({ client, stage, onClose }) {
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
-            <TimeSlotSelect
-              date={date}
-              value={time}
-              onChange={setTime}
-              durationMinutes={MEETING_DURATION_MINUTES}
-            />
+            <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={MEETING_DURATION_MINUTES} />
           </div>
 
           {isConfigured && googleEventId && googleStatus === "connected" ? (

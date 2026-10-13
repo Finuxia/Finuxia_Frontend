@@ -13,7 +13,10 @@ export default function ModuleGate({ moduleKey, moduleName, children }) {
 
   if (!billing && billingStatus === "error") {
     return (
-      <div role="alert" className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+      <div
+        role="alert"
+        className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm"
+      >
         <p className="text-lg font-semibold text-navy">We couldn't check your plan</p>
         <p className="max-w-sm text-sm text-slate-500">Check your connection and try again.</p>
         <button

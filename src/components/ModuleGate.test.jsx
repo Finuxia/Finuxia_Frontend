@@ -54,9 +54,7 @@ describe("ModuleGate", () => {
 
   it("shows an error with a retry when the plan cannot be fetched, and recovers on retry", async () => {
     let attempts = 0;
-    server.use(
-      http.get(`${API}/api/billing/me`, () => (++attempts === 1 ? HttpResponse.error() : HttpResponse.json(testBilling)))
-    );
+    server.use(http.get(`${API}/api/billing/me`, () => (++attempts === 1 ? HttpResponse.error() : HttpResponse.json(testBilling))));
     render(<Gated />);
     expect(await screen.findByRole("alert")).toHaveTextContent("couldn't check your plan");
     expect(screen.queryByText(/isn't included/)).not.toBeInTheDocument(); // a failed fetch is not "not entitled"

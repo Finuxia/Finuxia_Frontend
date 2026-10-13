@@ -34,7 +34,8 @@ describe("removed dead code stays removed", () => {
       for (const name of readdirSync(dir)) {
         const path = `${dir}/${name}`;
         if (statSync(path).isDirectory()) walk(path);
-        else if (/\.(jsx?|mjs)$/.test(name) && !/\.test\./.test(name)) for (const m of read(path).matchAll(/import\.meta\.env\.(VITE_[A-Z0-9_]+)/g)) found.add(m[1]);
+        else if (/\.(jsx?|mjs)$/.test(name) && !/\.test\./.test(name))
+          for (const m of read(path).matchAll(/import\.meta\.env\.(VITE_[A-Z0-9_]+)/g)) found.add(m[1]);
       }
     };
     walk("src");

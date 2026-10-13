@@ -88,11 +88,11 @@ export default function RemindersSection({ date, isToday, reminders, onToggleSta
                 {done && <span className="h-2 w-2 rounded-full bg-white" />}
               </button>
               <button onClick={() => onEdit(r)} className="min-w-0 flex-1 text-left">
-                <p className={`flex items-center gap-1.5 truncate text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-navy"}`}>
+                <p
+                  className={`flex items-center gap-1.5 truncate text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-navy"}`}
+                >
                   <span className="truncate">{r.title}</span>
-                  {r.repeat && r.repeat !== "none" && (
-                    <Repeat size={11} className="shrink-0 text-slate-400" aria-label="Repeats" />
-                  )}
+                  {r.repeat && r.repeat !== "none" && <Repeat size={11} className="shrink-0 text-slate-400" aria-label="Repeats" />}
                 </p>
                 <p className="flex items-center gap-2 truncate text-xs text-slate-400">
                   {overdue ? (

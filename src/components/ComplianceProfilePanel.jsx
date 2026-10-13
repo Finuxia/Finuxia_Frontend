@@ -51,15 +51,12 @@ export default function ComplianceProfilePanel() {
   const [supervisorPhone, setSupervisorPhone] = useState(user?.supervisorPhone || "");
   const [ownershipRelationship, setOwnershipRelationship] = useState(user?.ownershipRelationship || "");
   const [compensationModel, setCompensationModel] = useState(user?.compensationModel || "");
-  const [additionalCompensationEligible, setAdditionalCompensationEligible] = useState(
-    Boolean(user?.additionalCompensationEligible)
-  );
+  const [additionalCompensationEligible, setAdditionalCompensationEligible] = useState(Boolean(user?.additionalCompensationEligible));
   const [standingDisclosure, setStandingDisclosure] = useState(user?.standingDisclosure || "");
 
   const isQuebecLicensed = licensedProvinces.includes("QC");
 
-  const toggle = (list, setList, value) =>
-    setList((l) => (l.includes(value) ? l.filter((v) => v !== value) : [...l, value]));
+  const toggle = (list, setList, value) => setList((l) => (l.includes(value) ? l.filter((v) => v !== value) : [...l, value]));
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -102,15 +99,31 @@ export default function ComplianceProfilePanel() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Professional Title</span>
-            <input value={professionalTitle} onChange={(e) => setProfessionalTitle(e.target.value)} placeholder="Financial Advisor" className={inputClass} />
+            <input
+              value={professionalTitle}
+              onChange={(e) => setProfessionalTitle(e.target.value)}
+              placeholder="Financial Advisor"
+              className={inputClass}
+            />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Business Email</span>
-            <input type="email" value={businessEmail} onChange={(e) => setBusinessEmail(e.target.value)} placeholder="advisor@domain.ca" className={inputClass} />
+            <input
+              type="email"
+              value={businessEmail}
+              onChange={(e) => setBusinessEmail(e.target.value)}
+              placeholder="advisor@domain.ca"
+              className={inputClass}
+            />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Business Phone</span>
-            <input value={businessPhone} onChange={(e) => setBusinessPhone(e.target.value)} placeholder="(403) 555-0000" className={inputClass} />
+            <input
+              value={businessPhone}
+              onChange={(e) => setBusinessPhone(e.target.value)}
+              placeholder="(403) 555-0000"
+              className={inputClass}
+            />
           </label>
         </div>
       </section>
@@ -123,7 +136,9 @@ export default function ComplianceProfilePanel() {
             <select value={agencyName} onChange={(e) => setAgencyName(e.target.value)} className={inputClass}>
               <option value="">Select...</option>
               {AGENCY_OPTIONS.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>
+                  {o}
+                </option>
               ))}
             </select>
           </label>
@@ -135,9 +150,13 @@ export default function ComplianceProfilePanel() {
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Branch</span>
             <select value={businessBranchName} onChange={(e) => setBusinessBranchName(e.target.value)} className={inputClass}>
               <option value="">Select...</option>
-              {[...BRANCH_OPTIONS, ...(businessBranchName && !BRANCH_OPTIONS.includes(businessBranchName) ? [businessBranchName] : [])].map((o) => (
-                <option key={o} value={o}>{o}</option>
-              ))}
+              {[...BRANCH_OPTIONS, ...(businessBranchName && !BRANCH_OPTIONS.includes(businessBranchName) ? [businessBranchName] : [])].map(
+                (o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                )
+              )}
             </select>
           </label>
         </div>
@@ -151,10 +170,17 @@ export default function ComplianceProfilePanel() {
             <label
               key={code}
               className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
-                licensedProvinces.includes(code) ? "border-gold bg-gold/10 text-gold-dark" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                licensedProvinces.includes(code)
+                  ? "border-gold bg-gold/10 text-gold-dark"
+                  : "border-slate-200 text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <input type="checkbox" checked={licensedProvinces.includes(code)} onChange={() => toggle(licensedProvinces, setLicensedProvinces, code)} className="sr-only" />
+              <input
+                type="checkbox"
+                checked={licensedProvinces.includes(code)}
+                onChange={() => toggle(licensedProvinces, setLicensedProvinces, code)}
+                className="sr-only"
+              />
               {code} — {name}
             </label>
           ))}
@@ -168,10 +194,17 @@ export default function ComplianceProfilePanel() {
                 <label
                   key={sector}
                   className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
-                    quebecSectors.includes(sector) ? "border-gold bg-gold/10 text-gold-dark" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    quebecSectors.includes(sector)
+                      ? "border-gold bg-gold/10 text-gold-dark"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  <input type="checkbox" checked={quebecSectors.includes(sector)} onChange={() => toggle(quebecSectors, setQuebecSectors, sector)} className="sr-only" />
+                  <input
+                    type="checkbox"
+                    checked={quebecSectors.includes(sector)}
+                    onChange={() => toggle(quebecSectors, setQuebecSectors, sector)}
+                    className="sr-only"
+                  />
                   {sector}
                 </label>
               ))}
@@ -212,10 +245,17 @@ export default function ComplianceProfilePanel() {
             <label
               key={c}
               className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
-                companiesRepresented.includes(c) ? "border-gold bg-gold/10 text-gold-dark" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                companiesRepresented.includes(c)
+                  ? "border-gold bg-gold/10 text-gold-dark"
+                  : "border-slate-200 text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <input type="checkbox" checked={companiesRepresented.includes(c)} onChange={() => toggle(companiesRepresented, setCompaniesRepresented, c)} className="sr-only" />
+              <input
+                type="checkbox"
+                checked={companiesRepresented.includes(c)}
+                onChange={() => toggle(companiesRepresented, setCompaniesRepresented, c)}
+                className="sr-only"
+              />
               {c}
             </label>
           ))}
@@ -258,7 +298,9 @@ export default function ComplianceProfilePanel() {
             <select value={ownershipRelationship} onChange={(e) => setOwnershipRelationship(e.target.value)} className={inputClass}>
               <option value="">Select...</option>
               {OWNERSHIP_OPTIONS.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>
+                  {o}
+                </option>
               ))}
             </select>
           </label>
@@ -267,23 +309,40 @@ export default function ComplianceProfilePanel() {
             <select value={compensationModel} onChange={(e) => setCompensationModel(e.target.value)} className={inputClass}>
               <option value="">Select...</option>
               {COMPENSATION_OPTIONS.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>
+                  {o}
+                </option>
               ))}
             </select>
           </label>
           <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
             <span className="text-sm text-navy">Additional compensation eligible?</span>
-            <Switch label="Additional compensation eligible?" checked={additionalCompensationEligible} onChange={(e) => setAdditionalCompensationEligible(e.target.checked)} />
+            <Switch
+              label="Additional compensation eligible?"
+              checked={additionalCompensationEligible}
+              onChange={(e) => setAdditionalCompensationEligible(e.target.checked)}
+            />
           </div>
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Known Standing Conflict / Additional Disclosure (optional)</span>
-            <textarea rows={3} value={standingDisclosure} onChange={(e) => setStandingDisclosure(e.target.value)} className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30" />
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Known Standing Conflict / Additional Disclosure (optional)
+            </span>
+            <textarea
+              rows={3}
+              value={standingDisclosure}
+              onChange={(e) => setStandingDisclosure(e.target.value)}
+              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            />
           </label>
         </div>
       </section>
 
       <div>
-        <button type="submit" disabled={saving} className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60">
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+        >
           {saving ? "Saving..." : "Save Compliance Profile"}
         </button>
       </div>

@@ -41,13 +41,19 @@ describe("the API client", () => {
     });
 
     it("digs the first message out of nested validation errors, never '[object Object]'", async () => {
-      server.use(http.get(`${API}/api/clients`, () => HttpResponse.json({ guestEmails: { 0: ["Enter a valid email address."] } }, { status: 400 })));
+      server.use(
+        http.get(`${API}/api/clients`, () => HttpResponse.json({ guestEmails: { 0: ["Enter a valid email address."] } }, { status: 400 }))
+      );
       const err = await api.getClients().catch((e) => e);
       expect(err.message).toBe("Enter a valid email address.");
     });
 
     it("keeps the body on the error, e.g. the server's copy on a 409 conflict", async () => {
-      server.use(http.patch(`${API}/api/clients/1`, () => HttpResponse.json({ error: "Changed elsewhere", client: { id: 1, version: 5 } }, { status: 409 })));
+      server.use(
+        http.patch(`${API}/api/clients/1`, () =>
+          HttpResponse.json({ error: "Changed elsewhere", client: { id: 1, version: 5 } }, { status: 409 })
+        )
+      );
       const err = await api.patchClient(1, { first: "A", version: 4 }).catch((e) => e);
       expect(err.status).toBe(409);
       expect(err.data.client.version).toBe(5);
@@ -146,7 +152,11 @@ describe("starting a purchase", () => {
       })
     );
     await api.purchasePlan(7);
-    expect(body).toEqual({ planId: 7, successUrl: `${window.location.origin}/billing/success`, cancelUrl: `${window.location.origin}/billing/cancel` });
+    expect(body).toEqual({
+      planId: 7,
+      successUrl: `${window.location.origin}/billing/success`,
+      cancelUrl: `${window.location.origin}/billing/cancel`,
+    });
   });
 });
 

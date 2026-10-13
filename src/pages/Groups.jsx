@@ -93,7 +93,9 @@ export default function Groups() {
                         onClick={() => navigate(`/clients/${c.id}`)}
                         className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-navy transition hover:bg-slate-50"
                       >
-                        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${AVATAR_BG[c.color] ?? "bg-navy"}`}>
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${AVATAR_BG[c.color] ?? "bg-navy"}`}
+                        >
                           {c.first[0]}
                           {c.last[0]}
                         </span>
@@ -118,9 +120,7 @@ export default function Groups() {
         </div>
       )}
 
-      {modalGroup !== undefined && (
-        <GroupModal group={modalGroup} onClose={() => setModalGroup(undefined)} onDelete={deleteGroup} />
-      )}
+      {modalGroup !== undefined && <GroupModal group={modalGroup} onClose={() => setModalGroup(undefined)} onDelete={deleteGroup} />}
     </div>
   );
 }

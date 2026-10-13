@@ -67,8 +67,7 @@ export default function ReconnectModal() {
           {status === "revoked" ? "Google Calendar access was revoked" : "Google Calendar session expired"}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Your meetings are still shown from your last sync, but reconnect to keep them up to date and add new
-          events.
+          Your meetings are still shown from your last sync, but reconnect to keep them up to date and add new events.
         </p>
 
         <div className="mt-5 flex flex-wrap justify-end gap-2">
@@ -78,10 +77,7 @@ export default function ReconnectModal() {
           >
             Disconnect
           </button>
-          <button
-            onClick={handleDismiss}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-          >
+          <button onClick={handleDismiss} className="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100">
             Later
           </button>
           <button

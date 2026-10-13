@@ -3,16 +3,7 @@ import { PIPELINE_STAGES, FIRST_STAGE_ID } from "./pipeline";
 
 // The columns the importer understands. Kept in one place so the downloadable
 // template always matches what the parser expects.
-export const TEMPLATE_COLUMNS = [
-  "Name",
-  "Phone",
-  "Email",
-  "Telegram",
-  "Referred By",
-  "Stage",
-  "Last Contact",
-  "Next Follow-up",
-];
+export const TEMPLATE_COLUMNS = ["Name", "Phone", "Email", "Telegram", "Referred By", "Stage", "Last Contact", "Next Follow-up"];
 
 // Sample row — its Name carries a clear "delete" marker; the importer skips
 // any row whose name says SAMPLE + delete, so it can never become a real client.
@@ -69,8 +60,7 @@ export function mapImportRows(rows, { colors, colorOffset = 0 }) {
     const lastContactDate = toISODate(dateValue(row.lastContact ?? row["Last Contact"]));
 
     const rawStage = text(row.stage || row.Stage).toLowerCase();
-    const matchedStage =
-      PIPELINE_STAGES.find((s) => s.label.toLowerCase() === rawStage || s.id === rawStage)?.id || FIRST_STAGE_ID;
+    const matchedStage = PIPELINE_STAGES.find((s) => s.label.toLowerCase() === rawStage || s.id === rawStage)?.id || FIRST_STAGE_ID;
 
     created.push({
       first,

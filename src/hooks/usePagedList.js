@@ -33,7 +33,9 @@ export default function usePagedList(path, params = {}) {
     const changed = key !== shownFor.current;
     shownFor.current = key;
     setState((s) =>
-      changed ? { items: [], cursor: null, hasMore: false, loading: true, loadingMore: false, error: null } : { ...s, loading: true, loadingMore: false, error: null }
+      changed
+        ? { items: [], cursor: null, hasMore: false, loading: true, loadingMore: false, error: null }
+        : { ...s, loading: true, loadingMore: false, error: null }
     );
     try {
       const { results, nextCursor } = await api.getPage(path, paramsRef.current);

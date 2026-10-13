@@ -32,8 +32,7 @@ import { setErrorReporter } from "./errorReporting";
 import { lastRequestId } from "./api";
 
 const DSN = import.meta.env.VITE_SENTRY_DSN || "";
-const ENVIRONMENT =
-  import.meta.env.VITE_SENTRY_ENVIRONMENT || (import.meta.env.DEV ? "development" : "production");
+const ENVIRONMENT = import.meta.env.VITE_SENTRY_ENVIRONMENT || (import.meta.env.DEV ? "development" : "production");
 // The commit the bundle was built from, so a regression maps to a deploy rather than to a date.
 // Nothing sets this yet; empty is better than wrong, because Sentry then groups the event with no
 // release instead of blaming whichever build happened to be last.
@@ -44,12 +43,44 @@ export const REDACTED = "[redacted]";
 export const DROPPED_BODY = "[dropped: request bodies are never sent]";
 
 const SENSITIVE_KEY_FRAGMENTS = [
-  "password", "passwd", "secret", "token", "authorization", "auth", "cookie", "csrf", "signature",
-  "api_key", "apikey", "private", "credential",
-  "card", "cvc", "cvv", "iban", "account_number", "routing",
-  "ssn", "social_insurance", "insurance_number", "passport", "licence", "license",
-  "email", "phone", "mobile", "address", "postal", "dob", "birth",
-  "first_name", "last_name", "full_name", "client_name", "given_name", "surname",
+  "password",
+  "passwd",
+  "secret",
+  "token",
+  "authorization",
+  "auth",
+  "cookie",
+  "csrf",
+  "signature",
+  "api_key",
+  "apikey",
+  "private",
+  "credential",
+  "card",
+  "cvc",
+  "cvv",
+  "iban",
+  "account_number",
+  "routing",
+  "ssn",
+  "social_insurance",
+  "insurance_number",
+  "passport",
+  "licence",
+  "license",
+  "email",
+  "phone",
+  "mobile",
+  "address",
+  "postal",
+  "dob",
+  "birth",
+  "first_name",
+  "last_name",
+  "full_name",
+  "client_name",
+  "given_name",
+  "surname",
 ];
 
 const MAX_DEPTH = 6;

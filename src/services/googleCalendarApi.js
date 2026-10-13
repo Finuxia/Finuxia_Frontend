@@ -20,9 +20,5 @@ export function isAllDay(event) {
 export function isOnDate(event, day = new Date()) {
   const start = eventStart(event);
   if (!start || Number.isNaN(start.getTime())) return false;
-  return (
-    start.getFullYear() === day.getFullYear() &&
-    start.getMonth() === day.getMonth() &&
-    start.getDate() === day.getDate()
-  );
+  return start.getFullYear() === day.getFullYear() && start.getMonth() === day.getMonth() && start.getDate() === day.getDate();
 }

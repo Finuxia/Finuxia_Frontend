@@ -11,7 +11,7 @@ name: CI
 # forgotten; a process step can, and forgetting it is exactly what happened.
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
 
 # A branch in this repository with an open pull request matches both triggers above. Grouping a push
