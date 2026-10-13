@@ -5,13 +5,13 @@ import { Plus, LayoutGrid, CalendarDays, Users, Clock, Upload, BarChart3, BookOp
 import Logo from "./Logo";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
-import { todayISO } from "../lib/followUp";
 import GlobalSearch from "./GlobalSearch";
 import NotificationsDropdown from "./NotificationsDropdown";
 import AddClientModal from "./AddClientModal";
 import ReconnectModal from "./ReconnectModal";
 import ConnectNudgeModal from "./ConnectNudgeModal";
 import Footer from "./Footer";
+import TrialBanner from "./TrialBanner";
 import VerifyEmailNotice from "./VerifyEmailNotice";
 import PageSpinner from "./PageSpinner";
 import RouteErrorBoundary from "./RouteErrorBoundary";
@@ -68,7 +68,7 @@ const NAV_MENUS = [
 
 export default function Layout() {
   const [modalOpen, setModalOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, billing } = useAuth();
 
   // Email gate: an unverified account can sign in but sees only the "confirm your email"
   // screen — no trial has started and AI credit can't be spent until the link is used.
@@ -82,7 +82,6 @@ export default function Layout() {
   if (user && user.subscriptionActive === false) {
     return <Navigate to="/subscribe" replace />;
   }
-  const trialDaysLeft = daysUntil(user?.subscriptionUntil);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -128,16 +127,7 @@ export default function Layout() {
         </div>
       </header>
 
-      {trialDaysLeft !== null && trialDaysLeft <= 7 && (
-        <div className="bg-gold/15 px-4 py-2 text-center text-xs font-medium text-gold-dark sm:px-6">
-          {trialDaysLeft > 0
-            ? `Your free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"}.`
-            : "Your free trial ends today."}{" "}
-          <NavLink to="/subscribe" className="font-semibold underline">
-            Subscribe
-          </NavLink>
-        </div>
-      )}
+      <TrialBanner user={user} billing={billing} />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 sm:px-6">
         <RouteErrorBoundary>
@@ -166,15 +156,6 @@ export default function Layout() {
 }
 
 // Whole days from today until an ISO datetime; null if none/unlimited.
-function daysUntil(iso) {
-  if (!iso) return null;
-  const end = new Date(iso);
-  if (Number.isNaN(end.getTime())) return null;
-  const [y, m, d] = todayISO().split("-").map(Number);
-  const startOfToday = new Date(y, m - 1, d);
-  return Math.ceil((end - startOfToday) / (1000 * 60 * 60 * 24));
-}
-
 function NavDropdown({ menu }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState(null);

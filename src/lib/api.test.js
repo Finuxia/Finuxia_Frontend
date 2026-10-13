@@ -150,6 +150,22 @@ describe("starting a purchase", () => {
   });
 });
 
+describe("setContinueIntent", () => {
+  it("PUTs willContinue and nothing else", async () => {
+    let seen;
+    server.use(
+      http.put(`${API}/api/billing/intent`, async ({ request }) => {
+        seen = { method: request.method, body: await request.json() };
+        return HttpResponse.json({ notContinuingSince: null });
+      })
+    );
+    await api.setContinueIntent(false);
+    expect(seen).toEqual({ method: "PUT", body: { willContinue: false } });
+    await api.setContinueIntent(true);
+    expect(seen.body).toEqual({ willContinue: true });
+  });
+});
+
 describe("clearLocalData", () => {
   it("removes only this app's cached data", () => {
     localStorage.setItem("advisorpilot.clients.x", "1");
