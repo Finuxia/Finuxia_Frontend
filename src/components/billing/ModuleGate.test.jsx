@@ -33,7 +33,7 @@ describe("ModuleGate", () => {
       })
     );
     render(<Gated />);
-    expect(await screen.findByRole("status")).toHaveTextContent("Checking your plan");
+    expect(await screen.findByText("Checking your plan…")).toBeInTheDocument();
     expect(screen.queryByText(/isn't included/)).not.toBeInTheDocument();
     expect(await screen.findByText("the documents page")).toBeInTheDocument();
   });
@@ -41,7 +41,7 @@ describe("ModuleGate", () => {
   it("renders the children when the plan includes the module", async () => {
     render(<Gated moduleKey="documents" />);
     expect(await screen.findByText("the documents page")).toBeInTheDocument();
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByText("Checking your plan…")).not.toBeInTheDocument();
   });
 
   it("shows the upgrade prompt, with a way to the plans, when it does not", async () => {

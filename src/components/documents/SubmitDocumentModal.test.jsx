@@ -30,13 +30,13 @@ describe("the document suggestion and the AI allowance", () => {
   it("shows the 95% warning above the suggest button", async () => {
     server.use(http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json(usage())));
     await open();
-    expect(await screen.findByRole("status")).toHaveTextContent(/96%.*4 credits left/);
+    expect(await screen.findByTestId("ai-usage-warning")).toHaveTextContent(/96%.*4 credits left/);
   });
 
   it("shows no warning when nothing needs saying", async () => {
     server.use(http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json(usage({ warning: null, percentUsed: 10 }))));
     await open();
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ai-usage-warning")).not.toBeInTheDocument();
   });
 
   it("a suggestion the account cannot pay for names the limit and offers the way out, not a toast", async () => {
@@ -92,7 +92,7 @@ describe("the document suggestion and the AI allowance", () => {
       http.post(`${API}/api/documents/suggest`, () => HttpResponse.json({ topic: "T", summary: "S", keywords: ["k"] }))
     );
     const button = await open();
-    await screen.findByRole("status");
+    await screen.findByTestId("ai-usage-warning");
     const before = asked;
     await userEvent.click(button);
     await waitFor(() => expect(asked).toBeGreaterThan(before));

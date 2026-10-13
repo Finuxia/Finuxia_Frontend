@@ -120,6 +120,7 @@ export default function Profile() {
             disabled={avatarSaving}
             className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-navy text-2xl font-bold text-gold transition disabled:opacity-60"
             title="Change photo"
+            aria-label="Change photo"
           >
             {user.hasAvatar ? (
               <img src={`${api.avatarUrl(user.id)}?t=${avatarBust}`} alt="" className="h-full w-full object-cover" />
@@ -133,6 +134,7 @@ export default function Profile() {
             disabled={avatarSaving}
             className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gold text-navy shadow-sm transition hover:bg-gold-light"
             title="Change photo"
+            aria-label="Change photo"
           >
             <Camera size={12} />
           </button>
@@ -143,6 +145,7 @@ export default function Profile() {
               disabled={avatarSaving}
               className="absolute -bottom-1 -left-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-white text-av-red shadow-sm transition hover:bg-av-red/10"
               title="Remove photo"
+              aria-label="Remove photo"
             >
               <Trash2 size={12} />
             </button>

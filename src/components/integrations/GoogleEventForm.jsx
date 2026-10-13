@@ -1,3 +1,4 @@
+import Modal, { ModalTitle } from "../ui/Modal";
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useGoogleCalendar } from "../../context/GoogleCalendarContext";
@@ -58,86 +59,76 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
   };
 
   return (
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
-      onClick={onClose}
-    >
-      <div
-        role="presentation"
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-navy">{title}</h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-        </div>
+    <Modal onClose={onClose} panelClassName="max-w-sm rounded-2xl p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <ModalTitle className="text-lg font-semibold text-navy">{title}</ModalTitle>
+        <button
+          onClick={onClose}
+          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
+          <input
+            autoFocus
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
+            placeholder="Meeting with..."
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          />
+        </label>
+
+        <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Date</span>
             <input
-              autoFocus
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              placeholder="Meeting with..."
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
+          <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={durationMin} />
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Date</span>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-              />
-            </label>
-            <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={durationMin} />
-          </div>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Duration</span>
+          <select
+            value={durationMin}
+            onChange={(e) => setDurationMin(Number(e.target.value))}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          >
+            <option value={15}>15 minutes</option>
+            <option value={30}>30 minutes</option>
+            <option value={45}>45 minutes</option>
+            <option value={60}>1 hour</option>
+          </select>
+        </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Duration</span>
-            <select
-              value={durationMin}
-              onChange={(e) => setDurationMin(Number(e.target.value))}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-            >
-              <option value={15}>15 minutes</option>
-              <option value={30}>30 minutes</option>
-              <option value={45}>45 minutes</option>
-              <option value={60}>1 hour</option>
-            </select>
-          </label>
+        {error && <p className="text-xs text-av-red">{error}</p>}
 
-          {error && <p className="text-xs text-av-red">{error}</p>}
-
-          <div className="mt-1 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
-            >
-              {saving ? "Saving..." : submitLabel}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="mt-1 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+          >
+            {saving ? "Saving..." : submitLabel}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }

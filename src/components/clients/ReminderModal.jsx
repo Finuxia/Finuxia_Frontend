@@ -1,3 +1,4 @@
+import Modal, { ModalTitle } from "../ui/Modal";
 import { useState } from "react";
 import { X, Trash2 } from "lucide-react";
 import { useClients } from "../../context/ClientsContext";
@@ -78,141 +79,131 @@ export default function ReminderModal({ initial, kind = "reminder", lockClient, 
   };
 
   return (
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in"
-      onClick={onClose}
-    >
-      <div
-        role="presentation"
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-navy">
-            {isFollowUp ? (isEdit ? "Edit Follow-up" : "New Follow-up") : isEdit ? "Edit Reminder" : "New Reminder"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-        </div>
+    <Modal onClose={onClose} panelClassName="max-w-sm rounded-2xl p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <ModalTitle className="text-lg font-semibold text-navy">
+          {isFollowUp ? (isEdit ? "Edit Follow-up" : "New Follow-up") : isEdit ? "Edit Reminder" : "New Reminder"}
+        </ModalTitle>
+        <button
+          onClick={onClose}
+          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
+          <input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Call about renewal..."
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Note (optional)</span>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={2}
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          />
+        </label>
+
+        <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Due date</span>
             <input
-              autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Call about renewal..."
+              type="date"
+              value={dueDate}
+              min={todayISO()}
+              onChange={(e) => setDueDate(e.target.value)}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
+          <TimeInput label="Due time (optional)" value={dueTime} onChange={setDueTime} />
+        </div>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Note (optional)</span>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={2}
-              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-            />
-          </label>
-
-          <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          {lockClient ? (
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Due date</span>
-              <input
-                type="date"
-                value={dueDate}
-                min={todayISO()}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-              />
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</span>
+              <div className="flex w-full items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-navy">
+                {lockClient.first} {lockClient.last}
+              </div>
             </label>
-            <TimeInput label="Due time (optional)" value={dueTime} onChange={setDueTime} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {lockClient ? (
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Client</span>
-                <div className="flex w-full items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-navy">
-                  {lockClient.first} {lockClient.last}
-                </div>
-              </label>
-            ) : (
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Client (optional)</span>
-                <select
-                  value={clientRef}
-                  onChange={(e) => setClientRef(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-                >
-                  <option value="">None</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.first} {c.last}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+          ) : (
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Repeat</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Client (optional)</span>
               <select
-                value={repeat}
-                onChange={(e) => setRepeat(e.target.value)}
+                value={clientRef}
+                onChange={(e) => setClientRef(e.target.value)}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               >
-                <option value="none">Does not repeat</option>
-                <option value="daily">Every day</option>
-                <option value="every_other_day">Every other day</option>
-                <option value="weekly">Every week</option>
-                <option value="monthly">Every month</option>
+                <option value="">None</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.first} {c.last}
+                  </option>
+                ))}
               </select>
             </label>
-          </div>
+          )}
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Repeat</span>
+            <select
+              value={repeat}
+              onChange={(e) => setRepeat(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            >
+              <option value="none">Does not repeat</option>
+              <option value="daily">Every day</option>
+              <option value="every_other_day">Every other day</option>
+              <option value="weekly">Every week</option>
+              <option value="monthly">Every month</option>
+            </select>
+          </label>
+        </div>
 
-          {error && <p className="text-xs text-av-red">{error}</p>}
+        {error && <p className="text-xs text-av-red">{error}</p>}
 
-          <div className="mt-1 flex items-center justify-between gap-3">
-            {isEdit && onDelete ? (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/10 disabled:opacity-60"
-              >
-                <Trash2 size={14} />
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            ) : (
-              <span />
-            )}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
-              >
-                {saving ? "Saving..." : isEdit ? "Save" : "Create"}
-              </button>
-            </div>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          {isEdit && onDelete ? (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/10 disabled:opacity-60"
+            >
+              <Trash2 size={14} />
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            >
+              {saving ? "Saving..." : isEdit ? "Save" : "Create"}
+            </button>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 }

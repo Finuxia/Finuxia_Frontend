@@ -1,3 +1,4 @@
+import Modal, { ModalTitle } from "../ui/Modal";
 import { useState } from "react";
 import { X, Plus, Trash2, GripVertical, CalendarClock, Link2 } from "lucide-react";
 import { useGoogleCalendar } from "../../context/GoogleCalendarContext";
@@ -104,237 +105,231 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
   };
 
   return (
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-navy/50 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
-      onClick={onClose}
+    <Modal
+      onClose={onClose}
+      variant="sheet"
+      panelClassName="flex max-h-[90vh] flex-col overflow-hidden rounded-t-2xl sm:max-w-lg sm:rounded-2xl"
     >
-      <div
-        role="presentation"
-        className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-slide-up sm:max-w-lg sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-navy">{isEdit ? "Edit Booking Link" : "New Booking Link"}</h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-        </div>
+      <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+        <ModalTitle className="text-lg font-semibold text-navy">{isEdit ? "Edit Booking Link" : "New Booking Link"}</ModalTitle>
+        <button
+          onClick={onClose}
+          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 overflow-y-auto px-6 py-5">
-          {isConfigured && calStatus !== "connected" && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-av-amber/40 bg-av-amber/5 px-3 py-2.5">
-              <div className="flex items-start gap-2">
-                <CalendarClock size={15} className="mt-0.5 shrink-0 text-av-amber" />
-                <p className="text-xs text-slate-600">
-                  Connect Google Calendar so bookings through this link confirm instantly with a Google Meet link, no approval needed.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleConnect}
-                disabled={connecting}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-navy-light disabled:opacity-60"
-              >
-                <Link2 size={12} />
-                {connecting ? "Connecting..." : "Connect"}
-              </button>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 overflow-y-auto px-6 py-5">
+        {isConfigured && calStatus !== "connected" && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-av-amber/40 bg-av-amber/5 px-3 py-2.5">
+            <div className="flex items-start gap-2">
+              <CalendarClock size={15} className="mt-0.5 shrink-0 text-av-amber" />
+              <p className="text-xs text-slate-600">
+                Connect Google Calendar so bookings through this link confirm instantly with a Google Meet link, no approval needed.
+              </p>
             </div>
-          )}
-
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
-            <input
-              autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Client Introduction Session"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-            />
-          </label>
-
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Description</span>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              placeholder="What's this meeting for? Shown to clients before they book."
-              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-            />
-          </label>
-
-          <div className="grid grid-cols-2 gap-4">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Duration</span>
-              <select
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
-              >
-                {[15, 30, 45, 60, 90, 120].map((m) => (
-                  <option key={m} value={m}>
-                    {m} min
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Buffer between meetings</span>
-              <select
-                value={bufferMinutes}
-                onChange={(e) => setBufferMinutes(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
-              >
-                {[0, 5, 10, 15, 30, 45, 60].map((m) => (
-                  <option key={m} value={m}>
-                    {m === 0 ? "None" : `${m} min`}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <button
+              type="button"
+              onClick={handleConnect}
+              disabled={connecting}
+              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-navy-light disabled:opacity-60"
+            >
+              <Link2 size={12} />
+              {connecting ? "Connecting..." : "Connect"}
+            </button>
           </div>
+        )}
 
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</span>
+          <input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Client Introduction Session"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Description</span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            placeholder="What's this meeting for? Shown to clients before they book."
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          />
+        </label>
+
+        <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Location</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Duration</span>
             <select
-              value={locationType}
-              onChange={(e) => setLocationType(e.target.value)}
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(e.target.value)}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
             >
-              {LOCATION_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              {[15, 30, 45, 60, 90, 120].map((m) => (
+                <option key={m} value={m}>
+                  {m} min
                 </option>
               ))}
             </select>
           </label>
-          {locationType === "zoom" && (
-            <p className="-mt-2 text-xs text-slate-400">
-              Needs a connected Zoom account (Profile → Zoom) — without one, bookings still work but land pending for you to add the link
-              yourself.
-            </p>
-          )}
-          {locationType === "ask_invitee" && (
-            <p className="-mt-2 text-xs text-slate-400">The client will be asked where they'd like to meet when they book.</p>
-          )}
-          {LOCATION_VALUE_FIELD[locationType] && (
-            <label className="-mt-2 flex flex-col gap-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                {LOCATION_VALUE_FIELD[locationType].label} (optional)
-              </span>
-              <input
-                value={locationValue}
-                onChange={(e) => setLocationValue(e.target.value)}
-                placeholder={LOCATION_VALUE_FIELD[locationType].placeholder}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
-              />
-            </label>
-          )}
-
-          <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
-            <span className="text-sm text-navy">Allow guests</span>
-            <Switch label="Allow guests" checked={guestsAllowed} onChange={(e) => setGuestsAllowed(e.target.checked)} />
-          </div>
-          {guestsAllowed && (
-            <p className="-mt-2 text-xs text-slate-400">Clients will see a field to add guest emails when booking through this link.</p>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Intake questions (optional)</span>
-              <button
-                type="button"
-                onClick={addQuestion}
-                disabled={questions.length >= 10}
-                className="flex items-center gap-1 text-xs font-semibold text-gold-dark transition hover:underline disabled:opacity-40"
-              >
-                <Plus size={12} />
-                Add question
-              </button>
-            </div>
-            {questions.map((q) => (
-              <div key={q.id} className="flex items-start gap-2 rounded-lg border border-slate-200 p-2.5">
-                <GripVertical size={14} className="mt-2 shrink-0 text-slate-300" />
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <input
-                    value={q.label}
-                    onChange={(e) => updateQuestion(q.id, { label: e.target.value })}
-                    placeholder="What would you like to discuss?"
-                    className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-navy outline-none focus:border-gold"
-                  />
-                  <label className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <input
-                      type="checkbox"
-                      checked={q.required}
-                      onChange={(e) => updateQuestion(q.id, { required: e.target.checked })}
-                      className="accent-gold"
-                    />
-                    Required
-                  </label>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeQuestion(q.id)}
-                  aria-label="Remove question"
-                  className="shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-av-red/10 hover:text-av-red"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            ))}
-          </div>
-
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Confirmation message (optional)</span>
-            <textarea
-              value={confirmationMessage}
-              onChange={(e) => setConfirmationMessage(e.target.value)}
-              rows={2}
-              placeholder="Shown to clients right after they book. Leave blank for the default message."
-              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Buffer between meetings</span>
+            <select
+              value={bufferMinutes}
+              onChange={(e) => setBufferMinutes(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+            >
+              {[0, 5, 10, 15, 30, 45, 60].map((m) => (
+                <option key={m} value={m}>
+                  {m === 0 ? "None" : `${m} min`}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Location</span>
+          <select
+            value={locationType}
+            onChange={(e) => setLocationType(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+          >
+            {LOCATION_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {locationType === "zoom" && (
+          <p className="-mt-2 text-xs text-slate-400">
+            Needs a connected Zoom account (Profile → Zoom) — without one, bookings still work but land pending for you to add the link
+            yourself.
+          </p>
+        )}
+        {locationType === "ask_invitee" && (
+          <p className="-mt-2 text-xs text-slate-400">The client will be asked where they'd like to meet when they book.</p>
+        )}
+        {LOCATION_VALUE_FIELD[locationType] && (
+          <label className="-mt-2 flex flex-col gap-1.5">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {LOCATION_VALUE_FIELD[locationType].label} (optional)
+            </span>
+            <input
+              value={locationValue}
+              onChange={(e) => setLocationValue(e.target.value)}
+              placeholder={LOCATION_VALUE_FIELD[locationType].placeholder}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
+        )}
 
-          {error && <p className="text-xs text-av-red">{error}</p>}
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
+          <span className="text-sm text-navy">Allow guests</span>
+          <Switch label="Allow guests" checked={guestsAllowed} onChange={(e) => setGuestsAllowed(e.target.checked)} />
+        </div>
+        {guestsAllowed && (
+          <p className="-mt-2 text-xs text-slate-400">Clients will see a field to add guest emails when booking through this link.</p>
+        )}
 
-          <div className="mt-1 flex items-center justify-between gap-3">
-            {isEdit ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Intake questions (optional)</span>
+            <button
+              type="button"
+              onClick={addQuestion}
+              disabled={questions.length >= 10}
+              className="flex items-center gap-1 text-xs font-semibold text-gold-dark transition hover:underline disabled:opacity-40"
+            >
+              <Plus size={12} />
+              Add question
+            </button>
+          </div>
+          {questions.map((q) => (
+            <div key={q.id} className="flex items-start gap-2 rounded-lg border border-slate-200 p-2.5">
+              <GripVertical size={14} className="mt-2 shrink-0 text-slate-300" />
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <input
+                  value={q.label}
+                  onChange={(e) => updateQuestion(q.id, { label: e.target.value })}
+                  placeholder="What would you like to discuss?"
+                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-navy outline-none focus:border-gold"
+                />
+                <label className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <input
+                    type="checkbox"
+                    checked={q.required}
+                    onChange={(e) => updateQuestion(q.id, { required: e.target.checked })}
+                    className="accent-gold"
+                  />
+                  Required
+                </label>
+              </div>
               <button
                 type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/10 disabled:opacity-60"
+                onClick={() => removeQuestion(q.id)}
+                aria-label="Remove question"
+                className="shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-av-red/10 hover:text-av-red"
               >
-                <Trash2 size={14} />
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            ) : (
-              <span />
-            )}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
-              >
-                {saving ? "Saving..." : isEdit ? "Save" : "Create Link"}
+                <Trash2 size={13} />
               </button>
             </div>
+          ))}
+        </div>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Confirmation message (optional)</span>
+          <textarea
+            value={confirmationMessage}
+            onChange={(e) => setConfirmationMessage(e.target.value)}
+            rows={2}
+            placeholder="Shown to clients right after they book. Leave blank for the default message."
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          />
+        </label>
+
+        {error && <p className="text-xs text-av-red">{error}</p>}
+
+        <div className="mt-1 flex items-center justify-between gap-3">
+          {isEdit ? (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/10 disabled:opacity-60"
+            >
+              <Trash2 size={14} />
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            >
+              {saving ? "Saving..." : isEdit ? "Save" : "Create Link"}
+            </button>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 }

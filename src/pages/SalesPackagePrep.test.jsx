@@ -455,7 +455,7 @@ describe("the Reason Why Letter", () => {
       http.post(`${P}/packages/:id/reason-why-letter`, () => HttpResponse.json({ text: "Drafted" }))
     );
     const button = await openLetterStep();
-    expect(await screen.findByRole("status")).toHaveTextContent(/85%.*15 credits left/);
+    expect(await screen.findByTestId("ai-usage-warning")).toHaveTextContent(/85%.*15 credits left/);
     const before = asked;
     await userEvent.click(button);
     await waitFor(() => expect(asked).toBeGreaterThan(before));
@@ -464,7 +464,7 @@ describe("the Reason Why Letter", () => {
   it("shows no warning when the account has plenty left", async () => {
     server.use(http.get(`${API}/api/billing/ai-usage`, () => HttpResponse.json(aiUsage({ warning: null, percentUsed: 10 }))));
     await openLetterStep();
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ai-usage-warning")).not.toBeInTheDocument();
   });
 
   it("works as before when the usage cannot be loaded", async () => {

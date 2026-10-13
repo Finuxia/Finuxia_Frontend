@@ -1,3 +1,4 @@
+import Modal, { ModalTitle } from "../ui/Modal";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { HardDrive, CalendarClock, X } from "lucide-react";
@@ -58,59 +59,56 @@ export default function ConnectNudgeModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-navy/50 p-4 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-slide-up">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-navy">Connect your Google account</h2>
-          <button
-            onClick={() => setDismissed(true)}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
-            aria-label="Dismiss"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        <p className="mb-4 text-sm text-slate-500">
-          For the best experience, connect Google Drive and Google Calendar — client folders, meetings, and booking links all depend on
-          them.
-        </p>
-
-        <div className="flex flex-col gap-2.5">
-          {driveNeeded && (
-            <button
-              onClick={handleConnectDrive}
-              disabled={connecting !== null}
-              className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-slate-50 disabled:opacity-60"
-            >
-              <span className="flex items-center gap-2">
-                <HardDrive size={15} className="text-gold-dark" />
-                Google Drive
-              </span>
-              <span className="text-xs font-medium text-gold-dark">{connecting === "drive" ? "Connecting..." : "Connect"}</span>
-            </button>
-          )}
-          {calendarNeeded && (
-            <button
-              onClick={handleConnectCalendar}
-              disabled={connecting !== null}
-              className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-slate-50 disabled:opacity-60"
-            >
-              <span className="flex items-center gap-2">
-                <CalendarClock size={15} className="text-gold-dark" />
-                Google Calendar
-              </span>
-              <span className="text-xs font-medium text-gold-dark">{connecting === "calendar" ? "Connecting..." : "Connect"}</span>
-            </button>
-          )}
-        </div>
-
+    <Modal onClose={() => setDismissed(true)} panelClassName="max-w-sm rounded-2xl p-6" zIndex="z-[60]" dismissOnBackdrop={false}>
+      <div className="mb-3 flex items-center justify-between">
+        <ModalTitle className="text-lg font-semibold text-navy">Connect your Google account</ModalTitle>
         <button
           onClick={() => setDismissed(true)}
-          className="mt-4 w-full rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-navy"
+          aria-label="Dismiss"
         >
-          Skip for now
+          <X size={18} />
         </button>
       </div>
-    </div>
+      <p className="mb-4 text-sm text-slate-500">
+        For the best experience, connect Google Drive and Google Calendar — client folders, meetings, and booking links all depend on them.
+      </p>
+
+      <div className="flex flex-col gap-2.5">
+        {driveNeeded && (
+          <button
+            onClick={handleConnectDrive}
+            disabled={connecting !== null}
+            className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-slate-50 disabled:opacity-60"
+          >
+            <span className="flex items-center gap-2">
+              <HardDrive size={15} className="text-gold-dark" />
+              Google Drive
+            </span>
+            <span className="text-xs font-medium text-gold-dark">{connecting === "drive" ? "Connecting..." : "Connect"}</span>
+          </button>
+        )}
+        {calendarNeeded && (
+          <button
+            onClick={handleConnectCalendar}
+            disabled={connecting !== null}
+            className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-slate-50 disabled:opacity-60"
+          >
+            <span className="flex items-center gap-2">
+              <CalendarClock size={15} className="text-gold-dark" />
+              Google Calendar
+            </span>
+            <span className="text-xs font-medium text-gold-dark">{connecting === "calendar" ? "Connecting..." : "Connect"}</span>
+          </button>
+        )}
+      </div>
+
+      <button
+        onClick={() => setDismissed(true)}
+        className="mt-4 w-full rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+      >
+        Skip for now
+      </button>
+    </Modal>
   );
 }

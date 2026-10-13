@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -29,6 +29,7 @@ import {
 import Logo from "./Logo";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
+import useMenu from "../../hooks/useMenu";
 import GlobalSearch from "./GlobalSearch";
 import NotificationsDropdown from "./NotificationsDropdown";
 import AddClientModal from "../clients/AddClientModal";
@@ -109,6 +110,17 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
+      <a
+        href="#main-content"
+        onClick={(e) => {
+          // A plain #anchor would change the URL the router owns: move focus to the content instead.
+          e.preventDefault();
+          document.getElementById("main-content")?.focus();
+        }}
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-navy focus:shadow-lg"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-navy">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <NavLink to="/dashboard" className="flex shrink-0 items-center gap-2">
@@ -129,7 +141,7 @@ export default function Layout() {
         </div>
 
         <div className="border-t border-white/5">
-          <nav className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-1.5 sm:px-6">
+          <nav aria-label="Main" className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-1.5 sm:px-6">
             {NAV_LINKS.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
@@ -153,7 +165,7 @@ export default function Layout() {
 
       <TrialBanner user={user} billing={billing} />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 sm:px-6">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 outline-none sm:px-6">
         <RouteErrorBoundary>
           {/* A page's code is fetched on first visit: the navigation stays, only this area shows the spinner. */}
           <Suspense fallback={<PageSpinner inline />}>
@@ -179,78 +191,47 @@ export default function Layout() {
   );
 }
 
-// Whole days from today until an ISO datetime; null if none/unlimited.
 function NavDropdown({ menu }) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState(null);
-  const btnRef = useRef(null);
-  const menuRef = useRef(null);
   const { icon: Icon, label, items } = menu;
   const location = useLocation();
   const isActive = items.some((item) => location.pathname.startsWith(item.to));
-
-  useEffect(() => {
-    function onDocClick(e) {
-      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
-      setOpen(false);
-    }
-    function onScrollOrResize() {
-      setOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    window.addEventListener("resize", onScrollOrResize);
-    window.addEventListener("scroll", onScrollOrResize, true);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      window.removeEventListener("resize", onScrollOrResize);
-      window.removeEventListener("scroll", onScrollOrResize, true);
-    };
-  }, []);
-
-  const toggle = () => {
-    setOpen((o) => {
-      if (!o && btnRef.current) {
-        const r = btnRef.current.getBoundingClientRect();
-        setPos({ top: r.bottom + 6, left: r.left });
-      }
-      return !o;
-    });
-  };
+  const { open, pos, close, triggerProps, menuProps, itemProps } = useMenu({ align: "left" });
 
   return (
     <>
       <button
-        ref={btnRef}
-        onClick={toggle}
+        {...triggerProps}
         className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
           open || isActive ? "bg-white/10 text-gold" : "text-slate-300 hover:text-white"
         }`}
       >
-        <Icon size={14} />
+        <Icon size={14} aria-hidden="true" />
         {label}
-        <ChevronDown size={13} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={13} aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {/* Rendered in a portal so the nav's overflow-x-auto can't clip it. */}
       {open &&
         pos &&
         createPortal(
           <div
-            ref={menuRef}
+            {...menuProps}
+            aria-label={label}
             style={{ position: "fixed", top: pos.top, left: pos.left }}
             className="z-[60] w-52 animate-fade-in rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
           >
             {items.map(({ to, label: itemLabel, icon: ItemIcon }) => (
               <NavLink
+                {...itemProps}
                 key={to}
                 to={to}
-                onClick={() => setOpen(false)}
+                onClick={() => close()}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
                     isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
                   }`
                 }
               >
-                <ItemIcon size={15} />
+                <ItemIcon size={15} aria-hidden="true" />
                 {itemLabel}
               </NavLink>
             ))}
@@ -262,102 +243,62 @@ function NavDropdown({ menu }) {
 }
 
 function UserMenu({ user }) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState(null);
-  const btnRef = useRef(null);
-  const menuRef = useRef(null);
   const { logout } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    function onDocClick(e) {
-      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
-      setOpen(false);
-    }
-    function onScrollOrResize() {
-      setOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    window.addEventListener("resize", onScrollOrResize);
-    window.addEventListener("scroll", onScrollOrResize, true);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      window.removeEventListener("resize", onScrollOrResize);
-      window.removeEventListener("scroll", onScrollOrResize, true);
-    };
-  }, []);
-
-  const toggle = () => {
-    setOpen((o) => {
-      if (!o && btnRef.current) {
-        const r = btnRef.current.getBoundingClientRect();
-        setPos({ top: r.bottom + 6, right: window.innerWidth - r.right });
-      }
-      return !o;
-    });
-  };
+  const { open, pos, close, triggerProps, menuProps, itemProps } = useMenu({ align: "right" });
 
   const handleLogout = () => {
-    setOpen(false);
+    close();
     logout();
     navigate("/login", { replace: true });
   };
 
+  const linkClass = ({ isActive }) =>
+    `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+      isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
+    }`;
+
   return (
     <>
       <button
-        ref={btnRef}
-        onClick={toggle}
+        {...triggerProps}
         className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gold text-sm font-bold text-navy"
+        aria-label={user?.name ? `Account menu for ${user.name}` : "Account menu"}
         title={user?.name}
       >
         {user?.hasAvatar ? (
           <img src={api.avatarUrl(user.id)} alt="" className="h-full w-full object-cover" />
         ) : (
-          (user?.name?.[0]?.toUpperCase() ?? "?")
+          <span aria-hidden="true">{user?.name?.[0]?.toUpperCase() ?? "?"}</span>
         )}
       </button>
       {open &&
         pos &&
         createPortal(
           <div
-            ref={menuRef}
+            {...menuProps}
+            aria-label="Account"
             style={{ position: "fixed", top: pos.top, right: pos.right }}
             className="z-[60] w-52 animate-fade-in rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
           >
-            <div className="mb-1 border-b border-slate-100 px-3 py-2">
+            <div role="presentation" className="mb-1 border-b border-slate-100 px-3 py-2">
               <p className="truncate text-sm font-semibold text-navy">{user?.name}</p>
               <p className="truncate text-xs text-slate-400">{user?.email}</p>
             </div>
-            <NavLink
-              to="/profile"
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
-                }`
-              }
-            >
-              <UserIcon size={15} />
+            <NavLink {...itemProps} to="/profile" onClick={() => close()} className={linkClass}>
+              <UserIcon size={15} aria-hidden="true" />
               Profile
             </NavLink>
-            <NavLink
-              to="/billing"
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
-                }`
-              }
-            >
-              <CreditCard size={15} />
+            <NavLink {...itemProps} to="/billing" onClick={() => close()} className={linkClass}>
+              <CreditCard size={15} aria-hidden="true" />
               Plans &amp; Billing
             </NavLink>
             <button
+              {...itemProps}
               onClick={handleLogout}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/5"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-av-red"
             >
-              <LogOut size={15} />
+              <LogOut size={15} aria-hidden="true" />
               Log Out
             </button>
           </div>,
