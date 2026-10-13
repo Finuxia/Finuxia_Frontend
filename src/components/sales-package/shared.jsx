@@ -1,8 +1,9 @@
 import { useRef } from "react";
 import { formatCurrencyInput } from "../../lib/currency";
 
-export const inputClass =
-  "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30";
+import { INPUT_CLASS as inputClass } from "../ui";
+
+export { inputClass };
 
 export function StepCard({ title, subtitle, children }) {
   return (

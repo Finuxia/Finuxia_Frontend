@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { LICENSED_PROVINCE_CODES, QUEBEC_SECTORS, COMPANIES_REPRESENTED_OPTIONS } from "../../lib/salesPackageOptions";
 import Switch from "../ui/Switch";
+import { INPUT_CLASS as inputClass } from "../ui";
 
 const OWNERSHIP_OPTIONS = [
   "No ownership relationship",
@@ -18,9 +19,6 @@ const AGENCY_OPTIONS = ["World Financial Group (WFG)"];
 
 // More branch addresses will be added as they're provided.
 const BRANCH_OPTIONS = ["1075 W Georgia St, Vancouver, Floor 26 Unit 2650"];
-
-const inputClass =
-  "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30";
 
 /**
  * "Sales Package & Compliance Profile" — reusable advisor facts (licensing,

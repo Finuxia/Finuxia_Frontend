@@ -1,35 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, BookOpen, LifeBuoy } from "lucide-react";
 import { api } from "../lib/api";
+import useAsync from "../hooks/useAsync";
 
 export default function Guide() {
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [openId, setOpenId] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await api.getGuides();
-        if (!cancelled) {
-          setGroups(data);
-          // open the very first question by default
-          setOpenId(data?.[0]?.items?.[0]?.id ?? null);
-        }
-      } catch (err) {
-        if (!cancelled) setError(err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: groups, loading, error } = useAsync(() => api.getGuides(), [], { initial: [] });
+  const [openChoice, setOpenChoice] = useState(undefined);
+  // Until the reader chooses, the very first question is open by default.
+  const openId = openChoice === undefined ? (groups?.[0]?.items?.[0]?.id ?? null) : openChoice;
+  const setOpenId = setOpenChoice;
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">

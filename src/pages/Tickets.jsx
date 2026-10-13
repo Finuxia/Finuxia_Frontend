@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { LifeBuoy, Plus, MessageSquare, Bug, Sparkles } from "lucide-react";
 import usePagedList from "../hooks/usePagedList";
 import { formatDate } from "../lib/followUp";
-import { getTicketStatusMeta, getTicketTypeMeta } from "../lib/ticketMeta";
+import { getTicketStatusMeta, getTicketTypeMeta, toneClasses } from "../lib/statusMeta";
+import { Badge } from "../components/ui";
 import LoadMore from "../components/ui/LoadMore";
 import NewTicketModal from "../components/tickets/NewTicketModal";
 
@@ -59,7 +60,7 @@ export default function Tickets() {
                 onClick={() => navigate(`/tickets/${t.id}`)}
                 className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left shadow-sm transition hover:shadow-md"
               >
-                <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${typeMeta.badge}`}>
+                <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${toneClasses(typeMeta.tone).badge}`}>
                   <TypeIcon size={15} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -74,7 +75,7 @@ export default function Tickets() {
                     )}
                   </p>
                 </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusMeta.badge}`}>{statusMeta.label}</span>
+                <Badge meta={statusMeta} className="shrink-0" />
               </button>
             );
           })}

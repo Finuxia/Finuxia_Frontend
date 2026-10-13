@@ -1,15 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CalendarClock, Check, X, RefreshCcw, Clock, Mail, Phone, AlertTriangle } from "lucide-react";
 import { api } from "../lib/api";
+import { getBookingRequestStatusMeta } from "../lib/statusMeta";
+import { Badge } from "../components/ui";
+import useAsync from "../hooks/useAsync";
 import { useToast } from "../context/ToastContext";
 import { useGoogleCalendar } from "../context/GoogleCalendarContext";
 import TimeInput from "../components/ui/TimeInput";
-
-const STATUS_META = {
-  pending: { label: "Pending", badge: "bg-av-amber/10 text-av-amber" },
-  confirmed: { label: "Confirmed", badge: "bg-av-green/10 text-av-green" },
-  cancelled: { label: "Cancelled", badge: "bg-slate-100 text-slate-500" },
-};
 
 function formatTimeLabel(time) {
   const [h, m] = time.split(":").map(Number);
@@ -30,23 +27,10 @@ function toISO(date, time) {
 export default function BookingRequests() {
   const { addToast } = useToast();
   const { status: calStatus, createEvent } = useGoogleCalendar();
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // A failed read leaves the list empty, as it always did (the page has no error state); `load` re-reads after every action.
+  const { data: requests, loading, reload: load } = useAsync(() => api.getBookingRequests(), [], { initial: [] });
   const [busyId, setBusyId] = useState(null);
   const [rescheduling, setRescheduling] = useState(null); // request being rescheduled, or null
-
-  const load = () => {
-    setLoading(true);
-    api
-      .getBookingRequests()
-      .then(setRequests)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
 
   const handleApprove = async (req) => {
     setBusyId(req.id);
@@ -203,14 +187,14 @@ export default function BookingRequests() {
 }
 
 function RequestCard({ req, busy, onApprove, onCancel, onReschedule }) {
-  const meta = STATUS_META[req.status] ?? STATUS_META.pending;
+  const meta = getBookingRequestStatusMeta(req.status);
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-navy">{req.clientName}</p>
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${meta.badge}`}>{meta.label}</span>
+            <Badge meta={meta} size="sm" />
           </div>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
             <Clock size={12} />

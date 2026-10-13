@@ -4,13 +4,11 @@ import usePagedList from "../hooks/usePagedList";
 import { api } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import LoadMore from "../components/ui/LoadMore";
+import { getDocumentStatusMeta } from "../lib/statusMeta";
+import { Badge } from "../components/ui";
 import SubmitDocumentModal from "../components/documents/SubmitDocumentModal";
 
-const STATUS_META = {
-  pending: { label: "Pending review", badge: "bg-av-amber/10 text-av-amber", icon: Clock },
-  approved: { label: "Approved", badge: "bg-av-green/10 text-av-green", icon: CheckCircle2 },
-  rejected: { label: "Rejected", badge: "bg-av-red/10 text-av-red", icon: XCircle },
-};
+const STATUS_ICON = { pending: Clock, approved: CheckCircle2, rejected: XCircle };
 
 export default function Documents() {
   const { addToast } = useToast();
@@ -96,8 +94,8 @@ export default function Documents() {
               <h2 className="mb-2.5 text-sm font-semibold text-navy">My Submissions</h2>
               <div className="flex flex-col gap-2.5">
                 {pendingOrRejectedMine.map((doc) => {
-                  const meta = STATUS_META[doc.status] ?? STATUS_META.pending;
-                  const StatusIcon = meta.icon;
+                  const meta = getDocumentStatusMeta(doc.status);
+                  const StatusIcon = STATUS_ICON[doc.status] ?? Clock;
                   return (
                     <div key={doc.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                       <div className="flex items-start justify-between gap-3">
@@ -105,10 +103,10 @@ export default function Documents() {
                           <p className="truncate text-sm font-semibold text-navy">{doc.title}</p>
                           <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{doc.summary}</p>
                         </div>
-                        <span className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${meta.badge}`}>
+                        <Badge meta={meta} className="shrink-0">
                           <StatusIcon size={11} />
                           {meta.label}
-                        </span>
+                        </Badge>
                       </div>
                       {doc.status === "rejected" && doc.rejectionNote && (
                         <p className="mt-2 rounded-lg bg-av-red/5 px-2.5 py-1.5 text-xs text-av-red">{doc.rejectionNote}</p>

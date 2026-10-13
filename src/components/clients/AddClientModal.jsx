@@ -5,6 +5,7 @@ import { useToast } from "../../context/ToastContext";
 import { formatCanadianPhone } from "../../lib/phone";
 import { PROVINCES } from "../../lib/salesPackageOptions";
 import { birthDateError, MIN_BIRTH_DATE, todayISO } from "../../lib/dates";
+import { Field, inputClass } from "../ui";
 
 const EMPTY_FORM = {
   first: "",
@@ -267,23 +268,4 @@ export default function AddClientModal({ open, onClose, client = null, initialVa
       </div>
     </div>
   );
-}
-
-function Field({ label, required, error, children }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {label}
-        {required && <span className="text-av-red"> *</span>}
-      </span>
-      {children}
-      {error && <span className="text-xs text-av-red">{error}</span>}
-    </label>
-  );
-}
-
-function inputClass(error) {
-  return `w-full rounded-lg border px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 ${
-    error ? "border-av-red" : "border-slate-200"
-  }`;
 }
