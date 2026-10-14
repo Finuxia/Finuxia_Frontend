@@ -50,18 +50,26 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const login = async (identifier, password) => {
-    const { user: u } = await api.login(identifier, password);
-    setUser(u);
+  // Every account signs in with a second factor (SEC-12). A correct password therefore answers with the next step and NO session:
+  //   { step: "verify", challenge }  an enrolled account types the code from its authenticator app
+  //   { step: "enrol",  challenge }  an account that has not set it up yet does so now
+  //   { step: "done", user }         an account that needs none (the requirement was lifted on the record)
+  const afterPassword = (result) => {
+    if (result.mfa) return { step: result.mfa, challenge: result.challenge };
+    setUser(result.user);
     refreshBilling();
-    return u;
+    return { step: "done", user: result.user };
   };
 
-  const register = async (name, email, password) => {
-    const { user: u } = await api.register({ name, email, password });
-    setUser(u);
+  const login = async (identifier, password) => afterPassword(await api.login(identifier, password));
+
+  const register = async (name, email, password) => afterPassword(await api.register({ name, email, password }));
+
+  // The session a successful second step (or the set-up of the factor) created: the server has set the cookies, this loads the account into the app.
+  const completeMfa = (result) => {
+    setUser(result.user);
     refreshBilling();
-    return u;
+    return result.user;
   };
 
   // Re-reads the account (e.g. after the email link was used in another tab or browser).
@@ -144,6 +152,7 @@ export function AuthProvider({ children }) {
       hasModule,
       login,
       register,
+      completeMfa,
       logout,
       requestPasswordReset,
       updateProfile,
