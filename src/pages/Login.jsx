@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCard";
 import { useAuth } from "../context/AuthContext";
 import ErrorNotice from "../components/ErrorNotice";
+import MfaFlow from "../components/auth/MfaFlow";
 import useCountdown from "../hooks/useCountdown";
 import { describeError } from "../lib/apiErrors";
 import { destinationAfterLogin } from "../lib/redirects";
@@ -17,6 +18,10 @@ export default function Login() {
   const lockout = error && describeError(error).kind === "login_locked" ? describeError(error) : null;
   const waitLeft = useCountdown(lockout?.retryAfter || 0);
   const [submitting, setSubmitting] = useState(false);
+  // After a correct password an account that needs a second factor gets { step, challenge } instead of a session (SEC-12).
+  const [mfa, setMfa] = useState(null);
+
+  const goOn = () => navigate(destinationAfterLogin(location), { replace: true });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,15 +29,29 @@ export default function Login() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(identifier, password);
-      const redirectTo = destinationAfterLogin(location);
-      navigate(redirectTo, { replace: true });
+      const result = await login(identifier, password);
+      if (result.step === "done") goOn();
+      else setMfa(result);
     } catch (err) {
       setError(err);
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (mfa) {
+    return (
+      <MfaFlow
+        step={mfa.step}
+        challenge={mfa.challenge}
+        onDone={goOn}
+        onBack={() => {
+          setMfa(null);
+          setPassword("");
+        }}
+      />
+    );
+  }
 
   return (
     <AuthCard

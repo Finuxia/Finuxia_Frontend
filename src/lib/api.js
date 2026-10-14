@@ -62,7 +62,15 @@ function refreshSession() {
   return refreshing;
 }
 
-const NO_REFRESH_PATHS = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout"];
+// The MFA steps happen BEFORE a session exists, so a 401 there (an expired step, a wrong challenge) is an answer to show, never a reason to try a refresh.
+const NO_REFRESH_PATHS = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/refresh",
+  "/api/auth/logout",
+  "/api/auth/mfa/enrol",
+  "/api/auth/mfa/verify",
+];
 
 // The id of the most recent API response (OPS-01 / OPS-08). The backend puts one on every log line
 // for a request and returns it in X-Request-ID, so attaching it to a UI error report makes a
@@ -444,6 +452,14 @@ export const api = {
   // auth
   register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
   login: (identifier, password) => request("/api/auth/login", { method: "POST", body: { identifier, password } }),
+  // Multi-factor sign-in (SEC-12). login/register answer { mfa: "verify" | "enrol", challenge } instead of a session when the account needs a second factor;
+  // the challenge is exchanged for a session by mfaVerify (a code or a recovery code) or, for a first-time set-up, by mfaEnrolConfirm.
+  mfaEnrolStart: (challenge) => request("/api/auth/mfa/enrol/start", { method: "POST", body: { challenge } }),
+  mfaEnrolConfirm: (challenge, code) => request("/api/auth/mfa/enrol/confirm", { method: "POST", body: { challenge, code } }),
+  mfaVerify: (challenge, { code, recoveryCode }) =>
+    request("/api/auth/mfa/verify", { method: "POST", body: { challenge, ...(recoveryCode ? { recoveryCode } : { code }) } }),
+  mfaStatus: () => request("/api/auth/mfa/status"),
+  mfaRegenerateRecoveryCodes: (code) => request("/api/auth/mfa/recovery-codes", { method: "POST", body: { code } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
   me: () => request("/api/auth/me"),
   updateMe: (patch) => request("/api/auth/me", { method: "PATCH", body: patch }),
