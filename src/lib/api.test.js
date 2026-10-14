@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
-import { ApiError, api, clearLocalData, setSessionExpiredHandler } from "./api";
+import { ApiError, api, clearLocalData, requestForTests, setSessionExpiredHandler } from "./api";
 
 afterEach(() => setSessionExpiredHandler(null));
 
@@ -139,6 +139,79 @@ describe("the API client", () => {
       const err = await api.login("a@b.c", "wrong").catch((e) => e);
       expect([err.message, refreshes]).toEqual(["Invalid credentials", 0]);
     });
+  });
+});
+
+describe("public requests (auth: false)", () => {
+  const publicCalls = {
+    "the guides": () => api.getGuides(),
+    "a public booking page": () => api.getPublicBookingInfo("my-link"),
+    "a public booking page's free times": () => api.getPublicBookingSlots("my-link", "2026-10-20", "Europe/London"),
+  };
+  const urls = {
+    "the guides": `${API}/api/guides`,
+    "a public booking page": `${API}/api/booking/public/my-link`,
+    "a public booking page's free times": `${API}/api/booking/public/my-link/slots`,
+  };
+
+  it.each(Object.keys(publicCalls))("%s are asked for without the browser's cookies", async (name) => {
+    let seen = null;
+    server.use(
+      http.get(urls[name], ({ request }) => {
+        seen = request.credentials;
+        return HttpResponse.json({});
+      })
+    );
+    await publicCalls[name]();
+    expect(seen).toBe("omit");
+  });
+
+  it("an ordinary call still sends them", async () => {
+    let seen = null;
+    server.use(
+      http.get(`${API}/api/clients`, ({ request }) => {
+        seen = request.credentials;
+        return HttpResponse.json([]);
+      })
+    );
+    await api.getClients();
+    expect(seen).toBe("include");
+  });
+
+  it("a 401 on a public page is just a 401: no refresh is tried and nobody is signed out", async () => {
+    const expired = vi.fn();
+    setSessionExpiredHandler(expired);
+    let refreshes = 0;
+    server.use(
+      http.get(`${API}/api/booking/public/my-link`, () => HttpResponse.json({ detail: "nope" }, { status: 401 })),
+      http.post(`${API}/api/auth/refresh`, () => {
+        refreshes += 1;
+        return HttpResponse.json({});
+      })
+    );
+    const err = await api.getPublicBookingInfo("my-link").catch((e) => e);
+    expect([err.status, refreshes, expired.mock.calls.length]).toEqual([401, 0, 0]);
+  });
+
+  it("no CSRF header goes with it either, even if a token cookie is present", async () => {
+    document.cookie = "fx_csrf=abc123";
+    let header = "unset";
+    server.use(
+      http.post(`${API}/api/anything`, ({ request }) => {
+        header = request.headers.get("X-CSRF-Token");
+        return HttpResponse.json({});
+      })
+    );
+    await requestForTests("/api/anything", { method: "POST", body: {}, auth: false });
+    expect(header).toBeNull();
+    await requestForTests("/api/anything", { method: "POST", body: {} }); // the same call with credentials DOES carry it, so the check above can fail
+    expect(header).toBe("abc123");
+    document.cookie = "fx_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  });
+
+  it("an option the function does not support is refused instead of silently doing nothing", async () => {
+    await expect(requestForTests("/api/clients", { credentials: "omit" })).rejects.toThrow(/unsupported option credentials/);
+    await expect(requestForTests("/api/clients", { auht: false })).rejects.toThrow(/unsupported option auht/);
   });
 });
 
