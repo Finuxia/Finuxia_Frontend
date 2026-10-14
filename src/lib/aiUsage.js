@@ -1,17 +1,7 @@
 // Presentation helpers for the AI usage view. Everything here is in CREDITS: token counts are provider detail and mean nothing to an advisor,
 // so the API never sends them and this never shows them. The warning level ("warning" / "critical" / "exhausted") and the blocked state are
 // decided by the server; this only words them, so the page cannot disagree with the server about when a warning starts.
-
-/** Money from a whole number of cents, by integer arithmetic only: 1005 -> "$10.05". Anything that is not a whole number reads as $0.00. */
-export function formatCents(cents) {
-  if (!Number.isInteger(cents)) return "$0.00";
-  const sign = cents < 0 ? "-" : "";
-  const abs = Math.abs(cents);
-  const dollars = Math.floor(abs / 100)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return `${sign}$${dollars}.${String(abs % 100).padStart(2, "0")}`;
-}
+import { formatCents } from "./currency";
 
 export function creditsLabel(n) {
   const value = Number.isFinite(n) ? n : 0;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { creditsLabel, formatCents, formatResetDay, isAiBlocked, warningMessage } from "./aiUsage";
+import { creditsLabel, formatResetDay, isAiBlocked, warningMessage } from "./aiUsage";
 
 const usage = (over = {}) => ({
   mode: "allowance",
@@ -10,26 +10,6 @@ const usage = (over = {}) => ({
   credits: { included: 100, extra: 0, total: 100, used: 85, inFlight: 0, remaining: 15 },
   wallet: { balanceCents: 250 },
   ...over,
-});
-
-describe("formatCents", () => {
-  it("shows whole cents exactly, with thousands separators", () => {
-    const cases = {
-      0: "$0.00",
-      1: "$0.01",
-      9: "$0.09",
-      100: "$1.00",
-      1005: "$10.05",
-      123456: "$1,234.56",
-      99999999: "$999,999.99",
-      [-250]: "-$2.50",
-    };
-    for (const [cents, text] of Object.entries(cases)) expect(formatCents(Number(cents)), cents).toBe(text);
-  });
-
-  it("never shows a fraction of a cent or NaN: anything that is not a whole number reads as $0.00", () => {
-    for (const bad of [1.5, NaN, undefined, null, "12", Infinity]) expect(formatCents(bad), String(bad)).toBe("$0.00");
-  });
 });
 
 describe("creditsLabel", () => {
