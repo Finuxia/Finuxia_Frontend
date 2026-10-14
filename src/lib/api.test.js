@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
 import { ApiError, api, clearLocalData, setSessionExpiredHandler } from "./api";
@@ -139,6 +139,84 @@ describe("the API client", () => {
       const err = await api.login("a@b.c", "wrong").catch((e) => e);
       expect([err.message, refreshes]).toEqual(["Invalid credentials", 0]);
     });
+  });
+});
+
+describe("a 429 reads the same whichever way the request was sent", () => {
+  // jsdom cannot complete a real XMLHttpRequest upload, so the upload's transport is a stand-in that answers the way a browser would.
+  class FakeXhr {
+    static reply = { status: 200, body: "{}", headers: {} };
+    upload = {};
+    open() {}
+    setRequestHeader() {}
+    getResponseHeader(name) {
+      return FakeXhr.reply.headers[name] ?? null;
+    }
+    send() {
+      queueMicrotask(() => {
+        this.status = FakeXhr.reply.status;
+        this.responseText = FakeXhr.reply.body;
+        this.onload();
+      });
+    }
+  }
+  const upload = () => api.uploadSalesPackageDocument("p1", "passport", new File(["x"], "p.pdf", { type: "application/pdf" }));
+  const ordinary = () => api.getClients();
+
+  const refuse = (retryAfter, body = { detail: "Request was throttled. Expected available in 5 seconds." }) => {
+    const headers = retryAfter === undefined ? {} : { "Retry-After": retryAfter };
+    FakeXhr.reply = { status: 429, body: JSON.stringify(body), headers };
+    server.use(http.get(`${API}/api/clients`, () => HttpResponse.json(body, { status: 429, headers })));
+  };
+
+  beforeEach(() => vi.stubGlobal("XMLHttpRequest", FakeXhr));
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it.each([
+    ["seconds", "45", /Try again in 45 seconds\./, 45],
+    ["more than a minute", "100", /Try again in 2 minutes\./, 100],
+    ["hours", "7200", /Try again in 2 hours\./, 7200],
+  ])(
+    "Retry-After in %s gives the same message and the same wait for an upload and for an ordinary request",
+    async (_name, header, message, seconds) => {
+      refuse(header);
+      const [fromUpload, fromFetch] = await Promise.all([upload().catch((e) => e), ordinary().catch((e) => e)]);
+      expect(fromUpload).toBeInstanceOf(ApiError);
+      expect(fromUpload.status).toBe(429);
+      expect(fromUpload.message).toMatch(message);
+      expect(fromUpload.retryAfter).toBe(seconds);
+      expect([fromUpload.message, fromUpload.retryAfter]).toEqual([fromFetch.message, fromFetch.retryAfter]);
+    }
+  );
+
+  it("Retry-After as an HTTP date is read too (it used to be dropped on uploads, with no wait shown)", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-14T10:00:00Z"));
+    refuse("Wed, 14 Oct 2026 10:01:30 GMT");
+    const [fromUpload, fromFetch] = await Promise.all([upload().catch((e) => e), ordinary().catch((e) => e)]);
+    expect([fromUpload.retryAfter, fromUpload.message]).toEqual([90, "Too many requests. Try again in 2 minutes."]);
+    expect([fromUpload.message, fromUpload.retryAfter]).toEqual([fromFetch.message, fromFetch.retryAfter]);
+  });
+
+  it("with no Retry-After it says to wait a moment, rather than inventing a time", async () => {
+    refuse(undefined);
+    const err = await upload().catch((e) => e);
+    expect([err.message, err.retryAfter]).toEqual(["Too many requests. Please wait a moment and try again.", null]);
+  });
+
+  it("the server's own sentence wins when it sent one", async () => {
+    refuse("30", { detail: "You have uploaded too many documents for one package." });
+    const err = await upload().catch((e) => e);
+    expect([err.message, err.retryAfter]).toEqual(["You have uploaded too many documents for one package.", 30]);
+  });
+
+  it("the wording of a rate-limit message lives in one place", async () => {
+    const source = (await import("./api.js?raw")).default;
+    expect(source).not.toMatch(/Too many requests|too many attempts/i);
+    expect(source).not.toMatch(/throttledMessage|waitPhrase/);
   });
 });
 
