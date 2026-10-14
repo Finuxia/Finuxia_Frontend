@@ -11,6 +11,7 @@ import AvailabilityPanel from "../components/booking/AvailabilityPanel";
 import ComplianceProfilePanel from "../components/account/ComplianceProfilePanel";
 import AiUsagePanel from "../components/AiUsagePanel";
 import TwoFactorPanel from "../components/account/TwoFactorPanel";
+import { PASSWORD_REQUIREMENT, passwordTooShort } from "../lib/passwordPolicy";
 
 const TABS = [
   { key: "account", label: "Account" },
@@ -52,8 +53,8 @@ export default function Profile() {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    if (pw.next.length < 12) {
-      addToast("The new password must be at least 12 characters.");
+    if (passwordTooShort(pw.next)) {
+      addToast(`The new password must be ${PASSWORD_REQUIREMENT.toLowerCase()}`);
       return;
     }
     if (pw.next !== pw.confirm) {
@@ -231,7 +232,7 @@ export default function Profile() {
       {tab === "account" && (
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="mb-1 text-sm font-semibold text-navy">Change password</h2>
-          <p className="mb-4 text-xs text-slate-500">At least 12 characters. Changing it signs out your other devices.</p>
+          <p className="mb-4 text-xs text-slate-500">{PASSWORD_REQUIREMENT} Changing it signs out your other devices.</p>
           <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
             {[
               ["current", "Current password", "current-password"],

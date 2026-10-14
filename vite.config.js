@@ -26,10 +26,9 @@ export default defineConfig({
       reporter: ["text-summary", "text", "lcov"],
       include: ["src/**/*.{js,jsx}"],
       exclude: ["src/main.jsx", "src/test/**", "src/**/*.test.{js,jsx}", "src/data/**"],
-      // A floor, not a goal: set just under what the first real tests cover, so coverage can only go up.
-      // Raise it as tests are added (see README, "Testing").
-      // A floor, not a target: raised with FE-05's suite, and measured at 53/82/55/53 when it was set.
-      thresholds: { statements: 25, branches: 70, functions: 35, lines: 25 },
+      // A floor, not a goal: raised with TEST-07's security tests. Measured 2026-10-15 at
+      // 72.19/83.73/61.25/72.19 (statements/branches/functions/lines); keep each floor just below it.
+      thresholds: { statements: 71, branches: 82, functions: 60, lines: 71 },
     },
   },
 });

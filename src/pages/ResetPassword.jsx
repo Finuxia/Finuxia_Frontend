@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCard";
 import { api } from "../lib/api";
+import { PASSWORD_REQUIREMENT, passwordTooShort } from "../lib/passwordPolicy";
 
 export default function ResetPassword() {
   const [params] = useSearchParams();
@@ -18,8 +19,8 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (password.length < 12) {
-      setError("Password must be at least 12 characters");
+    if (passwordTooShort(password)) {
+      setError(`Password must be ${PASSWORD_REQUIREMENT.toLowerCase().replace(/\.$/, "")}`);
       return;
     }
     if (password !== confirm) {
@@ -68,7 +69,7 @@ export default function ResetPassword() {
   return (
     <AuthCard
       title="Choose a new password"
-      subtitle="Use at least 12 characters."
+      subtitle={`Use ${PASSWORD_REQUIREMENT.toLowerCase()}`}
       footer={
         <Link to="/login" className="font-semibold text-gold-dark hover:underline">
           Back to log in
