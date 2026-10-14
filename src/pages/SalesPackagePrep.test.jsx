@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../lib/api";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
+import { cleanup } from "@testing-library/react";
 import { renderWithProviders, screen, userEvent, waitFor, within } from "../test/utils";
 import SalesPackagePrep from "./SalesPackagePrep";
 
@@ -134,7 +135,9 @@ beforeEach(() => {
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   serverWith();
 });
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("starting", () => {
   it("opens the wizard on the Client step for a package id in the address", async () => {
@@ -485,6 +488,30 @@ describe("documents", () => {
     await userEvent.click(stepper("documents"));
     await screen.findByText("Upload Documents");
   };
+
+  it("loads a real PDF preview for every uploaded document through the authenticated API client", async () => {
+    const originalCreate = URL.createObjectURL;
+    const originalRevoke = URL.revokeObjectURL;
+    URL.createObjectURL = vi.fn(() => "blob:package-preview");
+    URL.revokeObjectURL = vi.fn();
+    server_pkg.documents = documents(DOCS.map(([key]) => key));
+    try {
+      renderWizard();
+      await screen.findByText("Client Information");
+      await userEvent.click(stepper("review"));
+      for (const [, label] of DOCS) {
+        const preview = await screen.findByTitle(label);
+        expect(preview).toHaveAttribute("src", "blob:package-preview");
+      }
+      expect(screen.getAllByTitle(/./)).toHaveLength(DOCS.length);
+    } finally {
+      cleanup();
+      if (originalCreate) URL.createObjectURL = originalCreate;
+      else delete URL.createObjectURL;
+      if (originalRevoke) URL.revokeObjectURL = originalRevoke;
+      else delete URL.revokeObjectURL;
+    }
+  });
   const fileInputs = () => [...document.querySelectorAll("input[type=file]")];
   const pick = (input, file) => userEvent.upload(input, file, { applyAccept: false });
 
