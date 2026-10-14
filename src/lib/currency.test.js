@@ -44,6 +44,20 @@ describe("formatCents", () => {
     expect(formatCents(1234, "eur")).toBe("12.34 EUR");
   });
 
+  it("shows the wallet-sized amounts the AI panel used to format for itself, identically", () => {
+    const cases = {
+      0: "$0.00",
+      1: "$0.01",
+      9: "$0.09",
+      100: "$1.00",
+      1005: "$10.05",
+      123456: "$1,234.56",
+      99999999: "$999,999.99",
+      [-250]: "-$2.50",
+    };
+    for (const [cents, text] of Object.entries(cases)) expect(formatCents(Number(cents)), cents).toBe(text);
+  });
+
   it("shows a negative balance with its sign, and nothing at all as zero", () => {
     expect(formatCents(-20, "usd")).toBe("-$0.20");
     expect(formatCents(-1250, "usd")).toBe("-$12.50");
@@ -55,5 +69,28 @@ describe("formatCents", () => {
     for (const bad of [49.99, 0.5, NaN, Infinity, "4900", {}, [], Number.MAX_SAFE_INTEGER + 2]) {
       expect(formatCents(bad, "usd")).toBe("–");
     }
+  });
+});
+
+describe("there is one way to show money from cents", () => {
+  // Two functions of this name once existed (here and in the AI usage helpers) and disagreed on bad input; a figure on screen depended on which page it was.
+  const sources = import.meta.glob(["../**/*.{js,jsx,ts,tsx}", "!../**/*.test.*", "!../test/**"], {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  });
+
+  it("only lib/currency.js defines formatCents", () => {
+    const definers = Object.entries(sources)
+      .filter(([, text]) => /(export\s+)?(async\s+)?function\s+formatCents\b|(const|let|var)\s+formatCents\s*=/.test(text))
+      .map(([file]) => file);
+    expect(definers).toEqual(["./currency.js"]);
+  });
+
+  it("everything that uses it imports it from there", () => {
+    const wrong = Object.entries(sources)
+      .filter(([, text]) => /import\s*\{[^}]*\bformatCents\b[^}]*\}\s*from\s*["'][^"']*(?<!currency)["']/.test(text))
+      .map(([file]) => file);
+    expect(wrong).toEqual([]);
   });
 });
