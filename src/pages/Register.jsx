@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCard";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import MfaFlow from "../components/auth/MfaFlow";
 
 export default function Register() {
   const { register } = useAuth();
@@ -11,6 +12,13 @@ export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // A new account sets up its second factor before it gets a session (SEC-12).
+  const [mfa, setMfa] = useState(null);
+
+  const welcome = () => {
+    addToast(`Welcome to Finuxia, ${form.name.split(" ")[0]}! Check your email to confirm your address.`);
+    navigate("/dashboard", { replace: true, state: { justRegistered: true } });
+  };
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -27,15 +35,29 @@ export default function Register() {
     }
     setSubmitting(true);
     try {
-      await register(form.name, form.email, form.password);
-      addToast(`Welcome to Finuxia, ${form.name.split(" ")[0]}! Check your email to confirm your address.`);
-      navigate("/dashboard", { replace: true, state: { justRegistered: true } });
+      const result = await register(form.name, form.email, form.password);
+      if (result.step === "done") welcome();
+      else setMfa(result);
     } catch (err) {
       setError(err.message);
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (mfa) {
+    return (
+      <MfaFlow
+        step={mfa.step}
+        challenge={mfa.challenge}
+        onDone={welcome}
+        onBack={() => {
+          // The account exists; signing in with the same password brings the person back to this step.
+          navigate("/login", { replace: true });
+        }}
+      />
+    );
+  }
 
   return (
     <AuthCard

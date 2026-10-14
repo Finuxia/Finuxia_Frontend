@@ -62,7 +62,15 @@ function refreshSession() {
   return refreshing;
 }
 
-const NO_REFRESH_PATHS = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout"];
+// The MFA steps happen BEFORE a session exists, so a 401 there (an expired step, a wrong challenge) is an answer to show, never a reason to try a refresh.
+const NO_REFRESH_PATHS = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/refresh",
+  "/api/auth/logout",
+  "/api/auth/mfa/enrol",
+  "/api/auth/mfa/verify",
+];
 
 // The id of the most recent API response (OPS-01 / OPS-08). The backend puts one on every log line
 // for a request and returns it in X-Request-ID, so attaching it to a UI error report makes a
@@ -81,16 +89,22 @@ export function resetLastRequestId() {
   lastResponseRequestId = "";
 }
 
+/** Testing seam: the generic request function, to check what it accepts. */
+export { request as requestForTests };
+
 // fetch + cookies + CSRF header, and one silent refresh-and-retry on a 401.
-async function authedFetch(path, init = {}) {
+// `auth: false` is for the public endpoints (a client's booking page, the guides): the request carries NO cookies and no CSRF header, and a 401 is never
+// answered by a refresh or by ending the session. It matters when an advisor opens a public page in a browser that still holds their (possibly expired)
+// cookies: the server would try to authenticate the stale cookie first and refuse a page that needs no sign-in, and the client would then sign the advisor out.
+async function authedFetch(path, init = {}, { auth = true } = {}) {
   const send = async () => {
     const method = (init.method || "GET").toUpperCase();
     const headers = { ...(init.headers || {}) };
-    if (method !== "GET" && method !== "HEAD") {
+    if (auth && method !== "GET" && method !== "HEAD") {
       const csrf = readCookie(CSRF_COOKIE);
       if (csrf) headers["X-CSRF-Token"] = csrf;
     }
-    const response = await fetch(`${BASE_URL}${path}`, { ...init, headers, credentials: "include" });
+    const response = await fetch(`${BASE_URL}${path}`, { ...init, headers, credentials: auth ? "include" : "omit" });
     // Every request in this client funnels through here, so this is the one place it needs doing.
     // Guarded because a network failure and some test doubles give a response with no headers.
     try {
@@ -102,7 +116,7 @@ async function authedFetch(path, init = {}) {
     return response;
   };
   let res = await send();
-  if (res.status === 401 && !NO_REFRESH_PATHS.some((p) => path.startsWith(p))) {
+  if (auth && res.status === 401 && !NO_REFRESH_PATHS.some((p) => path.startsWith(p))) {
     if (await refreshSession()) {
       res = await send();
     } else {
@@ -114,25 +128,6 @@ async function authedFetch(path, init = {}) {
     }
   }
   return res;
-}
-
-// Turns a Retry-After header (seconds) into "about 12 minutes" for the "too many requests" message.
-function waitPhrase(seconds) {
-  if (!Number.isFinite(seconds) || seconds <= 0) return "a little while";
-  if (seconds < 60) return `${Math.ceil(seconds)} second${Math.ceil(seconds) === 1 ? "" : "s"}`;
-  if (seconds < 3600) {
-    const m = Math.ceil(seconds / 60);
-    return `about ${m} minute${m === 1 ? "" : "s"}`;
-  }
-  const h = Math.ceil(seconds / 3600);
-  return `about ${h} hour${h === 1 ? "" : "s"}`;
-}
-
-// A 429 from the API (rate limit, e.g. the per-user AI limit) becomes a plain-language message
-// instead of the raw "Request was throttled. Expected available in N seconds."
-export function throttledMessage(retryAfterHeader) {
-  const seconds = parseInt(retryAfterHeader, 10);
-  return `Too many requests — please try again in ${waitPhrase(seconds)}.`;
 }
 
 export class ApiError extends Error {
@@ -202,23 +197,28 @@ async function apiErrorFromResponse(res, path) {
 /**
  * @param {string} path
  * @param {{ method?: string, body?: unknown, headers?: Record<string, string>, auth?: boolean }} [options]
- *   `auth` is ACCEPTED AND IGNORED. Several call sites pass `{ auth: false }` meaning "do not
- *   send credentials", and this function has never honoured it — every request sends
- *   `credentials: "include"` regardless. It is in this type only so those existing call sites
- *   type-check while the real question is settled on SCRUM-115: either make it work, or take it
- *   off the call sites. Do not add new uses of it.
+ *   `auth: false` sends the request without credentials, for the public endpoints (see `authedFetch`). Any other option is refused: this function used to
+ *   take `auth` and silently ignore it, and a misspelt or unsupported option should fail where it is written, not do nothing.
  * @returns {Promise<any>} the parsed JSON body (null for a 204); the public methods below narrow it with their own return types.
  */
-async function request(path, { method = "GET", body, headers: extraHeaders } = {}) {
+async function request(path, options = {}) {
+  const { method = "GET", body, headers: extraHeaders, auth = true, ...unknown } = options;
+  const unknownKeys = Object.keys(unknown);
+  if (unknownKeys.length)
+    throw new TypeError(`request(${path}): unsupported option${unknownKeys.length > 1 ? "s" : ""} ${unknownKeys.join(", ")}`);
   const headers = { "Content-Type": "application/json", ...extraHeaders };
 
   let res;
   try {
-    res = await authedFetch(path, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    res = await authedFetch(
+      path,
+      {
+        method,
+        headers,
+        body: body === undefined ? undefined : JSON.stringify(body),
+      },
+      { auth }
+    );
   } catch {
     throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
@@ -339,9 +339,6 @@ function sendMultipartXHR(path, formData, onProgress) {
       }
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve(data);
-      } else if (xhr.status === 429) {
-        const header = xhr.getResponseHeader("Retry-After");
-        reject(new ApiError(throttledMessage(header), { status: 429, retryAfter: parseInt(header ?? "", 10) || undefined }));
       } else {
         reject(apiErrorFrom(xhr.status, data, path, xhr.getResponseHeader("Retry-After")));
       }
@@ -455,6 +452,14 @@ export const api = {
   // auth
   register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
   login: (identifier, password) => request("/api/auth/login", { method: "POST", body: { identifier, password } }),
+  // Multi-factor sign-in (SEC-12). login/register answer { mfa: "verify" | "enrol", challenge } instead of a session when the account needs a second factor;
+  // the challenge is exchanged for a session by mfaVerify (a code or a recovery code) or, for a first-time set-up, by mfaEnrolConfirm.
+  mfaEnrolStart: (challenge) => request("/api/auth/mfa/enrol/start", { method: "POST", body: { challenge } }),
+  mfaEnrolConfirm: (challenge, code) => request("/api/auth/mfa/enrol/confirm", { method: "POST", body: { challenge, code } }),
+  mfaVerify: (challenge, { code, recoveryCode }) =>
+    request("/api/auth/mfa/verify", { method: "POST", body: { challenge, ...(recoveryCode ? { recoveryCode } : { code }) } }),
+  mfaStatus: () => request("/api/auth/mfa/status"),
+  mfaRegenerateRecoveryCodes: (code) => request("/api/auth/mfa/recovery-codes", { method: "POST", body: { code } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
   me: () => request("/api/auth/me"),
   updateMe: (patch) => request("/api/auth/me", { method: "PATCH", body: patch }),

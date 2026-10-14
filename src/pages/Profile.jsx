@@ -10,6 +10,7 @@ import ZoomPanel from "../components/integrations/ZoomPanel";
 import AvailabilityPanel from "../components/booking/AvailabilityPanel";
 import ComplianceProfilePanel from "../components/account/ComplianceProfilePanel";
 import AiUsagePanel from "../components/AiUsagePanel";
+import TwoFactorPanel from "../components/account/TwoFactorPanel";
 
 const TABS = [
   { key: "account", label: "Account" },
@@ -261,6 +262,8 @@ export default function Profile() {
           </form>
         </section>
       )}
+
+      {tab === "account" && <TwoFactorPanel />}
 
       {tab === "integrations" && (
         <div className="flex flex-col gap-6">

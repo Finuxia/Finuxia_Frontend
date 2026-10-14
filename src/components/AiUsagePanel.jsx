@@ -8,7 +8,8 @@ import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import { formatLongDate } from "../lib/dates";
 import { createAttemptKeys, isRetryable } from "../lib/idempotency";
-import { creditsLabel, formatCents } from "../lib/aiUsage";
+import { creditsLabel } from "../lib/aiUsage";
+import { formatCents } from "../lib/currency";
 
 const TOP_UPS = [500, 1000, 2500];
 

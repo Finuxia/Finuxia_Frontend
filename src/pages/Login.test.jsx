@@ -1,11 +1,11 @@
 import { http, HttpResponse } from "msw";
 import { Route, Routes, useLocation } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import ProtectedRoute from "../components/layout/ProtectedRoute";
 import { destinationAfterLogin } from "../lib/redirects";
 import { API, testUser } from "../test/handlers";
 import { server } from "../test/server";
-import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
+import { act, renderWithProviders, screen, userEvent } from "../test/utils";
 import Login from "./Login";
 
 function Where() {
@@ -90,6 +90,12 @@ describe("destinationAfterLogin", () => {
 });
 
 describe("login rate limiting", () => {
+  // The wait is counted by an interval. Only the clock and that interval are replaced, so the network mock and the test library's own polling keep running
+  // for real, and the test moves time by hand instead of sleeping through the wait (which made it slow, and flaky when the machine was busy).
+  const useClock = () => vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "Date"] });
+  afterEach(() => vi.useRealTimers());
+  const passTime = (ms) => act(() => vi.advanceTimersByTime(ms));
+
   const lockedOut = (retryAfter = 2) =>
     server.use(
       http.get(`${API}/api/auth/me`, () => new HttpResponse(null, { status: 401 })),
@@ -111,12 +117,18 @@ describe("login rate limiting", () => {
   });
 
   it("holds the Log In button until the wait is over, then lets the user try again", async () => {
+    useClock();
     lockedOut(2);
     renderWithProviders(<App />, { route: "/login", providers: ["router", "toast", "auth"] });
     await logIn();
     await screen.findByRole("alert");
-    expect(screen.getByRole("button", { name: "Log In" })).toBeDisabled();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Log In" })).toBeEnabled(), { timeout: 3500 });
+    const button = () => screen.getByRole("button", { name: "Log In" });
+    expect(button()).toBeDisabled();
+    passTime(1000);
+    expect(button()).toBeDisabled(); // one second of two has gone
+    expect(screen.getByRole("alert")).toHaveTextContent("Try again in 1 second.");
+    passTime(1000);
+    expect(button()).toBeEnabled();
   });
 
   it("a wrong password is still just the server's message, not a lockout", async () => {
