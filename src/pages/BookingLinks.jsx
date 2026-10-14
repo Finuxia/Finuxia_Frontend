@@ -99,7 +99,7 @@ export default function BookingLinks() {
           <p className="text-sm text-slate-400">No booking links yet. Create one to start taking requests.</p>
           <button
             onClick={() => setModalLink(null)}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
           >
             <Plus size={15} />
             New Link
@@ -108,7 +108,7 @@ export default function BookingLinks() {
       ) : (
         <div className="flex flex-col gap-3">
           {links.map((link) => (
-            <div key={link.id} className="rounded-2xl bg-white p-5 shadow-sm">
+            <div key={link.id} className="rounded-2xl bg-white p-5 shadow-xs">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">

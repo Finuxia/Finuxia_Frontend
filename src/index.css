@@ -1,6 +1,65 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --color-navy: #0f1c2e;
+  --color-navy-light: #16283f;
+  --color-navy-dark: #0a1420;
+
+  --color-gold: #c9a84c;
+  --color-gold-light: #ddbf74;
+  --color-gold-dark: #a8873a;
+
+  --color-av-blue: #3b82f6;
+  --color-av-green: #10b981;
+  --color-av-amber: #f59e0b;
+  --color-av-red: #ef4444;
+  --color-av-purple: #8b5cf6;
+  --color-av-teal: #14b8a6;
+  --color-av-yellow: #eab308;
+  --color-av-brown: #8b5e34;
+
+  --animate-slide-up: slide-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.15s ease-out;
+
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 html,
 body,

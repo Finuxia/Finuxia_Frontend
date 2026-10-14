@@ -273,7 +273,7 @@ export default function MyDay() {
 
       <Section icon={FileText} title="Pending Files" count={pendingFiles.length}>
         {pendingFiles.map(({ client, file }) => (
-          <div key={file.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div key={file.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-xs">
             <button
               onClick={() => toggleFileStatus(client.id, file.id)}
               aria-label={file.status === "done" ? "Mark file pending" : "Mark file done"}

@@ -102,7 +102,7 @@ export default function Documents() {
                   const meta = getDocumentStatusMeta(doc.status);
                   const StatusIcon = STATUS_ICON[doc.status] ?? Clock;
                   return (
-                    <div key={doc.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                    <div key={doc.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-xs">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-navy">{doc.title}</p>
@@ -133,7 +133,7 @@ export default function Documents() {
             ) : (
               <div className="flex flex-col gap-2.5">
                 {documents.map((doc) => (
-                  <div key={doc.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div key={doc.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
                     <div className="flex items-start gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy/5 text-navy">
                         <FileText size={16} />

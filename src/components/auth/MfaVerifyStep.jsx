@@ -68,7 +68,7 @@ export default function MfaVerifyStep({ challenge, onSignedIn, onBack }) {
       <button
         type="submit"
         disabled={!ready || submitting}
-        className="w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+        className="w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
       >
         {submitting ? "Checking..." : "Continue"}
       </button>

@@ -5,7 +5,7 @@ import { Lock } from "lucide-react";
 export default function UpgradePrompt({ moduleName, message }) {
   const what = moduleName || "This feature";
   return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+    <div className="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-xs">
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold-dark">
         <Lock size={24} />
       </div>
@@ -19,7 +19,7 @@ export default function UpgradePrompt({ moduleName, message }) {
       </div>
       <Link
         to="/billing"
-        className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+        className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
       >
         View Plans
       </Link>

@@ -31,7 +31,7 @@ export default function ZoomIntegrationDocs() {
           </span>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-xs">
           <h1 className="text-xl font-bold text-navy">Zoom integration guide</h1>
           <p className="mt-1 text-sm text-slate-500">How connecting Zoom to Finuxia works, what it does, and how to remove it.</p>
 

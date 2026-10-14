@@ -46,7 +46,7 @@ export default function ClientCard({ client, done, onToggleDone, onSnooze, onRes
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition hover:shadow-md">
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           onClick={() => onToggleDone?.(client.id)}

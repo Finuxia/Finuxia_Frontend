@@ -72,13 +72,10 @@ jobs:
           VITE_API_URL: https://api.example.invalid
       - name: Bundle check (public pages and first load exclude the signed-in app; size budget)
         run: npm run check:bundle
-      - name: Dependency audit (reported, not yet blocking)
-        # Measured 2026-10-09: two MODERATE advisories, both the same one — `uuid` below 11.1.1,
-        # reached through `exceljs`. npm's suggested fix downgrades exceljs to 3.4.0, which is a
-        # breaking change and would undo SEC-04's replacement of the vulnerable `xlsx` parser, so it
-        # is the wrong trade. Blocked until exceljs ships a release carrying a patched uuid.
-        #
-        # The previous note here claimed xlsx had no fixed release and react-router needed a major
-        # upgrade. Both are stale: SEC-04 removed xlsx entirely and react-router is on v7. Tracked
-        # as SEC-10 (SCRUM-79).
-        run: npm audit --omit=dev || true
+      - name: Dependency audit (fail on high and critical)
+        # The full audit is meaningful again after SEC-10: npm exits non-zero only for high or
+        # critical findings, while the two known moderate production findings remain visible but
+        # non-blocking. They are uuid <11.1.1 via exceljs; npm's suggested fix downgrades exceljs to
+        # 3.4.0, which would undo SEC-04's replacement of the vulnerable xlsx parser. Review by
+        # 2027-01-15, or sooner if exceljs ships a compatible uuid update. Never use --force here.
+        run: npm audit --audit-level=high

@@ -41,7 +41,7 @@ export default function Guide() {
         groups.map((group) => (
           <section key={group.category} className="flex flex-col gap-2">
             <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-gold-dark">{group.category}</h2>
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
               {group.items.map((item, i) => {
                 const open = openId === item.id;
                 return (

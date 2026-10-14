@@ -119,7 +119,7 @@ export default function GoogleMeetingsSection({ date, events = [], loading = fal
             const client = matchClientForEvent(event, clients);
             const done = isTaskDoneToday(event.id, "gcal", date);
             return (
-              <div key={event.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <div key={event.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-xs">
                 <button
                   onClick={() => toggleDailyTask(event.id, "gcal", date)}
                   aria-label={done ? "Mark as not done" : "Mark as done"}

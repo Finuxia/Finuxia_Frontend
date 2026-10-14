@@ -263,7 +263,7 @@ export default function SalesPackagePrep() {
           <button
             type="button"
             onClick={() => goStep(Math.min(STEPS.length - 1, step + 1))}
-            className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+            className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
           >
             Next
             <ChevronRight size={15} />

@@ -32,7 +32,7 @@ describe("priceLine", () => {
     expect(priceLine(plan({ currency: "cad", accessDuration: dur("days", { days: 30 }) }))).toBe("$49.00 CAD for 30 days");
   });
 
-  it("an amount with cents is exact, never rounded", () => {
+  it("an amount with cents is exact, never rounded-sm", () => {
     expect(priceLine(plan({ priceCents: 4999 }))).toBe("$49.99 for 1 month");
     expect(priceLine(plan({ priceCents: 1 }))).toBe("$0.01 for 1 month");
     expect(priceLine(plan({ priceCents: 1000000 }))).toBe("$10,000.00 for 1 month");

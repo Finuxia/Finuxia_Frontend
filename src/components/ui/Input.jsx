@@ -1,5 +1,5 @@
 const BASE =
-  "w-full rounded-lg border px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30";
+  "w-full rounded-lg border px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30";
 
 /** The class string of a text control, for the places that need a class and not a component. `invalid` turns the border red. */
 export function inputClass(invalid = false) {

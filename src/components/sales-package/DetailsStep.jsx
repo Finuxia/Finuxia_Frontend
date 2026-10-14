@@ -89,12 +89,12 @@ export default function DetailsStep({ data, patch, hasInvestmentProduct }) {
                 placeholder="Provider"
                 value={c.provider}
                 onChange={(e) => updateCoverage(c.id, { provider: e.target.value })}
-                className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-4"
+                className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-4"
               />
               <select
                 value={c.type}
                 onChange={(e) => updateCoverage(c.id, { type: e.target.value })}
-                className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-4"
+                className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-4"
               >
                 <option value="">Type</option>
                 {EXISTING_COVERAGE_TYPES.map((t) => (
@@ -107,7 +107,7 @@ export default function DetailsStep({ data, patch, hasInvestmentProduct }) {
                 placeholder="$0"
                 value={c.amount}
                 onChange={(v) => updateCoverage(c.id, { amount: v })}
-                className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-3"
+                className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-3"
               />
               <button
                 type="button"
@@ -137,7 +137,7 @@ export default function DetailsStep({ data, patch, hasInvestmentProduct }) {
           rows={4}
           value={data.advisorNotes}
           onChange={(e) => patch({ advisorNotes: e.target.value })}
-          className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
         />
       </StepCard>
     </>

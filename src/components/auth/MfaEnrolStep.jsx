@@ -121,7 +121,7 @@ export default function MfaEnrolStep({ challenge, onSignedIn, onBack }) {
           type="button"
           disabled={!saved}
           onClick={() => onSignedIn(done)}
-          className="w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+          className="w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
         >
           Continue to Finuxia
         </button>
@@ -172,7 +172,7 @@ export default function MfaEnrolStep({ challenge, onSignedIn, onBack }) {
       <button
         type="submit"
         disabled={!setup || !isCompleteCode(code) || submitting}
-        className="w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+        className="w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
       >
         {submitting ? "Checking..." : "Turn on two-factor sign-in"}
       </button>

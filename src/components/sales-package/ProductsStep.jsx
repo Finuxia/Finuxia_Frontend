@@ -32,7 +32,7 @@ export default function ProductsStep({
                 <select
                   value={p.companyId}
                   onChange={(e) => onCompanyChange(p.id, e.target.value)}
-                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-3"
+                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-3"
                 >
                   <option value="">Select Company</option>
                   {companies.map((c) => (
@@ -45,7 +45,7 @@ export default function ProductsStep({
                   value={p.productId}
                   onChange={(e) => onProductChange(p.id, e.target.value)}
                   disabled={!p.companyId}
-                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold disabled:bg-slate-50 disabled:text-slate-400 sm:col-span-3"
+                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold disabled:bg-slate-50 disabled:text-slate-400 sm:col-span-3"
                 >
                   <option value="">{p.companyId ? "Select Product" : "Pick a company first"}</option>
                   {products.map((prod) => (
@@ -58,12 +58,12 @@ export default function ProductsStep({
                   value={p.coverageAmount}
                   onChange={(v) => onFieldChange(p.id, { coverageAmount: v })}
                   placeholder="Face Amount"
-                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-2"
+                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-2"
                 />
                 <select
                   value={p.frequency}
                   onChange={(e) => onFieldChange(p.id, { frequency: e.target.value })}
-                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-2"
+                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-2"
                 >
                   <option value="">Frequency</option>
                   {FREQUENCIES.map((f) => (
@@ -78,7 +78,7 @@ export default function ProductsStep({
                   onChange={(v) => onFieldChange(p.id, { premium: v })}
                   placeholder={p.frequency ? "Premium" : "Pick frequency"}
                   title={p.frequency ? undefined : "Select a frequency first"}
-                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold disabled:bg-slate-50 disabled:text-slate-400 sm:col-span-1"
+                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold disabled:bg-slate-50 disabled:text-slate-400 sm:col-span-1"
                 />
                 <button
                   type="button"
@@ -100,7 +100,7 @@ export default function ProductsStep({
                   <select
                     value={p.accountType || ""}
                     onChange={(e) => onFieldChange(p.id, { accountType: e.target.value })}
-                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
+                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold"
                   >
                     <option value="">Select account type...</option>
                     {ACCOUNT_TYPES.map((t) => (
@@ -147,7 +147,7 @@ export default function ProductsStep({
                             max="100"
                             value={a.allocationPct}
                             onChange={(e) => onUpdateAllocation(p.id, a.id, { allocationPct: e.target.value })}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold"
                           />
                           <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
                         </div>

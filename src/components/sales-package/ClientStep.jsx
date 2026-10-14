@@ -141,7 +141,7 @@ export default function ClientStep({ data, patch }) {
                     placeholder="Full name"
                     value={dep.fullName}
                     onChange={(e) => updateDependant(dep.id, { fullName: e.target.value })}
-                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
+                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold"
                   />
                 </label>
                 <label className="flex flex-col gap-1">
@@ -149,7 +149,7 @@ export default function ClientStep({ data, patch }) {
                   <select
                     value={dep.relationship}
                     onChange={(e) => updateDependant(dep.id, { relationship: e.target.value })}
-                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
+                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold"
                   >
                     <option value="">Select...</option>
                     {DEPENDANT_RELATIONSHIPS.map((r) => (
@@ -166,7 +166,7 @@ export default function ClientStep({ data, patch }) {
                       placeholder="e.g. Grandchild"
                       value={dep.relationshipOther}
                       onChange={(e) => updateDependant(dep.id, { relationshipOther: e.target.value })}
-                      className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold"
+                      className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold"
                     />
                   </label>
                 )}
@@ -178,7 +178,7 @@ export default function ClientStep({ data, patch }) {
                     max={todayISO()}
                     value={dep.dateOfBirth}
                     onChange={(e) => updateDependant(dep.id, { dateOfBirth: e.target.value })}
-                    className={`rounded-lg border px-2.5 py-2 text-sm text-navy outline-none focus:border-gold ${birthDateError(dep.dateOfBirth) ? "border-av-red" : "border-slate-200"}`}
+                    className={`rounded-lg border px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold ${birthDateError(dep.dateOfBirth) ? "border-av-red" : "border-slate-200"}`}
                   />
                   {birthDateError(dep.dateOfBirth) && <span className="text-xs text-av-red">{birthDateError(dep.dateOfBirth)}</span>}
                 </label>

@@ -68,7 +68,7 @@ export default function Presentations() {
             const hasVariants = item.variants?.length > 0;
             const isOpen = expanded.has(item.slug);
             return (
-              <div key={item.slug} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div key={item.slug} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
                 <div className="flex items-center gap-3 px-5 py-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">

@@ -246,7 +246,7 @@ export default function AddClientModal({ open, onClose, client = null, initialVa
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
           >
             {saving ? "Saving…" : isEdit ? "Save Changes" : "Save Client"}
           </button>

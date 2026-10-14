@@ -207,7 +207,7 @@ export default function ReviewStep({
           type="button"
           onClick={onGenerate}
           disabled={!canGenerate || generating}
-          className="mt-4 flex items-center gap-1.5 rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-50"
+          className="mt-4 flex items-center gap-1.5 rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-50"
         >
           {generating ? (
             <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -228,7 +228,7 @@ export default function ReviewStep({
                 href="https://docuseal.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+                className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
               >
                 <ExternalLink size={14} />
                 Open DocuSeal

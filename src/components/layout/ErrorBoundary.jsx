@@ -45,7 +45,7 @@ export default class ErrorBoundary extends Component {
     const showDetail = this.props.showDetail ?? import.meta.env.DEV;
     return (
       <div role="alert" className={route ? "py-16" : "flex min-h-screen items-center justify-center bg-slate-50 px-4"}>
-        <div className="mx-auto max-w-lg rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div className="mx-auto max-w-lg rounded-xl border border-slate-200 bg-white p-8 text-center shadow-xs">
           <h1 className="text-xl font-semibold text-slate-900">Something went wrong</h1>
           <p className="mt-2 text-sm text-slate-600">
             {route
@@ -74,7 +74,7 @@ export default class ErrorBoundary extends Component {
             </a>
           </div>
           {showDetail ? (
-            <pre className="mt-6 max-h-64 overflow-auto rounded bg-slate-100 p-3 text-left text-xs text-slate-700">
+            <pre className="mt-6 max-h-64 overflow-auto rounded-sm bg-slate-100 p-3 text-left text-xs text-slate-700">
               {String(error?.stack || error?.message || error)}
             </pre>
           ) : (
