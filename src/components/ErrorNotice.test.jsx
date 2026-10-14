@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../lib/api";
 import { messageForStatus } from "../lib/apiErrors";
-import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
+import { act, renderWithProviders, screen, userEvent } from "../test/utils";
 import ErrorNotice from "./ErrorNotice";
 
 const err = (status, { message, ...rest } = {}) =>
@@ -16,14 +16,20 @@ describe("ErrorNotice", () => {
   });
 
   describe("rate limited", () => {
+    afterEach(() => vi.useRealTimers());
+
     it("says how long to wait, counts down, and enables the retry when the wait is over", async () => {
+      vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "Date"] }); // time is moved by hand below, not waited for
       const onRetry = vi.fn();
       render(<ErrorNotice error={err(429, { retryAfter: 2, path: "/api/clients" })} onRetry={onRetry} />);
       expect(screen.getByRole("alert")).toHaveTextContent("Too many requests. Try again in 2 seconds.");
       const retry = screen.getByRole("button", { name: "Try again" });
       expect(retry).toBeDisabled();
-      await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Try again in 1 second."), { timeout: 2500 });
-      await waitFor(() => expect(retry).toBeEnabled(), { timeout: 3000 });
+      act(() => vi.advanceTimersByTime(1000));
+      expect(screen.getByRole("alert")).toHaveTextContent("Try again in 1 second.");
+      expect(retry).toBeDisabled();
+      act(() => vi.advanceTimersByTime(1000));
+      expect(retry).toBeEnabled();
       await userEvent.click(retry);
       expect(onRetry).toHaveBeenCalledTimes(1);
     });
