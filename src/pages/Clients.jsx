@@ -77,13 +77,13 @@ export default function Clients() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name, phone, email, Telegram..."
-            className="w-full text-sm text-navy outline-none placeholder:text-slate-400"
+            className="w-full text-sm text-navy outline-hidden placeholder:text-slate-400"
           />
         </div>
         <select
           value={stageFilter}
           onChange={(e) => setStageFilter(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-none"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-hidden"
         >
           <option value="all">All Stages</option>
           {PIPELINE_STAGES.map((s) => (
@@ -95,7 +95,7 @@ export default function Clients() {
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-none"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-hidden"
         >
           <option value="all">All Priorities</option>
           <option value="High">High</option>
@@ -132,7 +132,7 @@ export default function Clients() {
               <button
                 key={c.id}
                 onClick={() => navigate(`/clients/${c.id}`)}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:shadow-md"
+                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-xs transition hover:shadow-md"
               >
                 <div
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${

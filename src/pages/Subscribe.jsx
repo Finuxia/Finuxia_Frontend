@@ -99,7 +99,7 @@ export default function Subscribe() {
           </span>
         </div>
 
-        <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+        <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-7 shadow-xs">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 text-gold-dark">
             {active ? <CalendarClock size={22} /> : <Lock size={22} />}
           </div>

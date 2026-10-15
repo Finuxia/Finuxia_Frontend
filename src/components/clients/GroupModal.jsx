@@ -80,7 +80,7 @@ export default function GroupModal({ group, initialMemberIds, onClose, onDelete 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Smith Family, Acme Corp, College friends..."
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -114,7 +114,7 @@ export default function GroupModal({ group, initialMemberIds, onClose, onDelete 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search clients..."
-              className="w-full text-sm text-navy outline-none placeholder:text-slate-400"
+              className="w-full text-sm text-navy outline-hidden placeholder:text-slate-400"
             />
           </div>
           <div className="max-h-56 overflow-y-auto rounded-lg border border-slate-100">
@@ -169,7 +169,7 @@ export default function GroupModal({ group, initialMemberIds, onClose, onDelete 
           <button
             onClick={handleSave}
             disabled={!name.trim()}
-            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
           >
             {isEdit ? "Save" : "Create Group"}
           </button>

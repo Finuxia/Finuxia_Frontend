@@ -31,7 +31,7 @@ export default function NotesSection({ notes, onAdd, onEdit, onDelete }) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Add a note... (e.g. Interested in retirement.)"
-          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
         />
         <button
           type="submit"
@@ -54,7 +54,7 @@ export default function NotesSection({ notes, onAdd, onEdit, onDelete }) {
                     autoFocus
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-navy outline-none focus:border-gold"
+                    className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-navy outline-hidden focus:border-gold"
                   />
                   <div className="flex justify-end gap-2">
                     <button

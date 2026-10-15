@@ -111,7 +111,7 @@ export default function OpenDriveFolderButton({ clientId, clientName }) {
                 <button
                   onClick={handleConnect}
                   disabled={connecting}
-                  className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+                  className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
                 >
                   <Link2 size={14} />
                   {connecting ? "Redirecting..." : "Connect Google Drive"}
@@ -130,7 +130,7 @@ export default function OpenDriveFolderButton({ clientId, clientName }) {
               <div className="mt-5 flex justify-end">
                 <button
                   onClick={() => setPrompt(null)}
-                  className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+                  className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
                 >
                   Got it
                 </button>

@@ -120,7 +120,7 @@ export default function NewTicketModal({ open, onClose, onCreated }) {
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
           >
             {submitting ? "Submitting..." : "Submit Ticket"}
           </button>

@@ -117,16 +117,16 @@ export default function GoogleDrivePanel() {
 
   if (!loading && !isConfigured) {
     return (
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-navy">
           <HardDrive size={15} className="text-slate-400" />
           Google Drive
         </h2>
         <p className="text-sm text-slate-500">
           Not configured yet — an admin needs to add a Google OAuth client as{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_DRIVE_CLIENT_ID</code> /{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_DRIVE_CLIENT_SECRET</code> on the backend to enable
-          this.
+          <code className="rounded-sm bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_DRIVE_CLIENT_ID</code> /{" "}
+          <code className="rounded-sm bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_DRIVE_CLIENT_SECRET</code> on the backend to
+          enable this.
         </p>
       </section>
     );
@@ -136,7 +136,7 @@ export default function GoogleDrivePanel() {
   const connected = status === "connected";
 
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm">
+    <section className="rounded-2xl bg-white p-6 shadow-xs">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-navy">
           <HardDrive size={15} className="text-slate-400" />
@@ -224,7 +224,7 @@ export default function GoogleDrivePanel() {
               value={folderInput}
               onChange={(e) => setFolderInput(e.target.value)}
               placeholder="Paste a Google Drive folder link (e.g. your Prospects folder)"
-              className="w-full min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
             <button
               type="submit"

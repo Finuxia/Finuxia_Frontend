@@ -74,7 +74,7 @@ export default function RemindersSection({ date, isToday, reminders, onToggleSta
           return (
             <div
               key={r.id}
-              className={`flex items-center gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm ${
+              className={`flex items-center gap-3 rounded-xl border bg-white px-4 py-3 shadow-xs ${
                 overdue ? "border-av-red/30" : "border-slate-200"
               }`}
             >

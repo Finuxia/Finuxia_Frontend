@@ -89,7 +89,7 @@ export default function SearchableSelect({
         aria-controls={listId}
         aria-haspopup="listbox"
         aria-autocomplete="list"
-        className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-2.5 pr-14 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 disabled:bg-slate-50 disabled:text-slate-400"
+        className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-2.5 pr-14 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30 disabled:bg-slate-50 disabled:text-slate-400"
       />
       <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1 text-slate-400">
         {clearable && (
@@ -100,7 +100,7 @@ export default function SearchableSelect({
               onChange(freeText ? "" : "", null);
               setQuery("");
             }}
-            className="rounded p-0.5 hover:text-navy"
+            className="rounded-sm p-0.5 hover:text-navy"
             aria-label="Clear"
           >
             <X size={13} />

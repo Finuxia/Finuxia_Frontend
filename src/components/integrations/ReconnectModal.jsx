@@ -49,7 +49,7 @@ export default function ReconnectModal() {
   };
 
   return (
-    <Modal onClose={handleDismiss} panelClassName="max-w-sm rounded-2xl p-6" zIndex="z-[60]" dismissOnBackdrop={false}>
+    <Modal onClose={handleDismiss} panelClassName="max-w-sm rounded-2xl p-6" zIndex="z-60" dismissOnBackdrop={false}>
       <div className="mb-3 flex items-center justify-between">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-av-amber/10 text-av-amber">
           <CalendarClock size={20} />
@@ -83,7 +83,7 @@ export default function ReconnectModal() {
         <button
           onClick={handleReconnect}
           disabled={busy}
-          className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+          className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
         >
           {busy ? "Reconnecting..." : "Reconnect"}
         </button>

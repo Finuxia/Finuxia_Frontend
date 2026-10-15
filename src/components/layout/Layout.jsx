@@ -117,7 +117,7 @@ export default function Layout() {
           e.preventDefault();
           document.getElementById("main-content")?.focus();
         }}
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-navy focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-70 focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-navy focus:shadow-lg"
       >
         Skip to content
       </a>
@@ -165,7 +165,7 @@ export default function Layout() {
 
       <AccessBanner />
 
-      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 outline-none sm:px-6">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 outline-hidden sm:px-6">
         <RouteErrorBoundary>
           {/* A page's code is fetched on first visit: the navigation stays, only this area shows the spinner. */}
           <Suspense fallback={<PageSpinner inline />}>
@@ -217,7 +217,7 @@ function NavDropdown({ menu }) {
             {...menuProps}
             aria-label={label}
             style={{ position: "fixed", top: pos.top, left: pos.left }}
-            className="z-[60] w-52 animate-fade-in rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+            className="z-60 w-52 animate-fade-in rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
           >
             {items.map(({ to, label: itemLabel, icon: ItemIcon }) => (
               <NavLink
@@ -226,7 +226,7 @@ function NavDropdown({ menu }) {
                 to={to}
                 onClick={() => close()}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+                  `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gold ${
                     isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
                   }`
                 }
@@ -254,7 +254,7 @@ function UserMenu({ user }) {
   };
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+    `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gold ${
       isActive ? "bg-gold/10 text-gold-dark" : "text-slate-600 hover:bg-slate-50 hover:text-navy"
     }`;
 
@@ -279,7 +279,7 @@ function UserMenu({ user }) {
             {...menuProps}
             aria-label="Account"
             style={{ position: "fixed", top: pos.top, right: pos.right }}
-            className="z-[60] w-52 animate-fade-in rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+            className="z-60 w-52 animate-fade-in rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
           >
             <div role="presentation" className="mb-1 border-b border-slate-100 px-3 py-2">
               <p className="truncate text-sm font-semibold text-navy">{user?.name}</p>
@@ -296,7 +296,7 @@ function UserMenu({ user }) {
             <button
               {...itemProps}
               onClick={handleLogout}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-av-red"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-av-red transition hover:bg-av-red/5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-av-red"
             >
               <LogOut size={15} aria-hidden="true" />
               Log Out

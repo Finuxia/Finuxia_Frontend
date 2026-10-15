@@ -84,15 +84,15 @@ export default function ZoomPanel() {
 
   if (!loading && !isConfigured) {
     return (
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-navy">
           <Video size={15} className="text-slate-400" />
           Zoom
         </h2>
         <p className="text-sm text-slate-500">
           Not configured yet — an admin needs to add a Zoom OAuth app as{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">ZOOM_CLIENT_ID</code> /{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">ZOOM_CLIENT_SECRET</code> on the backend to enable this.
+          <code className="rounded-sm bg-slate-100 px-1.5 py-0.5 text-xs text-navy">ZOOM_CLIENT_ID</code> /{" "}
+          <code className="rounded-sm bg-slate-100 px-1.5 py-0.5 text-xs text-navy">ZOOM_CLIENT_SECRET</code> on the backend to enable this.
         </p>
       </section>
     );
@@ -102,7 +102,7 @@ export default function ZoomPanel() {
   const connected = status === "connected";
 
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm">
+    <section className="rounded-2xl bg-white p-6 shadow-xs">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-navy">
           <Video size={15} className="text-slate-400" />

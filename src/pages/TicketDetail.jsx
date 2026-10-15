@@ -71,7 +71,7 @@ export default function TicketDetail() {
         Back to Tickets
       </button>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneClasses(typeMeta.tone).badge}`}>
@@ -121,7 +121,7 @@ export default function TicketDetail() {
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             placeholder="Add a reply…"
-            className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
           <button
             type="submit"

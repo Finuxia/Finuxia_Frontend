@@ -91,7 +91,7 @@ export default function ComplianceProfilePanel() {
 
   return (
     <form onSubmit={handleSave} className="flex flex-col gap-6">
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-1 text-sm font-semibold text-navy">Advisor Identity</h2>
         <p className="mb-4 text-xs text-slate-400">Your display name is set under the Account tab.</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -126,7 +126,7 @@ export default function ComplianceProfilePanel() {
         </div>
       </section>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-4 text-sm font-semibold text-navy">Agency / Dealer</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <label className="flex flex-col gap-1.5">
@@ -160,7 +160,7 @@ export default function ComplianceProfilePanel() {
         </div>
       </section>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-4 text-sm font-semibold text-navy">Licensing</h2>
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Licensed Provinces / Territories</p>
         <div className="mb-4 flex flex-wrap gap-2">
@@ -221,13 +221,13 @@ export default function ComplianceProfilePanel() {
                     placeholder="Licence number"
                     value={licenceNumbers[code]?.number || ""}
                     onChange={(e) => setLicenceNumbers((m) => ({ ...m, [code]: { ...m[code], number: e.target.value } }))}
-                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-5"
+                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-5"
                   />
                   <input
                     type="date"
                     value={licenceNumbers[code]?.expiry || ""}
                     onChange={(e) => setLicenceNumbers((m) => ({ ...m, [code]: { ...m[code], expiry: e.target.value } }))}
-                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-none focus:border-gold sm:col-span-5"
+                    className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-navy outline-hidden focus:border-gold sm:col-span-5"
                   />
                 </div>
               ))}
@@ -236,7 +236,7 @@ export default function ComplianceProfilePanel() {
         )}
       </section>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-4 text-sm font-semibold text-navy">Companies Represented</h2>
         <div className="flex flex-wrap gap-2">
           {COMPANIES_REPRESENTED_OPTIONS.map((c) => (
@@ -260,7 +260,7 @@ export default function ComplianceProfilePanel() {
         </div>
       </section>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-4 text-sm font-semibold text-navy">Supervisor</h2>
         <div className="mb-4 flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
           <span className="text-sm text-navy">Supervisor required?</span>
@@ -288,7 +288,7 @@ export default function ComplianceProfilePanel() {
         )}
       </section>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-4 text-sm font-semibold text-navy">Disclosure Defaults</h2>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
@@ -329,7 +329,7 @@ export default function ComplianceProfilePanel() {
               rows={3}
               value={standingDisclosure}
               onChange={(e) => setStandingDisclosure(e.target.value)}
-              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
         </div>
@@ -339,7 +339,7 @@ export default function ComplianceProfilePanel() {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+          className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
         >
           {saving ? "Saving..." : "Save Compliance Profile"}
         </button>

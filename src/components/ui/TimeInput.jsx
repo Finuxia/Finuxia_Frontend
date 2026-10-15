@@ -111,7 +111,7 @@ export default function TimeInput({ value, onChange, label, disabled = false, pl
               if (!ref.current?.contains(document.activeElement)) commit();
             }, 0);
           }}
-          className="w-full min-w-0 bg-transparent text-sm text-navy outline-none placeholder:text-slate-400 disabled:text-slate-400"
+          className="w-full min-w-0 bg-transparent text-sm text-navy outline-hidden placeholder:text-slate-400 disabled:text-slate-400"
         />
         <button
           type="button"

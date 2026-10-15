@@ -40,7 +40,7 @@ export function ToastProvider({ children }) {
           aria-label="Notifications"
           aria-live="polite"
           aria-atomic="false"
-          className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2"
+          className="fixed bottom-5 right-5 z-100 flex flex-col gap-2"
         >
           {toasts.map((t) => (
             <div key={t.id} className="animate-slide-up rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white shadow-lg">

@@ -63,7 +63,7 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
         disabled={isTriggerDisabled}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 ${
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30 ${
           isError
             ? "border-av-red/40 text-av-red"
             : isTriggerDisabled
@@ -125,7 +125,7 @@ export default function TimeSlotSelect({ date, durationMinutes = 30, value, onCh
                   onClick={() => handlePick(slot)}
                   className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm transition ${
                     !slot.available
-                      ? "cursor-not-allowed bg-av-red/[0.04] text-av-red/70 opacity-60"
+                      ? "cursor-not-allowed bg-av-red/4 text-av-red/70 opacity-60"
                       : selected
                         ? "bg-gold/10 font-semibold text-gold-dark"
                         : "text-navy hover:bg-slate-50"

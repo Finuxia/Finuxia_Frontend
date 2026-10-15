@@ -163,7 +163,7 @@ export default function PlanChangeDialog({ plan, onClose }) {
             type="button"
             onClick={confirm}
             disabled={!quote || !quote.canChange || submitting}
-            className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Processing..." : quote ? confirmLabel(quote) : "Confirm"}
           </button>

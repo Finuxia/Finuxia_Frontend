@@ -247,21 +247,21 @@ export default function Reports() {
         <div className="flex gap-2">
           <button
             onClick={handleExportPdf}
-            className="flex items-center gap-1.5 rounded-lg bg-navy px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-navy-light"
+            className="flex items-center gap-1.5 rounded-lg bg-navy px-3 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-navy-light"
           >
             <FileText size={14} />
             Export PDF
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy shadow-sm transition hover:bg-slate-50"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy shadow-xs transition hover:bg-slate-50"
           >
             <Download size={14} />
             Export CSV
           </button>
           <button
             onClick={handleExportFunnel}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy shadow-sm transition hover:bg-slate-50"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy shadow-xs transition hover:bg-slate-50"
           >
             <Table2 size={14} />
             Export Funnel
@@ -270,7 +270,7 @@ export default function Reports() {
       </div>
 
       {/* Filters — single row above all report content */}
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
+      <section className="rounded-2xl bg-white p-5 shadow-xs">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-wrap gap-1.5">
             {PRESETS.map((p) => (
@@ -295,7 +295,7 @@ export default function Reports() {
                   setPreset("custom");
                   setStartDate(e.target.value);
                 }}
-                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-navy outline-none focus:border-gold"
+                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-navy outline-hidden focus:border-gold"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -307,7 +307,7 @@ export default function Reports() {
                   setPreset("custom");
                   setEndDate(e.target.value);
                 }}
-                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-navy outline-none focus:border-gold"
+                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-navy outline-hidden focus:border-gold"
               />
             </label>
           </div>
@@ -428,7 +428,7 @@ export default function Reports() {
 
 function StatTile({ icon: Icon, label, value, hint }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10 text-gold-dark">
         <Icon size={17} />
       </div>
@@ -440,7 +440,7 @@ function StatTile({ icon: Icon, label, value, hint }) {
 
 function ReportCard({ title, children }) {
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm">
+    <section className="rounded-2xl bg-white p-6 shadow-xs">
       <h2 className="mb-4 text-sm font-semibold text-navy">{title}</h2>
       {children}
     </section>

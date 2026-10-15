@@ -176,7 +176,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="A short, specific title..."
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -187,7 +187,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
             onChange={(e) => setSummary(e.target.value)}
             rows={4}
             placeholder="What does this document cover, and who is it for?"
-            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -213,7 +213,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
               onKeyDown={handleKeywordKeyDown}
               onBlur={addKeyword}
               placeholder={keywords.length ? "" : "Type a keyword, press Enter..."}
-              className="min-w-[8rem] flex-1 border-0 py-1 text-sm text-navy outline-none placeholder:text-slate-400"
+              className="min-w-32 flex-1 border-0 py-1 text-sm text-navy outline-hidden placeholder:text-slate-400"
             />
           </div>
         </div>
@@ -231,7 +231,7 @@ export default function SubmitDocumentModal({ onClose, onSubmitted }) {
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
           >
             {submitting ? "Submitting..." : "Submit for Review"}
           </button>

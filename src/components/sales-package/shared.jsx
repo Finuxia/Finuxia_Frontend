@@ -7,7 +7,7 @@ export { inputClass };
 
 export function StepCard({ title, subtitle, children }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
       <h2 className="text-sm font-semibold text-navy">{title}</h2>
       {subtitle && <p className="mb-4 mt-0.5 text-xs text-slate-500">{subtitle}</p>}
       {!subtitle && <div className="mb-4" />}

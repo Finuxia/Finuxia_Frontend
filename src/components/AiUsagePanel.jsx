@@ -31,7 +31,7 @@ function ProgressBar({ percent, level }) {
 }
 
 function Card({ children }) {
-  return <section className="rounded-2xl bg-white p-6 shadow-sm">{children}</section>;
+  return <section className="rounded-2xl bg-white p-6 shadow-xs">{children}</section>;
 }
 
 /** Profile → AI usage: what AI the advisor has used this billing period and what is left, in credits, with the wallet that pays beyond it. */

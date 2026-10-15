@@ -134,7 +134,7 @@ export default function Profile() {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={avatarSaving}
-            className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gold text-navy shadow-sm transition hover:bg-gold-light"
+            className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gold text-navy shadow-xs transition hover:bg-gold-light"
             title="Change photo"
             aria-label="Change photo"
           >
@@ -145,7 +145,7 @@ export default function Profile() {
               type="button"
               onClick={handleRemoveAvatar}
               disabled={avatarSaving}
-              className="absolute -bottom-1 -left-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-white text-av-red shadow-sm transition hover:bg-av-red/10"
+              className="absolute -bottom-1 -left-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-white text-av-red shadow-xs transition hover:bg-av-red/10"
               title="Remove photo"
               aria-label="Remove photo"
             >
@@ -182,7 +182,7 @@ export default function Profile() {
       </div>
 
       {tab === "account" && (
-        <section className="rounded-2xl bg-white p-6 shadow-sm">
+        <section className="rounded-2xl bg-white p-6 shadow-xs">
           <h2 className="mb-4 text-sm font-semibold text-navy">Account details</h2>
           <form onSubmit={handleSave} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
@@ -190,7 +190,7 @@ export default function Profile() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
             <label className="flex flex-col gap-1.5">
@@ -199,7 +199,7 @@ export default function Profile() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
             {emailChanged && (
@@ -213,14 +213,14 @@ export default function Profile() {
                   value={emailPassword}
                   onChange={(e) => setEmailPassword(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
                 />
               </label>
             )}
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+                className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
               >
                 Save Changes
               </button>
@@ -230,7 +230,7 @@ export default function Profile() {
       )}
 
       {tab === "account" && (
-        <section className="rounded-2xl bg-white p-6 shadow-sm">
+        <section className="rounded-2xl bg-white p-6 shadow-xs">
           <h2 className="mb-1 text-sm font-semibold text-navy">Change password</h2>
           <p className="mb-4 text-xs text-slate-500">{PASSWORD_REQUIREMENT} Changing it signs out your other devices.</p>
           <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
@@ -247,7 +247,7 @@ export default function Profile() {
                   required
                   value={pw[key]}
                   onChange={(e) => setPw((p) => ({ ...p, [key]: e.target.value }))}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
                 />
               </label>
             ))}
@@ -255,7 +255,7 @@ export default function Profile() {
               <button
                 type="submit"
                 disabled={pwSaving}
-                className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+                className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
               >
                 {pwSaving ? "Saving..." : "Change Password"}
               </button>

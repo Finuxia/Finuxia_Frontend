@@ -93,7 +93,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
                   value={rule.frequency}
                   disabled={saving}
                   onChange={(e) => save({ frequency: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
                 >
                   {FREQUENCIES.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -108,7 +108,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
                   value={rule.tone}
                   disabled={saving}
                   onChange={(e) => save({ tone: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
                 >
                   {TONES.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -129,7 +129,7 @@ export default function FollowUpRuleModal({ client, onClose }) {
       <div className="mt-5 flex justify-end">
         <button
           onClick={onClose}
-          className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+          className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
         >
           Done
         </button>

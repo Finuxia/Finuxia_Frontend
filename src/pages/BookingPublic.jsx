@@ -209,7 +209,7 @@ export default function BookingPublic() {
   if (notFound) {
     return (
       <PageShell>
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-16 text-center shadow-sm">
+        <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-16 text-center shadow-xs">
           <AlertTriangle size={28} className="text-slate-300" />
           <p className="text-lg font-semibold text-navy">This booking link doesn't exist</p>
           <p className="text-sm text-slate-500">Double-check the link, or ask for a new one.</p>
@@ -231,7 +231,7 @@ export default function BookingPublic() {
       : "Details to follow.";
     return (
       <PageShell>
-        <div className="flex flex-col items-center gap-6 rounded-2xl bg-white px-6 py-12 shadow-sm">
+        <div className="flex flex-col items-center gap-6 rounded-2xl bg-white px-6 py-12 shadow-xs">
           <div className="flex flex-col items-center gap-1.5 text-center">
             <div className="flex items-center gap-2">
               <CheckCircle2 size={20} className="text-av-green" />
@@ -276,7 +276,7 @@ export default function BookingPublic() {
 
   return (
     <PageShell>
-      <div className="rounded-2xl bg-white shadow-sm">
+      <div className="rounded-2xl bg-white shadow-xs">
         <div className="border-b border-slate-100 px-6 py-5">
           <h1 className="text-lg font-bold text-navy">{info ? info.title : "Book a meeting"}</h1>
           {info?.advisorName && <p className="text-sm text-slate-500">with {info.advisorName}</p>}
@@ -355,7 +355,7 @@ export default function BookingPublic() {
               <input
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
             <label className="flex flex-col gap-1.5">
@@ -364,7 +364,7 @@ export default function BookingPublic() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
             <label className="flex flex-col gap-1.5">
@@ -374,7 +374,7 @@ export default function BookingPublic() {
                 value={form.phone}
                 onChange={(e) => setForm((f) => ({ ...f, phone: formatCanadianPhone(e.target.value) }))}
                 placeholder="(123) 456-7890"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
 
@@ -387,7 +387,7 @@ export default function BookingPublic() {
                   value={locationNote}
                   onChange={(e) => setLocationNote(e.target.value)}
                   placeholder="Phone number, address, or a video call link"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
                 />
               </label>
             )}
@@ -426,7 +426,7 @@ export default function BookingPublic() {
                       }
                     }}
                     placeholder="guest@example.com"
-                    className="w-full min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+                    className="w-full min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
                   />
                   <button
                     type="button"
@@ -450,7 +450,7 @@ export default function BookingPublic() {
                   value={answers[q.id] || ""}
                   onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
                   rows={2}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
                 />
               </label>
             ))}
@@ -461,7 +461,7 @@ export default function BookingPublic() {
                 value={form.note}
                 onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
                 rows={2}
-                className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
             </label>
 
@@ -470,7 +470,7 @@ export default function BookingPublic() {
             <button
               type="submit"
               disabled={!selectedSlot || submitting}
-              className="mt-1 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-1 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting
                 ? info?.instantConfirm

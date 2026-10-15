@@ -87,7 +87,7 @@ export default function ClientDetail() {
         Back to Clients
       </Link>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div
@@ -184,7 +184,7 @@ export default function ClientDetail() {
         />
       )}
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-3 text-sm font-semibold text-navy">Notes</h2>
         <NotesSection
           notes={client.notes}
@@ -194,7 +194,7 @@ export default function ClientDetail() {
         />
       </section>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-4 text-sm font-semibold text-navy">Timeline</h2>
         <Timeline client={client} onEditStage={(stage) => setEditingStageId(stage.id)} />
       </section>
@@ -292,7 +292,7 @@ function AIMessagePanel({ client, onClose }) {
             key={t.id}
             onClick={() => setTone(t.id)}
             className={`flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition ${
-              tone === t.id ? "bg-white text-navy shadow-sm" : "text-slate-500 hover:text-navy"
+              tone === t.id ? "bg-white text-navy shadow-xs" : "text-slate-500 hover:text-navy"
             }`}
           >
             {t.label}
@@ -304,7 +304,7 @@ function AIMessagePanel({ client, onClose }) {
         rows={10}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        className="mt-4 w-full rounded-lg border border-slate-200 p-3 text-sm text-navy outline-none focus:border-gold focus:ring-2 focus:ring-gold/30"
+        className="mt-4 w-full rounded-lg border border-slate-200 p-3 text-sm text-navy outline-hidden focus:border-gold focus:ring-2 focus:ring-gold/30"
       />
 
       <button

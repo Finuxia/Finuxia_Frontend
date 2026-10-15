@@ -197,7 +197,7 @@ export default function BookingRequests() {
 function RequestCard({ req, busy, onApprove, onCancel, onReschedule }) {
   const meta = getBookingRequestStatusMeta(req.status);
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ function RescheduleModal({ req, onClose, onConfirm }) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
         <TimeInput label="Time" value={time} onChange={setTime} />
@@ -292,7 +292,7 @@ function RescheduleModal({ req, onClose, onConfirm }) {
           </button>
           <button
             onClick={() => onConfirm(date, time)}
-            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
           >
             Save
           </button>

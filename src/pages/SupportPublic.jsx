@@ -13,7 +13,7 @@ export default function SupportPublic() {
           </span>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-xs">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 text-gold-dark">
             <Mail size={22} />
           </div>

@@ -301,3 +301,107 @@ describe("a conflict message", () => {
     expect(screen.queryByRole("button", { name: "Refresh" })).not.toBeInTheDocument(); // the toast closes
   });
 });
+
+describe("client workspace actions", () => {
+  it("keeps contact, stage, note, file, task, import, and group actions consistent", async () => {
+    serve([
+      serverClient({
+        currentStage: "cp",
+        followUpDate: "",
+        lastContactDate: "2026-01-01",
+        lastContact: "Met — 2026-01-01",
+        stages: {
+          cp: { status: "upcoming", data: {}, files: [] },
+          fc1: { status: "upcoming", data: {}, files: [] },
+          client: { status: "upcoming", data: {}, files: [] },
+        },
+        notes: [{ id: "n1", text: "Original" }],
+        files: [
+          { id: "pending", status: "pending" },
+          { id: "done", status: "done" },
+        ],
+        meeting: { date: "2026-06-01", time: "10:30" },
+      }),
+    ]);
+    server.use(
+      http.post(`${API}/api/clients/import`, async ({ request }) => {
+        const { clients: rows } = await request.json();
+        return HttpResponse.json(rows.map((row, index) => serverClient({ ...row, id: `import-${index}`, version: 1 })));
+      }),
+      http.patch(`${API}/api/clients/:id`, async ({ request }) => HttpResponse.json({ ...(await request.json()), version: 2 }))
+    );
+    render();
+    await screen.findByText("Ada|");
+
+    act(() => {
+      api.editClient("missing", { first: "No", last: "Client" });
+      api.editClient("c_1", { first: " Ada ", last: " Lovelace ", nextFollowUpDate: "", lastContactDate: "2026-01-01" });
+      api.editClient("c_1", { first: "Ada", last: "Lovelace", nextFollowUpDate: "2026-06-20", lastContactDate: "2026-01-02" });
+      api.editClient("c_1", { first: "Ada", last: "Lovelace", nextFollowUpDate: "2026-06-20", lastContactDate: "" });
+      api.addNote("c_1", "   ");
+      api.addNote("c_1", "  Follow up  ");
+      api.editNote("c_1", "n1", "Updated");
+      api.editNote("missing", "n1", "No-op");
+      api.deleteNote("c_1", "n1");
+      api.deleteNote("missing", "n1");
+      api.updateStage("missing", "cp", { status: "completed" });
+      api.updateStage("c_1", "cp", { status: "completed", date: "2026-06-03", note: "  Met  " });
+      api.updateStage("c_1", "cp", { status: "skipped", date: "2026-06-04", note: "" });
+      api.updateStage("c_1", "fc1", { status: "completed", date: "2026-06-05", note: "" });
+      api.updateClient("c_1", { currentStage: "client" });
+      api.updateStage("c_1", "client", { status: "completed", note: "Final stage" });
+      api.setStageGoogleEventId("c_1", "new-stage", "event-1");
+      api.setStageGoogleEventId("missing", "new-stage", "event-2");
+      api.setStageGoogleEventId("c_1", "new-stage", null);
+      api.markContacted("c_1");
+      api.snooze("c_1");
+      api.snooze("missing", 2);
+      api.rescheduleFollowUp("c_1", "2026-06-22");
+      api.rescheduleMeeting("c_1", "2026-06-23", "11:00");
+      api.rescheduleMeeting("missing", "2026-06-23");
+      api.toggleFileStatus("c_1", "pending");
+      api.toggleFileStatus("c_1", "done");
+      api.toggleFileStatus("missing", "pending");
+      api.toggleDailyTask("c_1", "call");
+      api.toggleDailyTask("c_1", "call");
+      api.toggleDailyTask("c_1", "email", "2026-06-20");
+      api.addGroup("   ");
+      api.addGroup("  Household  ");
+      api.addGroup("Business", "av-purple");
+    });
+
+    const household = api.groups.find((group) => group.name === "Household");
+    act(() => {
+      api.updateGroup("missing", { name: "No-op" });
+      api.updateGroup(household.id, { name: "Family" });
+      api.setGroupMembers(household.id, ["c_1"]);
+      api.toggleClientInGroup(household.id, 1);
+      api.toggleClientInGroup(household.id, "c_1");
+      api.toggleClientInGroup("missing", "c_1");
+      api.deleteGroup("missing");
+    });
+
+    expect(api.getClient("c_1")).toMatchObject({ first: "Ada", last: "Lovelace", followUpDate: "2026-06-22" });
+    expect(api.getClient("c_1").stages.fc1.status).toBe("completed");
+    expect(api.getClient("c_1").currentStage).toBe("client");
+    expect(api.getClient("c_1").lastContact).toBe("Logged contact, today");
+    expect(api.getClient("c_1").notes.some((note) => note.text === "Follow up")).toBe(true);
+    expect(api.getClient("c_1").files.map((file) => file.status)).toEqual(["done", "pending"]);
+    expect(api.isTaskDoneToday("c_1", "call")).toBe(false);
+    expect(api.isTaskDoneToday("c_1", "email", "2026-06-20")).toBe(true);
+    expect(api.getGroupsForClient("1")).toHaveLength(1);
+    expect(api.groups).toHaveLength(2);
+    act(() => api.deleteGroup(household.id));
+    expect(api.groups).toHaveLength(1);
+
+    let imported;
+    await act(async () => {
+      imported = await api.importClients([
+        { Name: "A New Client", Stage: "FC1", "Next Follow-up": "2026-06-30", "Last Contact": "2026-06-01" },
+        { Name: "SAMPLE delete this row" },
+        { Phone: "no name" },
+      ]);
+    });
+    expect(imported).toMatchObject({ successCount: 1, failedRows: [{ row: 3, error: "Missing Name" }] });
+  });
+});

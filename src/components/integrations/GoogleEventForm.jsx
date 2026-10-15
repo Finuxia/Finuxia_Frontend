@@ -79,7 +79,7 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             placeholder="Meeting with..."
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -90,7 +90,7 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
           <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={durationMin} />
@@ -101,7 +101,7 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
           <select
             value={durationMin}
             onChange={(e) => setDurationMin(Number(e.target.value))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           >
             <option value={15}>15 minutes</option>
             <option value={30}>30 minutes</option>
@@ -123,7 +123,7 @@ export default function GoogleEventForm({ title, initial, onSubmit, onClose, sub
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
           >
             {saving ? "Saving..." : submitLabel}
           </button>
