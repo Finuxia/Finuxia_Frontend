@@ -18,7 +18,7 @@ export default function PlanCards({ plans, currentPlanKey, actionFor, className 
         return (
           <div
             key={plan.id}
-            className={`flex flex-col gap-4 rounded-2xl border bg-white p-6 shadow-sm ${isCurrent ? "border-gold ring-2 ring-gold/30" : "border-slate-200"}`}
+            className={`flex flex-col gap-4 rounded-2xl border bg-white p-6 shadow-xs ${isCurrent ? "border-gold ring-2 ring-gold/30" : "border-slate-200"}`}
           >
             <div>
               <div className="flex items-center justify-between gap-2">
@@ -60,7 +60,7 @@ export default function PlanCards({ plans, currentPlanKey, actionFor, className 
               type="button"
               onClick={action.onClick}
               disabled={action.disabled}
-              className="mt-auto rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-auto rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
             >
               {action.label}
             </button>
@@ -76,5 +76,5 @@ export default function PlanCards({ plans, currentPlanKey, actionFor, className 
 function PlanLogo({ plan }) {
   const base = (import.meta.env.VITE_API_URL || "http://localhost:4000").replace(/\/$/, "");
   const src = /^https?:\/\//i.test(plan.logoUrl) ? plan.logoUrl : `${base}${plan.logoUrl}`;
-  return <img src={src} alt="" width={28} height={28} loading="lazy" className="h-7 w-7 shrink-0 rounded object-contain" />;
+  return <img src={src} alt="" width={28} height={28} loading="lazy" className="h-7 w-7 shrink-0 rounded-sm object-contain" />;
 }

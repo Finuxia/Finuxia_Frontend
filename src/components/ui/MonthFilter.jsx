@@ -17,7 +17,7 @@ export default function MonthFilter({ value, onChange, months = 12, includeAll =
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
       >
         {includeAll && <option value="">All time</option>}
         {options.map((opt) => (

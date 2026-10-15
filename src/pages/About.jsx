@@ -42,7 +42,7 @@ export default function About() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {POINTS.map(({ icon: Icon, title, body }) => (
-          <div key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10 text-gold-dark">
               <Icon size={18} />
             </div>

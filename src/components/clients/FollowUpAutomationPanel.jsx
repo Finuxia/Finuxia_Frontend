@@ -63,7 +63,7 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
   if (!rule) return null;
 
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-sm">
+    <section className="rounded-2xl bg-white p-5 shadow-xs">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10 text-gold-dark">
@@ -90,7 +90,7 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
               value={rule.frequency}
               disabled={saving}
               onChange={(e) => save({ frequency: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
             >
               {FREQUENCIES.map((f) => (
                 <option key={f.id} value={f.id}>
@@ -105,7 +105,7 @@ export default function FollowUpAutomationPanel({ clientRef, clientName }) {
               value={rule.tone}
               disabled={saving}
               onChange={(e) => save({ tone: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
             >
               {TONES.map((t) => (
                 <option key={t.id} value={t.id}>

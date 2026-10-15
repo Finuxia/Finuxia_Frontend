@@ -146,7 +146,7 @@ export default function MeetingModal({ client, stage, onClose }) {
               value={date}
               min={todayISO()}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
           <TimeSlotSelect date={date} value={time} onChange={setTime} durationMinutes={MEETING_DURATION_MINUTES} />
@@ -183,7 +183,7 @@ export default function MeetingModal({ client, stage, onClose }) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -204,7 +204,7 @@ export default function MeetingModal({ client, stage, onClose }) {
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             placeholder="What happened in this meeting..."
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -218,7 +218,7 @@ export default function MeetingModal({ client, stage, onClose }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+            className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
           >
             Save
           </button>

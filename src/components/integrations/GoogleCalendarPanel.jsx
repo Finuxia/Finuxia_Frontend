@@ -92,12 +92,12 @@ export default function GoogleCalendarPanel() {
 
   if (!isConfigured) {
     return (
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-1 text-sm font-semibold text-navy">Google Calendar</h2>
         <p className="text-sm text-slate-500">
           Not configured yet — add a Google OAuth client as{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_CALENDAR_CLIENT_ID</code> on the backend to enable
-          this.
+          <code className="rounded-sm bg-slate-100 px-1.5 py-0.5 text-xs text-navy">GOOGLE_CALENDAR_CLIENT_ID</code> on the backend to
+          enable this.
         </p>
       </section>
     );
@@ -152,7 +152,7 @@ export default function GoogleCalendarPanel() {
   };
 
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm">
+    <section className="rounded-2xl bg-white p-6 shadow-xs">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-navy">Google Calendar</h2>
         <span className="flex items-center gap-1.5 text-xs font-semibold">

@@ -37,7 +37,7 @@ export default function TwoFactorPanel() {
   const low = mfa.enrolled && mfa.recoveryCodesRemaining <= 2;
 
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm" aria-labelledby="two-factor-heading">
+    <section className="rounded-2xl bg-white p-6 shadow-xs" aria-labelledby="two-factor-heading">
       <h2 id="two-factor-heading" className="mb-1 text-sm font-semibold text-navy">
         Two-factor sign-in
       </h2>
@@ -78,7 +78,7 @@ export default function TwoFactorPanel() {
                 autoComplete="one-time-code"
                 maxLength={7}
                 placeholder="123456"
-                className="w-40 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-40 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold focus:ring-2 focus:ring-gold/30"
               />
               {error && (
                 <p role="alert" className="text-xs text-av-red">

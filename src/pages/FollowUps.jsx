@@ -141,7 +141,7 @@ export default function FollowUps() {
           </div>
           <div className="flex flex-col gap-2.5">
             {missed.map(({ client: c, stage }) => (
-              <div key={c.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-av-red/30 bg-white px-4 py-3 shadow-sm">
+              <div key={c.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-av-red/30 bg-white px-4 py-3 shadow-xs">
                 <button onClick={() => navigate(`/clients/${c.id}`)} className="min-w-[160px] flex-1 text-left">
                   <p className="text-sm font-semibold text-navy">
                     {c.first} {c.last}
@@ -191,7 +191,7 @@ export default function FollowUps() {
                       return (
                         <div
                           key={item.id}
-                          className={`flex items-center gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm ${
+                          className={`flex items-center gap-3 rounded-xl border bg-white px-4 py-3 shadow-xs ${
                             overdue ? "border-av-red/30" : "border-slate-200"
                           }`}
                         >
@@ -235,7 +235,7 @@ export default function FollowUps() {
                 return (
                   <div
                     key={c.id}
-                    className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                    className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-xs"
                   >
                     <button onClick={() => navigate(`/clients/${c.id}`)} className="min-w-[160px] flex-1 text-left">
                       <p className="text-sm font-semibold text-navy">
@@ -365,7 +365,7 @@ export default function FollowUps() {
             <select
               value={pickerClientId}
               onChange={(e) => setPickerClientId(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
             >
               <option value="">Select a client...</option>
               {clients.map((c) => (
@@ -393,7 +393,7 @@ export default function FollowUps() {
                 else setReminderFor(client);
               }}
               disabled={!pickerClientId}
-              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-50"
+              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-50"
             >
               Continue
             </button>

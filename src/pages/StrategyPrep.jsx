@@ -93,7 +93,7 @@ export default function StrategyPrep() {
           id="strategy-client"
           value={selectedId}
           onChange={(e) => setSelected(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 sm:max-w-sm"
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30 sm:max-w-sm"
         >
           {clients.length === 0 && <option value="">No clients yet</option>}
           {clients.map((c) => (
@@ -110,7 +110,7 @@ export default function StrategyPrep() {
         </div>
       ) : (
         <>
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <section className="rounded-2xl bg-white p-6 shadow-xs">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-navy">Snapshot</h2>
               <span className="rounded-full bg-navy/5 px-2.5 py-0.5 text-xs font-semibold text-navy/70">
@@ -131,7 +131,7 @@ export default function StrategyPrep() {
             </div>
           </section>
 
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <section className="rounded-2xl bg-white p-6 shadow-xs">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-navy">
               <ClipboardCheck size={15} className="text-gold-dark" />
               Suggested agenda

@@ -74,7 +74,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-3">
+        <section className="rounded-2xl bg-white p-6 shadow-xs lg:col-span-3">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold text-navy">Pipeline by Stage</h2>
             <span className="text-xs text-slate-400">
@@ -84,7 +84,7 @@ export default function Dashboard() {
           <PipelineBarChart clients={monthClients} onSelectStage={(stageId) => navigate(`/reports?month=${month}&stage=${stageId}`)} />
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-2">
+        <section className="rounded-2xl bg-white p-6 shadow-xs lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold text-navy">Follow-ups by Urgency</h2>
           </div>
@@ -92,7 +92,7 @@ export default function Dashboard() {
         </section>
       </div>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-2xl bg-white p-6 shadow-xs">
         <h2 className="mb-4 text-base font-semibold text-navy">Today's Priorities</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <PriorityGroup
@@ -134,7 +134,7 @@ export default function Dashboard() {
 
 function StatCard({ icon: Icon, label, value, color, bg }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs transition hover:shadow-md">
       <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${bg} ${color}`}>
         <Icon size={17} />
       </div>

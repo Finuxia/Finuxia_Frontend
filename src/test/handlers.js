@@ -21,6 +21,16 @@ export const testBilling = {
   access: { status: "unlimited", warning: "none", endsAt: null, daysLeft: null, valid: true, warnDays: 14 },
 };
 
+const packageDocumentKeys = [
+  "agentDisclosureForm",
+  "reasonWhyLetter",
+  "fna",
+  "financialStrategy",
+  "illustration1",
+  "illustration2",
+  "supervisionForm",
+];
+
 // Defaults every test starts from: a signed-in advisor with no clients. A test overrides what it cares
 // about with `server.use(http.get(...))`; anything it does not override still answers, so a component never
 // hits a real network (an unhandled request fails the test, see setup.js).
@@ -52,6 +62,16 @@ export const defaultHandlers = [
   http.get(`${API}/api/billing/plans`, () => HttpResponse.json({ plans: [], stripeConfigured: false, purchasesOpen: true })),
   http.get(`${API}/api/sales-packages/companies`, () => HttpResponse.json([])),
   http.get(`${API}/api/sales-packages/companies/:id/products`, () => HttpResponse.json([])),
+  // Uploaded package previews are binary PDF responses (not JSON status objects).
+  ...packageDocumentKeys.map((docKey) =>
+    http.get(
+      `${API}/api/sales-packages/packages/:packageId/documents/${docKey}`,
+      () =>
+        new HttpResponse("%PDF-1.7\n% Finuxia test preview\n", {
+          headers: { "Content-Type": "application/pdf", "Content-Disposition": 'inline; filename="preview.pdf"' },
+        })
+    )
+  ),
   http.get(`${API}/api/tickets`, () => HttpResponse.json([])),
   http.get(`${API}/api/reminders`, () => HttpResponse.json([])),
   http.get(`${API}/api/booking/requests`, () => HttpResponse.json([])),

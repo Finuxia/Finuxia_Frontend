@@ -150,7 +150,7 @@ export default function Modal({
           handler in the effect above, and focus is moved into the dialog on open, so the behaviour is covered. */}
       <div
         role="presentation"
-        className={`fixed inset-0 ${zIndex} flex bg-navy/50 backdrop-blur-sm animate-fade-in ${placement}`}
+        className={`fixed inset-0 ${zIndex} flex bg-navy/50 backdrop-blur-xs animate-fade-in ${placement}`}
         onMouseDown={(e) => {
           pressedOnBackdrop.current = e.target === e.currentTarget;
         }}
@@ -166,7 +166,7 @@ export default function Modal({
           aria-labelledby={ariaLabel ? undefined : titleId}
           aria-label={ariaLabel}
           tabIndex={-1}
-          className={`w-full bg-white shadow-2xl outline-none animate-slide-up ${panelClassName}`}
+          className={`w-full bg-white shadow-2xl outline-hidden animate-slide-up ${panelClassName}`}
         >
           {children}
         </div>

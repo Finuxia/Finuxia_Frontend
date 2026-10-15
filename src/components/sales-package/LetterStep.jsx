@@ -53,7 +53,7 @@ function LetterPreview({ text }) {
             <div key={i} className="mt-4 grid grid-cols-1 gap-x-8 gap-y-5 text-sm text-slate-700 sm:grid-cols-2">
               {b.rows.flatMap((row, r) =>
                 row.map((cell, c) => (
-                  <p key={`${r}-${c}`} className="break-words">
+                  <p key={`${r}-${c}`} className="wrap-break-word">
                     {cell}
                   </p>
                 ))
@@ -96,7 +96,7 @@ export default function LetterStep({
             type="button"
             onClick={onDraftLetter}
             disabled={letterDrafting}
-            className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+            className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
           >
             <Sparkles size={15} />
             {letterDrafting ? "Drafting..." : data.reasonWhyLetterText ? "Regenerate Draft" : "Generate Draft"}
@@ -128,7 +128,7 @@ export default function LetterStep({
             value={data.reasonWhyLetterText}
             onChange={(e) => patch({ reasonWhyLetterText: e.target.value })}
             placeholder={'Click "Generate Draft" above, then review/edit the letter here before saving.'}
-            className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         ) : (
           <div className="max-h-[600px] overflow-y-auto rounded-lg border border-slate-200 bg-white p-5">

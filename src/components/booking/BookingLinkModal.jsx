@@ -149,7 +149,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Client Introduction Session"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -160,7 +160,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="What's this meeting for? Shown to clients before they book."
-            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -170,7 +170,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
             <select
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
             >
               {[15, 30, 45, 60, 90, 120].map((m) => (
                 <option key={m} value={m}>
@@ -184,7 +184,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
             <select
               value={bufferMinutes}
               onChange={(e) => setBufferMinutes(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
             >
               {[0, 5, 10, 15, 30, 45, 60].map((m) => (
                 <option key={m} value={m}>
@@ -200,7 +200,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
           <select
             value={locationType}
             onChange={(e) => setLocationType(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-gold"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden focus:border-gold"
           >
             {LOCATION_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -227,7 +227,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
               value={locationValue}
               onChange={(e) => setLocationValue(e.target.value)}
               placeholder={LOCATION_VALUE_FIELD[locationType].placeholder}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
         )}
@@ -261,7 +261,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
                   value={q.label}
                   onChange={(e) => updateQuestion(q.id, { label: e.target.value })}
                   placeholder="What would you like to discuss?"
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-navy outline-none focus:border-gold"
+                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-navy outline-hidden focus:border-gold"
                 />
                 <label className="flex items-center gap-1.5 text-xs text-slate-500">
                   <input
@@ -292,7 +292,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
             onChange={(e) => setConfirmationMessage(e.target.value)}
             rows={2}
             placeholder="Shown to clients right after they book. Leave blank for the default message."
-            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -323,7 +323,7 @@ export default function BookingLinkModal({ link, onClose, onSave, onDelete }) {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
             >
               {saving ? "Saving..." : isEdit ? "Save" : "Create Link"}
             </button>

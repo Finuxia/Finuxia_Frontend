@@ -4,6 +4,7 @@ import AuthCard, { AuthField, authInputClass } from "../components/layout/AuthCa
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import MfaFlow from "../components/auth/MfaFlow";
+import { MIN_PASSWORD_LENGTH, passwordTooShort } from "../lib/passwordPolicy";
 
 export default function Register() {
   const { register } = useAuth();
@@ -29,8 +30,8 @@ export default function Register() {
       setError("Passwords do not match");
       return;
     }
-    if (form.password.length < 12) {
-      setError("Password must be at least 12 characters");
+    if (passwordTooShort(form.password)) {
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
       return;
     }
     setSubmitting(true);
@@ -93,7 +94,7 @@ export default function Register() {
             value={form.password}
             onChange={update("password")}
             className={authInputClass()}
-            placeholder="At least 12 characters"
+            placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
           />
         </AuthField>
         <AuthField label="Confirm Password">
@@ -112,7 +113,7 @@ export default function Register() {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-1 w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+          className="mt-1 w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
         >
           {submitting ? "Creating..." : "Create Account"}
         </button>

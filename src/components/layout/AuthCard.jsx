@@ -13,7 +13,7 @@ export default function AuthCard({ title, subtitle, children, footer }) {
             </span>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-xs">
             <h1 className="text-xl font-bold text-navy">{title}</h1>
             {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
             <div className="mt-6">{children}</div>
@@ -38,7 +38,7 @@ export function AuthField({ label, error, children }) {
 }
 
 export function authInputClass(error) {
-  return `w-full rounded-lg border px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 ${
+  return `w-full rounded-lg border px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30 ${
     error ? "border-av-red" : "border-slate-200"
   }`;
 }

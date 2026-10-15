@@ -46,7 +46,7 @@ export default function GlobalSearch() {
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search name, phone, email, Telegram..."
-          className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
+          className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 outline-hidden"
         />
       </div>
 

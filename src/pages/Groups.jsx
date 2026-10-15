@@ -35,7 +35,7 @@ export default function Groups() {
         </div>
         <button
           onClick={() => setModalGroup(null)}
-          className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+          className="flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
         >
           <Plus size={15} />
           New Group
@@ -53,7 +53,7 @@ export default function Groups() {
           </p>
           <button
             onClick={() => setModalGroup(null)}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
           >
             <Plus size={15} />
             New Group
@@ -64,7 +64,7 @@ export default function Groups() {
           {groups.map((g) => {
             const members = g.memberIds.map((id) => clientById.get(String(id))).filter(Boolean);
             return (
-              <div key={g.id} className="rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md">
+              <div key={g.id} className="rounded-2xl bg-white p-5 shadow-xs transition hover:shadow-md">
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span className={`h-3 w-3 shrink-0 rounded-full ${AVATAR_BG[g.color] ?? "bg-navy"}`} />

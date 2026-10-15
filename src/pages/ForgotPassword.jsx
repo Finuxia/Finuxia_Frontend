@@ -66,7 +66,7 @@ export default function ForgotPassword() {
 
         <button
           type="submit"
-          className="mt-1 w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+          className="mt-1 w-full rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
         >
           Send Reset Link
         </button>

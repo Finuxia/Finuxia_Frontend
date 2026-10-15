@@ -14,7 +14,7 @@ export default function PackagePicker({ packages, incomplete = false, onResume, 
         {packages.map((p) => (
           <div
             key={p.id}
-            className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-gold"
+            className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-xs transition hover:border-gold"
           >
             <button type="button" onClick={() => onResume(p.id)} className="min-w-0 flex-1 text-left">
               <p className="truncate text-sm font-semibold text-navy">{p.insuredPerson || p.policyOwner || "Untitled package"}</p>

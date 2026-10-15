@@ -22,7 +22,7 @@ export default function AccessCard() {
   const Icon = copy.headline === "Your access does not end." ? InfinityIcon : tone.icon;
 
   return (
-    <section aria-label="Your access" className={`rounded-2xl border p-5 shadow-sm ${tone.box}`}>
+    <section aria-label="Your access" className={`rounded-2xl border p-5 shadow-xs ${tone.box}`}>
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Your access</p>
       <p className="text-lg font-bold text-navy">{plan.name}</p>
       <p role="status" className="mt-2 flex items-start gap-2 text-sm font-medium text-navy">

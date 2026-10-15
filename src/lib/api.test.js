@@ -280,6 +280,13 @@ describe("a 429 reads the same whichever way the request was sent", () => {
     expect([err.message, err.retryAfter]).toEqual(["Too many requests. Please wait a moment and try again.", null]);
   });
 
+  it("an unusable Retry-After also falls back to a sensible wait message", async () => {
+    refuse("not-a-date");
+    const [fromUpload, fromFetch] = await Promise.all([upload().catch((e) => e), ordinary().catch((e) => e)]);
+    expect([fromUpload.message, fromUpload.retryAfter]).toEqual(["Too many requests. Please wait a moment and try again.", null]);
+    expect([fromFetch.message, fromFetch.retryAfter]).toEqual([fromUpload.message, fromUpload.retryAfter]);
+  });
+
   it("the server's own sentence wins when it sent one", async () => {
     refuse("30", { detail: "You have uploaded too many documents for one package." });
     const err = await upload().catch((e) => e);
@@ -350,6 +357,16 @@ describe("refusals the API layer now keeps intact", () => {
     server.use(http.post(`${API}/api/auth/me/avatar`, () => new HttpResponse(null, { status: 429, headers: { "Retry-After": "10" } })));
     const err = await api.uploadAvatar(new File(["x"], "a.png", { type: "image/png" })).catch((e) => e);
     expect([err.status, err.retryAfter, err.message]).toEqual([429, 10, "Too many requests. Try again in 10 seconds."]);
+  });
+
+  it("multipart requests use Retry-After too, with the wait rounded up to minutes", async () => {
+    server.use(
+      http.post(`${API}/api/auth/me/avatar`, () =>
+        HttpResponse.json({ detail: "Request was throttled." }, { status: 429, headers: { "Retry-After": "61" } })
+      )
+    );
+    const err = await api.uploadAvatar(new File(["x"], "a.png", { type: "image/png" })).catch((e) => e);
+    expect([err.status, err.retryAfter, err.message]).toEqual([429, 61, "Too many requests. Try again in 2 minutes."]);
   });
 });
 

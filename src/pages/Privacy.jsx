@@ -12,7 +12,7 @@ export default function Privacy() {
           </span>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-xs">
           <h1 className="text-xl font-bold text-navy">Privacy Policy</h1>
           <p className="mt-1 text-xs text-slate-400">
             Last updated {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}

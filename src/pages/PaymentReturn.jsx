@@ -57,7 +57,7 @@ export default function PaymentReturn({ outcome, intervalMs = 2000, maxAttempts 
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div role="status" className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <div role="status" className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-xs">
         {outcome === "cancel" ? (
           <>
             <XCircle className="mx-auto text-slate-400" size={36} />
@@ -99,7 +99,7 @@ export default function PaymentReturn({ outcome, intervalMs = 2000, maxAttempts 
 }
 
 function Actions({ primary, secondary }) {
-  const base = "rounded-lg px-5 py-2.5 text-sm font-semibold shadow-sm";
+  const base = "rounded-lg px-5 py-2.5 text-sm font-semibold shadow-xs";
   return (
     <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
       {primary.to ? (

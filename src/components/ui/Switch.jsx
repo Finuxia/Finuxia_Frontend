@@ -17,7 +17,7 @@ export default function Switch({ label, checked, onChange, disabled = false }) {
         className="peer sr-only"
       />
       <span className="absolute inset-0 rounded-full bg-slate-200 transition-colors peer-checked:bg-gold" />
-      <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+      <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
     </label>
   );
 }

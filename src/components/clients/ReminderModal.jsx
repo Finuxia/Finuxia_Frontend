@@ -101,7 +101,7 @@ export default function ReminderModal({ initial, kind = "reminder", lockClient, 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Call about renewal..."
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -111,7 +111,7 @@ export default function ReminderModal({ initial, kind = "reminder", lockClient, 
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}
-            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </label>
 
@@ -123,7 +123,7 @@ export default function ReminderModal({ initial, kind = "reminder", lockClient, 
               value={dueDate}
               min={todayISO()}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             />
           </label>
           <TimeInput label="Due time (optional)" value={dueTime} onChange={setDueTime} />
@@ -143,7 +143,7 @@ export default function ReminderModal({ initial, kind = "reminder", lockClient, 
               <select
                 value={clientRef}
                 onChange={(e) => setClientRef(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
               >
                 <option value="">None</option>
                 {clients.map((c) => (
@@ -159,7 +159,7 @@ export default function ReminderModal({ initial, kind = "reminder", lockClient, 
             <select
               value={repeat}
               onChange={(e) => setRepeat(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-hidden transition focus:border-gold focus:ring-2 focus:ring-gold/30"
             >
               <option value="none">Does not repeat</option>
               <option value="daily">Every day</option>
@@ -197,7 +197,7 @@ export default function ReminderModal({ initial, kind = "reminder", lockClient, 
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+              className="rounded-lg bg-navy px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light disabled:opacity-60"
             >
               {saving ? "Saving..." : isEdit ? "Save" : "Create"}
             </button>

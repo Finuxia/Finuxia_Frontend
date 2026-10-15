@@ -14,14 +14,14 @@ export default function ModuleGate({ moduleKey, moduleName, children }) {
     return (
       <div
         role="alert"
-        className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm"
+        className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-xs"
       >
         <p className="text-lg font-semibold text-navy">We couldn't check your plan</p>
         <p className="max-w-sm text-sm text-slate-500">Check your connection and try again.</p>
         <button
           type="button"
           onClick={refreshBilling}
-          className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light"
+          className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-navy-light"
         >
           Try again
         </button>

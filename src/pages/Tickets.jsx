@@ -58,7 +58,7 @@ export default function Tickets() {
               <button
                 key={t.id}
                 onClick={() => navigate(`/tickets/${t.id}`)}
-                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left shadow-sm transition hover:shadow-md"
+                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left shadow-xs transition hover:shadow-md"
               >
                 <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${toneClasses(typeMeta.tone).badge}`}>
                   <TypeIcon size={15} />

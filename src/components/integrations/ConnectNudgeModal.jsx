@@ -59,7 +59,7 @@ export default function ConnectNudgeModal() {
   };
 
   return (
-    <Modal onClose={() => setDismissed(true)} panelClassName="max-w-sm rounded-2xl p-6" zIndex="z-[60]" dismissOnBackdrop={false}>
+    <Modal onClose={() => setDismissed(true)} panelClassName="max-w-sm rounded-2xl p-6" zIndex="z-60" dismissOnBackdrop={false}>
       <div className="mb-3 flex items-center justify-between">
         <ModalTitle className="text-lg font-semibold text-navy">Connect your Google account</ModalTitle>
         <button
