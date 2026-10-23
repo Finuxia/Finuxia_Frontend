@@ -1,5 +1,8 @@
 # --- build stage: compile the Vite app ---
-FROM node:20-alpine AS build
+# Node 22 to match .github/workflows/ci.yml and .nvmrc. CI is the only place the 867 tests actually
+# run, so building the shipped artifact on a different major version means production runs a
+# toolchain nothing has been tested against — the same mismatch the backend had with Postgres.
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 # `npm ci` installs exactly what package-lock.json pins (reproducible builds).
