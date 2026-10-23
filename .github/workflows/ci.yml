@@ -79,3 +79,80 @@ jobs:
         # 3.4.0, which would undo SEC-04's replacement of the vulnerable xlsx parser. Review by
         # 2027-01-15, or sooner if exceljs ships a compatible uuid update. Never use --force here.
         run: npm audit --audit-level=high
+
+  # Deploys to Cloud Run on every push to develop (OPS-16).
+  #
+  # IN THIS WORKFLOW rather than a separate one, and gated on all three jobs above. A deploy cannot
+  # start unless the suite, the static checks and the build all passed on this exact commit, in this
+  # exact run. A second workflow triggered by the first completing would have let them drift, and
+  # the failure mode there is silent: a deploy that fires after a red run.
+  #
+  # Before this, deploying meant a person running `gcloud run deploy --source .` from Cloud Shell
+  # after cloning with a personal access token. The result was no link between a commit and what was
+  # serving, no rollback, and nothing preventing a deploy while CI was red.
+  #
+  # NO SERVICE ACCOUNT KEY. Workload Identity Federation: GitHub presents a short-lived OIDC token,
+  # Google exchanges it for a short-lived access token, and the exchange is restricted to this
+  # repository. A JSON key in a GitHub secret would be a permanent credential to a production
+  # project with no expiry and no revocation story.
+  #
+  # The image is built here rather than by `gcloud run deploy --source`, so the build log is in
+  # Actions where the team looks, and the image carries the commit SHA as its tag.
+  #
+  # Note the Dockerfile reads .env.production for VITE_API_URL, which is why that file is committed.
+  # The `build` job above deliberately builds with a bogus host instead, to prove nothing real is
+  # baked in by accident — the two are not duplicates, they answer different questions.
+  deploy:
+    needs: [test, static, build]
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    # id-token is what lets the job mint the OIDC token WIF exchanges. Without it the auth step
+    # fails with a message that does not mention permissions.
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT_ID: finuxia-prod-ca
+      PROJECT_NUMBER: "623375739626"
+      REGION: northamerica-northeast1
+      SERVICE: finuxia-web
+      RUNTIME_SA: finuxia-web@finuxia-prod-ca.iam.gserviceaccount.com
+      REPOSITORY: cloud-run-source-deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github/providers/github
+          service_account: github-deployer@finuxia-prod-ca.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Authenticate Docker to Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push the image
+        run: |
+          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}:${GITHUB_SHA}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      # Deploying by image with no --set-env-vars PRESERVES the service's existing configuration.
+      # The pipeline ships code; the environment stays where it is managed. A pipeline that also
+      # rewrote configuration could wipe a setting nobody had put in the repository.
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --image "$IMAGE" \
+            --region "$REGION" \
+            --service-account "$RUNTIME_SA" \
+            --quiet
+
+      - name: Report what is running
+        run: |
+          echo "Deployed ${GITHUB_SHA} to $SERVICE"
+          gcloud run services describe "$SERVICE" --region "$REGION" \
+            --format='value(status.url,status.latestReadyRevisionName)'
