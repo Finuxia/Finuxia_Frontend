@@ -13,6 +13,19 @@ on:
   push:
     branches: ["**"]
   pull_request:
+  # Manual run, so the environment can be updated without waiting for the full gate.
+  #
+  # skip_checks is deliberately NOT reachable from a push. A deploy triggered by pushing always runs
+  # the suite, the static checks and the build first, because "a deploy cannot happen on a red
+  # suite" is most of what this pipeline is for. The escape hatch is an explicit tick-box recorded
+  # in the run's inputs rather than a default, so skipping is a decision somebody made and can be
+  # seen to have made.
+  workflow_dispatch:
+    inputs:
+      skip_checks:
+        description: "Deploy without running the tests, static checks or build"
+        type: boolean
+        default: false
 
 # A branch in this repository with an open pull request matches both triggers above. Grouping a push
 # and its pull request under one key means the duplicate is cancelled rather than paid for twice, and
@@ -28,10 +41,12 @@ jobs:
   # Required check: make "test" a required status check for main and develop in the repository's
   # branch protection settings. Still not done — it needs repository admin access, not a code change.
   test:
+    # Skipped only on a manual run where somebody ticked the box. Every push runs it.
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -42,10 +57,11 @@ jobs:
   # Static checks (FE-09). Lint runs with zero warnings and every suppression needs a written reason (see eslint.config.js); the formatter and the
   # type check (JSDoc types over src/lib, src/hooks and src/services, see tsconfig.json) must pass too. Run all four locally with `npm run check`.
   static:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -58,10 +74,11 @@ jobs:
         run: npm run typecheck
 
   build:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -104,29 +121,40 @@ jobs:
   # baked in by accident — the two are not duplicates, they answer different questions.
   deploy:
     needs: [test, static, build]
-    if: github.ref == 'refs/heads/develop'
+    # `always()` is required, not decoration: without it SKIPPED upstream jobs would skip this one
+    # too, so a manual run with skip_checks ticked would do nothing at all. With it, the outcomes
+    # that may proceed are stated explicitly — passed, or deliberately skipped — and any FAILED job
+    # still blocks the deploy.
+    if: >-
+      always()
+      && github.ref == 'refs/heads/develop'
+      && (needs.test.result == 'success' || needs.test.result == 'skipped')
+      && (needs.static.result == 'success' || needs.static.result == 'skipped')
+      && (needs.build.result == 'success' || needs.build.result == 'skipped')
     runs-on: ubuntu-latest
     # id-token is what lets the job mint the OIDC token WIF exchanges. Without it the auth step
     # fails with a message that does not mention permissions.
     permissions:
       contents: read
       id-token: write
+    # Nothing about this project is written into the workflow. Every value comes from repository
+    # secrets, so the file is portable and says nothing about where it deploys. Consequence worth
+    # knowing: GitHub masks secrets in logs, so the service name and URL print as *** below.
     env:
-      PROJECT_ID: finuxia-prod-ca
-      PROJECT_NUMBER: "623375739626"
-      REGION: northamerica-northeast1
-      SERVICE: finuxia-web
-      RUNTIME_SA: finuxia-web@finuxia-prod-ca.iam.gserviceaccount.com
-      REPOSITORY: cloud-run-source-deploy
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      REGION: ${{ secrets.GCP_REGION }}
+      SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
+      RUNTIME_SA: ${{ secrets.CLOUD_RUN_RUNTIME_SA }}
+      REPOSITORY: ${{ secrets.GCP_AR_REPOSITORY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ env.PROJECT_ID }}
-          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github/providers/github
-          service_account: github-deployer@finuxia-prod-ca.iam.gserviceaccount.com
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
 
       - uses: google-github-actions/setup-gcloud@v2
 
