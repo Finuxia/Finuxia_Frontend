@@ -197,10 +197,14 @@ jobs:
             exit 1
           fi
 
+      # GIT_SHA is compiled INTO the bundle (Vite inlines import.meta.env at build time), so it has
+      # to be a build argument — a runtime environment variable on Cloud Run would never reach the
+      # browser. It feeds the version in the footer and Sentry's release grouping from one value, so
+      # the two cannot disagree about what is running.
       - name: Build and push the image
         run: |
           IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}:${GITHUB_SHA}"
-          docker build -t "$IMAGE" .
+          docker build --build-arg "GIT_SHA=${GITHUB_SHA}" -t "$IMAGE" .
           docker push "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
