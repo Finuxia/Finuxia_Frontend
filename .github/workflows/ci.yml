@@ -41,7 +41,7 @@ jobs:
   # Required check: make "test" a required status check for main and develop in the repository's
   # branch protection settings. Still not done — it needs repository admin access, not a code change.
   test:
-    # Two ways to skip, both deliberate and both leaving a record: `[skip tests]` in the commit
+    # Two ways to skip, both deliberate and both leaving a record: `[fast]` in the commit
     # message for a push, or the skip_checks tick-box on a manual run. See the long note in the
     # backend repository's workflow for why it is a commit-message token rather than a repository
     # variable — in short, a variable is a switch nobody remembers to flip back, while a token is
@@ -49,7 +49,7 @@ jobs:
     if: >-
       ${{
         !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
-        && !contains(github.event.head_commit.message, '[skip tests]')
+        && !contains(github.event.head_commit.message, '[fast]')
       }}
     runs-on: ubuntu-latest
     steps:
@@ -68,7 +68,7 @@ jobs:
     if: >-
       ${{
         !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
-        && !contains(github.event.head_commit.message, '[skip tests]')
+        && !contains(github.event.head_commit.message, '[fast]')
       }}
     runs-on: ubuntu-latest
     steps:
@@ -89,7 +89,7 @@ jobs:
     if: >-
       ${{
         !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
-        && !contains(github.event.head_commit.message, '[skip tests]')
+        && !contains(github.event.head_commit.message, '[fast]')
       }}
     runs-on: ubuntu-latest
     steps:
