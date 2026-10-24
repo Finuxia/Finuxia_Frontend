@@ -46,11 +46,7 @@ jobs:
     # backend repository's workflow for why it is a commit-message token rather than a repository
     # variable — in short, a variable is a switch nobody remembers to flip back, while a token is
     # per-commit and countable with `git log --grep`.
-    if: >-
-      ${{
-        !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
-        && !contains(github.event.head_commit.message, '[fast]')
-      }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) && !contains(github.event.head_commit.message, '[fast]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -65,11 +61,7 @@ jobs:
   # Static checks (FE-09). Lint runs with zero warnings and every suppression needs a written reason (see eslint.config.js); the formatter and the
   # type check (JSDoc types over src/lib, src/hooks and src/services, see tsconfig.json) must pass too. Run all four locally with `npm run check`.
   static:
-    if: >-
-      ${{
-        !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
-        && !contains(github.event.head_commit.message, '[fast]')
-      }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) && !contains(github.event.head_commit.message, '[fast]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -86,11 +78,7 @@ jobs:
         run: npm run typecheck
 
   build:
-    if: >-
-      ${{
-        !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
-        && !contains(github.event.head_commit.message, '[fast]')
-      }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) && !contains(github.event.head_commit.message, '[fast]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
