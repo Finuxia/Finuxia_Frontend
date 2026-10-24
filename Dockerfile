@@ -14,6 +14,9 @@ RUN npm run build
 # --- serve stage: static files via nginx on Cloud Run's port 8080 ---
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Not into conf.d/: everything matching conf.d/*.conf is auto-loaded as top-level configuration,
+# and this is a fragment meant to be `include`d from inside a server block.
+COPY nginx-security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
