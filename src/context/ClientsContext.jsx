@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { calcNextFollowUp, todayISO, addDays } from "../lib/followUp";
 import { getNextStageId, FIRST_STAGE_ID } from "../lib/pipeline";
 import { api } from "../lib/api";
+import { writeLocal } from "../lib/localData";
 import { mapImportRows } from "../lib/clientImport";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
@@ -58,11 +59,7 @@ function readCache(key, fallback) {
   return fallback;
 }
 function writeCache(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // ignore quota errors
-  }
+  writeLocal(key, value); // refuses after logout until the next sign-in; quota errors are ignored
 }
 
 export function ClientsProvider({ children }) {

@@ -167,7 +167,13 @@ describe("starting", () => {
     await waitFor(() => expect(screen.queryByText("Grace Hopper")).not.toBeInTheDocument());
     await waitToast(/Sales package deleted/);
     await userEvent.click(screen.getByRole("button", { name: /start a new sales package/i }));
-    expect(await screen.findByText("Client Information")).toBeInTheDocument();
+    // As in the test above: starting a draft puts its id in the address, which makes the wizard load that package again, so it shows, is replaced by
+    // "Loading..." and comes back. Wait for the address, then for the wizard to be there, and never hold on to an element found on the way (a one-off
+    // findByText could catch the first appearance and then assert on an element that had already been removed: the intermittent CI failure).
+    await waitFor(() => expect(screen.getByTestId("where")).toHaveTextContent(/\?id=\d+/));
+    await waitFor(() => expect(screen.getByText("Client Information")).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText("Loading...")).not.toBeInTheDocument());
+    expect(screen.getByText("Client Information")).toBeInTheDocument();
   });
 
   it("does not delete when the confirmation is declined", async () => {

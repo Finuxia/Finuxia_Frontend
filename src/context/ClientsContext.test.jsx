@@ -1,8 +1,9 @@
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { API } from "../test/handlers";
 import { server } from "../test/server";
-import { act, renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
+import { clearLocalData } from "../lib/api";
+import { act, cleanup, renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import { useAuth } from "./AuthContext";
 import { useClients } from "./ClientsContext";
 
@@ -265,13 +266,55 @@ describe("client sync", () => {
       expect(Object.keys(localStorage).filter((k) => k.startsWith("advisorpilot."))).toEqual([]);
     });
 
+    // What matters is that nothing WRITES after the clear, so the test watches the writes instead of sleeping past them.
+    const ours = (spy) => spy.mock.calls.filter(([key]) => String(key).startsWith("advisorpilot."));
+    const settled = async () => {
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+    };
+
     it("does not write the cleared state back into the cache afterwards", async () => {
       serve([serverClient({ first: "Private" })]);
       render();
       await screen.findByText("Private|");
+      await waitFor(() => expect(localStorage.getItem(CACHE_KEY)).toContain("Private")); // the load has finished and written its cache
+      const writes = vi.spyOn(Storage.prototype, "setItem");
       act(() => api.logout());
-      await new Promise((r) => setTimeout(r, 900));
+      await waitFor(() => expect(screen.queryAllByRole("listitem")).toHaveLength(0));
+      await settled();
+      expect(ours(writes)).toEqual([]);
       expect(Object.keys(localStorage).filter((k) => k.startsWith("advisorpilot."))).toEqual([]);
+      writes.mockRestore();
+    });
+
+    it("refuses a write that arrives after the clear but before the signed-in account has changed (the window logout leaves open)", async () => {
+      serve([serverClient({ first: "Private" })]);
+      render();
+      await screen.findByText("Private|");
+      await waitFor(() => expect(localStorage.getItem(CACHE_KEY)).toContain("Private"));
+      // The first thing logout does is clear the browser's copy; the signed-in account is only dropped a moment later. A change landing in
+      // between used to re-persist the client list into local storage: the logged-out machine kept the advisor's clients.
+      clearLocalData();
+      act(() => api.updateClient("c_1", { phone: "555" }));
+      await settled();
+      expect(Object.keys(localStorage).filter((k) => k.startsWith("advisorpilot."))).toEqual([]);
+    });
+
+    it("writes the cache again once somebody signs in", async () => {
+      serve([serverClient({ first: "Ada" })]);
+      render();
+      await screen.findByText("Ada|");
+      await waitFor(() => expect(localStorage.getItem(CACHE_KEY)).toContain("Ada"));
+      clearLocalData();
+      act(() => api.logout());
+      await waitFor(() => expect(screen.queryAllByRole("listitem")).toHaveLength(0));
+      cleanup();
+      localStorage.clear();
+      serve([serverClient({ first: "Grace" })]);
+      render();
+      await screen.findByText("Grace|");
+      await waitFor(() => expect(localStorage.getItem(CACHE_KEY)).toContain("Grace"));
     });
   });
 });

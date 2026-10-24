@@ -21,18 +21,8 @@ export function clearLegacyToken() {
   }
 }
 
-// Everything this app caches in the browser (client list, calendar events, tasks,
-// groups…) is namespaced "advisorpilot." — wiped on logout / session expiry so the
-// next person at a shared computer can't read the previous advisor's client data.
-export function clearLocalData() {
-  try {
-    Object.keys(localStorage)
-      .filter((k) => k.startsWith("advisorpilot."))
-      .forEach((k) => localStorage.removeItem(k));
-  } catch {
-    // ignore storage errors
-  }
-}
+// Browser-side cache wiping and the guard on writing it live in ./localData (re-exported: callers import it from here).
+export { clearLocalData } from "./localData";
 
 function readCookie(name) {
   const match = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`));

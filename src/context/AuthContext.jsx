@@ -1,10 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { api, clearLegacyToken, clearLocalData, setSessionExpiredHandler } from "../lib/api";
+import { allowLocalData } from "../lib/localData";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  // Loading an account reopens the browser cache that logout closed (see lib/localData.js).
+  const setSignedInUser = (u) => {
+    allowLocalData();
+    setUser(u);
+  };
   // `initializing` covers the boot-time /me call so ProtectedRoute doesn't
   // bounce a logged-in user to /login before their session is restored.
   const [initializing, setInitializing] = useState(true);
@@ -35,7 +41,7 @@ export function AuthProvider({ children }) {
       try {
         const { user: me } = await api.me();
         if (!cancelled) {
-          setUser(me);
+          setSignedInUser(me);
           refreshBilling();
         }
       } catch {
@@ -56,7 +62,7 @@ export function AuthProvider({ children }) {
   //   { step: "done", user }         an account that needs none (the requirement was lifted on the record)
   const afterPassword = (result) => {
     if (result.mfa) return { step: result.mfa, challenge: result.challenge };
-    setUser(result.user);
+    setSignedInUser(result.user);
     refreshBilling();
     return { step: "done", user: result.user };
   };
@@ -67,7 +73,7 @@ export function AuthProvider({ children }) {
 
   // The session a successful second step (or the set-up of the factor) created: the server has set the cookies, this loads the account into the app.
   const completeMfa = (result) => {
-    setUser(result.user);
+    setSignedInUser(result.user);
     refreshBilling();
     return result.user;
   };
@@ -75,7 +81,7 @@ export function AuthProvider({ children }) {
   // Re-reads the account (e.g. after the email link was used in another tab or browser).
   const refreshUser = async () => {
     const { user: u } = await api.me();
-    setUser(u);
+    setSignedInUser(u);
     refreshBilling();
     return u;
   };
@@ -90,31 +96,31 @@ export function AuthProvider({ children }) {
   const changePassword = async (currentPassword, newPassword) => {
     // Other devices are signed out; this one gets a fresh session from the response.
     const { user: u } = await api.changePassword(currentPassword, newPassword);
-    setUser(u);
+    setSignedInUser(u);
     return u;
   };
 
   const updateProfile = async (patch) => {
     const { user: u } = await api.updateMe(patch);
-    setUser(u);
+    setSignedInUser(u);
     return u;
   };
 
   const updateComplianceProfile = async (patch) => {
     const { user: u } = await api.updateComplianceProfile(patch);
-    setUser(u);
+    setSignedInUser(u);
     return u;
   };
 
   const uploadAvatar = async (file) => {
     const { user: u } = await api.uploadAvatar(file);
-    setUser(u);
+    setSignedInUser(u);
     return u;
   };
 
   const removeAvatar = async () => {
     const { user: u } = await api.deleteAvatar();
-    setUser(u);
+    setSignedInUser(u);
     return u;
   };
 
