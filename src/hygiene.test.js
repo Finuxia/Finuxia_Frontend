@@ -21,6 +21,12 @@ describe("removed dead code stays removed", () => {
   // adding it to .env.example fails the next test.
   const EXPECTED_ENV_VARS = [
     "VITE_API_URL",
+    // The product version in the footer. NOT set in a .env file: vite.config.js injects it from
+    // package.json, so there is one place to change it and a build cannot claim a version that
+    // disagrees with npm. It appears on this list because the source does read it through
+    // import.meta.env, and .env.example documents that it is build-injected and should be left
+    // alone.
+    "VITE_APP_VERSION",
     // Error tracking (OPS-01). All four are inert when VITE_SENTRY_DSN is empty.
     "VITE_SENTRY_DSN",
     "VITE_SENTRY_ENVIRONMENT",

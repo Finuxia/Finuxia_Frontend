@@ -1,9 +1,19 @@
+import { readFileSync } from "node:fs";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
+// The product version shown in the footer, taken from package.json so there is ONE place to change
+// it. Bump it there (or with `npm version minor`, which also tags the commit) and the next deploy
+// shows the new number — no separate file to keep in step, and no chance of the footer disagreeing
+// with what npm thinks the version is.
+const { version: APP_VERSION } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Injected rather than read from a .env file, because it is not configuration: nobody should be
+  // able to deploy a build claiming a version different from the one in package.json.
+  define: { "import.meta.env.VITE_APP_VERSION": JSON.stringify(APP_VERSION) },
   build: {
     // Lets scripts/check-bundle.mjs read which chunk imports which, to keep the public pages free of the signed-in app.
     manifest: true,
