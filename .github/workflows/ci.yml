@@ -41,8 +41,16 @@ jobs:
   # Required check: make "test" a required status check for main and develop in the repository's
   # branch protection settings. Still not done — it needs repository admin access, not a code change.
   test:
-    # Skipped only on a manual run where somebody ticked the box. Every push runs it.
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) }}
+    # Two ways to skip, both deliberate and both leaving a record: `[skip tests]` in the commit
+    # message for a push, or the skip_checks tick-box on a manual run. See the long note in the
+    # backend repository's workflow for why it is a commit-message token rather than a repository
+    # variable — in short, a variable is a switch nobody remembers to flip back, while a token is
+    # per-commit and countable with `git log --grep`.
+    if: >-
+      ${{
+        !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
+        && !contains(github.event.head_commit.message, '[skip tests]')
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -57,7 +65,11 @@ jobs:
   # Static checks (FE-09). Lint runs with zero warnings and every suppression needs a written reason (see eslint.config.js); the formatter and the
   # type check (JSDoc types over src/lib, src/hooks and src/services, see tsconfig.json) must pass too. Run all four locally with `npm run check`.
   static:
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) }}
+    if: >-
+      ${{
+        !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
+        && !contains(github.event.head_commit.message, '[skip tests]')
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -74,7 +86,11 @@ jobs:
         run: npm run typecheck
 
   build:
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_checks) }}
+    if: >-
+      ${{
+        !(github.event_name == 'workflow_dispatch' && inputs.skip_checks)
+        && !contains(github.event.head_commit.message, '[skip tests]')
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -149,6 +165,23 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # Stops an older commit overwriting a newer one in production. `develop` is exempt from the
+      # cancel-in-progress rule above on purpose, so two runs can be in flight and the earlier one
+      # can reach its deploy step later — quietly reverting the service to older code, with nothing
+      # announcing it. A concurrency group would not help: with cancel-in-progress the last job to
+      # arrive wins, and here the late arrival is the stale one. See the longer note in the backend
+      # repository's workflow.
+      - name: Refuse to deploy a commit that is no longer the tip of the branch
+        run: |
+          git fetch --depth 1 origin "${GITHUB_REF_NAME}"
+          TIP="$(git rev-parse FETCH_HEAD)"
+          if [ "$TIP" != "$GITHUB_SHA" ]; then
+            echo "::error::${GITHUB_REF_NAME} has moved on to $TIP. This run is for $GITHUB_SHA," \
+                 "so deploying it would replace newer code with older. Refusing."
+            exit 1
+          fi
+          echo "$GITHUB_SHA is still the tip of ${GITHUB_REF_NAME}."
+
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -160,6 +193,21 @@ jobs:
 
       - name: Authenticate Docker to Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      # An unset secret produces an empty path segment rather than an obvious error: a missing
+      # REPOSITORY yields "region-docker.pkg.dev/project//service" and docker reports "invalid
+      # reference format", which is what happened on the first run of this job and says nothing
+      # about which value is missing. Checking first turns that into a sentence naming the secret.
+      - name: Check the deployment secrets are all set
+        run: |
+          missing=""
+          for v in PROJECT_ID REGION SERVICE RUNTIME_SA REPOSITORY; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::These repository secrets are empty or unset:$missing"
+            exit 1
+          fi
 
       - name: Build and push the image
         run: |
