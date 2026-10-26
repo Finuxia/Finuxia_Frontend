@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { useClients } from "../../context/ClientsContext";
 import { buildNotifications } from "../../lib/notifications";
 import { api, isIncompleteList } from "../../lib/api";
+import { writeLocal } from "../../lib/localData";
 import IncompleteListNotice from "../IncompleteListNotice";
 
 const SEEN_KEY = "advisorpilot.seenNotifications";
@@ -16,11 +17,7 @@ function loadSeen() {
   }
 }
 function saveSeen(set) {
-  try {
-    localStorage.setItem(SEEN_KEY, JSON.stringify([...set]));
-  } catch {
-    /* ignore */
-  }
+  writeLocal(SEEN_KEY, [...set]);
 }
 
 export default function NotificationsDropdown() {

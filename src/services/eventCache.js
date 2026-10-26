@@ -1,3 +1,4 @@
+import { writeLocal } from "../lib/localData";
 /**
  * Offline cache for Google Calendar events, keyed per Finuxia user.
  *
@@ -31,11 +32,8 @@ export function readCachedEvents(userEmail) {
 }
 
 export function writeCachedEvents(userEmail, events) {
-  try {
-    localStorage.setItem(keyFor(userEmail), JSON.stringify({ version: VERSION, cachedAt: Date.now(), events }));
-  } catch {
-    // Quota or serialization failure is non-fatal — the live list still works.
-  }
+  // Refused after logout (lib/localData.js); a quota or serialization failure is non-fatal, the live list still works.
+  writeLocal(keyFor(userEmail), { version: VERSION, cachedAt: Date.now(), events });
 }
 
 export function clearCachedEvents(userEmail) {

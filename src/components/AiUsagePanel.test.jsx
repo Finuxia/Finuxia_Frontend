@@ -281,14 +281,24 @@ describe("AI wallet top-up", () => {
 
   it("only one top-up goes out at a time", async () => {
     serve(allowance());
+    // The first top-up is held open until the test lets it go, so the second click always lands while it is in flight (a fixed delay raced the second
+    // click on a loaded machine: the first finished first, the button was enabled again, and a second top-up went out).
+    let release;
+    const held = new Promise((r) => {
+      release = r;
+    });
     serveTopUp(async () => {
-      await new Promise((r) => setTimeout(r, 50));
+      await held;
       return HttpResponse.json({ mock: true });
     });
     render();
     const button = await screen.findByRole("button", { name: "Add $5.00" });
     await userEvent.click(button);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Add $10.00" })).toBeDisabled());
+    await waitFor(() => expect(topUps).toHaveLength(1)); // the first request has reached the server and is being held
     await userEvent.click(screen.getByRole("button", { name: "Add $10.00" }));
+    expect(topUps).toHaveLength(1);
+    release();
     await waitFor(() => expect(screen.getByRole("button", { name: "Add $10.00" })).not.toBeDisabled());
     expect(topUps).toHaveLength(1);
   });
