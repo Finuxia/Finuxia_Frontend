@@ -72,7 +72,7 @@ export default function Billing() {
 
   /**
    * What each plan's button says and does. The plan the account is already on stays buyable, labelled "Buy again": a plan is one payment for a
-   * stretch of access, so buying the same one again is how access is extended (the server keeps whichever end date is later). Every button is
+   * stretch of access, so buying the same one again is how access is extended (the server adds the plan's length after the current end, so no remaining day is lost). Every button is
    * disabled while any purchase is in flight, so a second plan cannot be started on top of the first.
    */
   // A customer whose access is running moves between plans through the change dialog, which shows what it does before anything happens; someone whose
