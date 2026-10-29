@@ -12,8 +12,11 @@ import { api } from "../lib/api";
  * `connect()` is a full-page redirect to Google (not a popup) — there's
  * nothing for a popup blocker to catch, and the token exchange happens
  * server-side after Google redirects back to /api/calendar-connect/callback.
+ *
+ * `account` is whoever is signed in (null when nobody is). The status is asked for only then, and again when a different person signs in. It used to be
+ * asked on every page load, the login page included, where it could only ever be refused (FE-16).
  */
-export function useCalendarConnection() {
+export function useCalendarConnection(account = null) {
   const [status, setStatus] = useState("disconnected"); // disconnected | connected | expired | revoked
   const [googleEmail, setGoogleEmail] = useState(null);
   const [isConfigured, setIsConfigured] = useState(true); // assume yes until status says otherwise
@@ -33,8 +36,16 @@ export function useCalendarConnection() {
   }, []);
 
   useEffect(() => {
+    if (!account) {
+      // Signed out: nothing to ask, and nothing of the previous person's connection may be left showing.
+      setStatus("disconnected");
+      setGoogleEmail(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     refreshStatus();
-  }, [refreshStatus]);
+  }, [account, refreshStatus]);
 
   const connect = useCallback(async () => {
     const { authUrl } = await api.getCalendarConnectUrl(window.location.pathname);

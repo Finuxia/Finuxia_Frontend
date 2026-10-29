@@ -23,7 +23,7 @@ export function GoogleCalendarProvider({ children }) {
   const { user } = useAuth();
   const { addToast } = useToast();
   const cacheKey = user?.email;
-  const auth = useCalendarConnection();
+  const auth = useCalendarConnection(user?.email ?? null);
   const cal = useGoogleCalendarEvents(cacheKey);
 
   // Lands here after the OAuth redirect comes back from Google, no matter
