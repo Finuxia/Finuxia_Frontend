@@ -30,6 +30,33 @@ npm run test:e2e -- account         # one file
 npx playwright show-report          # after a failure
 ```
 
+If port 8000 is taken on your machine, give the API another one and tell the suite:
+
+```bash
+FINUXIA_E2E_API_PORT=8010 docker compose up e2e-api                       # in Finuxia_Backend
+VITE_API_URL=http://localhost:8010 E2E_API_URL=http://localhost:8010 \
+  E2E_MAIL_DIR=../Finuxia_Backend/.e2e-mail npm run test:e2e            # in Finuxia_Frontend
+```
+
+`VITE_API_URL` is what the dev server the suite starts calls; `E2E_API_URL` is what `support/api.js`
+calls when a journey sets something up through the API.
+
+## Setting things up through the API
+
+A journey drives through the browser what it is about, and may prepare the rest through the same
+public API the web app calls, as the signed-in user (`support/api.js`: the browser context's cookies
+plus the `X-CSRF-Token` header). The booking journey creates the link and the working hours that way;
+the AI journey changes plan that way. Nothing in the backend exists for the tests.
+
+## The AI provider
+
+`e2e-api` points `AI_BASE_URL` at `e2e-ai-stub` (`Finuxia_Backend/scripts/e2e_ai_stub.py`), an
+OpenAI-compatible stand-in on the compose network. Everything else is real: the plan's AI grant, the
+hold on the wallet, settling, the 402 and the blocked notice. `e2e-api` also sets
+`AI_CHARGE_MARKUP_PERCENT=300000`, so one suggestion costs about $1.50-$1.80 and the $10 every account
+starts with runs out after five or six calls instead of thousands. The AI journey refuses to run
+against anything but a local target, because elsewhere it would spend real money.
+
 ## Why there is a separate backend service for this
 
 Two journeys need a link that only ever arrives by email — confirming an address, and resetting a
@@ -80,6 +107,13 @@ with no trial, land on the subscribe page instead of the application, and fail n
 cause. `uniqueEmail()` puts the stamp in the local part for this reason. It cost an afternoon to
 find once.
 
+**The journeys share one address** (the Docker gateway), so anything the backend limits per address
+is shared by all of them. That is how TEST-06 found a real bug: every signed-out page load asks
+`/api/auth/refresh` whether it has a session, and with no session it failed the CSRF check and counted
+as a failed sign-in attempt. After about 30 signed-out page loads a minute, sign-in, verification and
+reset links from that address were refused for everyone (an office, a VPN). Fixed in the backend; if
+the journeys start failing with 429s again, look at the per-address limits first.
+
 **No fixed waits, ever.** `retries` is 0 on purpose, because this story's criteria say flaky tests
 are fixed or deleted rather than retried until they pass — and a retry turns a real intermittent bug
 into a green run that tells you nothing. Every wait in here waits for a condition. The project has
@@ -92,9 +126,9 @@ By **label** and by **role**, never by CSS class. The classes are Tailwind utili
 change whenever the design does, and a suite that fails on a restyle teaches people to ignore it. A
 label changing is a real change to what the user sees, and a test noticing that is the test working.
 
-One exception, flagged in `support/actions.js`: the avatar menu is found by `title`, because its only
-visible text is the account's first initial and the menu is portalled outside the `<nav>` landmark.
-FE-05 (SCRUM-48) adds accessible menu primitives; it can have a proper label then.
+The account menu is found by its name ("Account menu for <name>") and its entries by role
+`menuitem`, which FE-05 (SCRUM-48) gave them. Until TEST-06's second batch `signOut` still looked for a
+*button* named "Log out", so every journey that signs out timed out after FE-05 landed.
 
 ## What is here, and what is not
 
@@ -102,9 +136,9 @@ FE-05 (SCRUM-48) adds accessible menu primitives; it can have a proper label the
 |---|---|
 | register → confirm → sign in → create a client → sign out → sign back in | **done** |
 | forgot password → reset → old password dead, new one works, link not reusable | **done** |
-| public booking link → pick a slot → submit → advisor approves | not yet |
+| public booking link → pick a slot → submit → advisor approves (`booking.spec.js`) | **done** |
 | subscribe → pay with a test card → entitlement granted | not yet, deliberately — see below |
-| use an AI feature until the quota is exhausted → blocked state | not yet; needs the AI provider stubbed |
+| use an AI feature until the wallet is empty → blocked state → add credit → works again (`ai-quota.spec.js`) | **done**, local only |
 | import a real spreadsheet → row counts match | not yet; needs the fixture from TEST-08 (SCRUM-86) |
 
 **The payment journey is last on purpose.** BIL-20 (SCRUM-108) walks a real Stripe sandbox checkout

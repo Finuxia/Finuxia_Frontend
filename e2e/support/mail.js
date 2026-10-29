@@ -107,6 +107,25 @@ export async function waitForLink(toEmail, pathname, { timeoutMs = 15000 } = {})
   );
 }
 
+/**
+ * Waits for a message to `toEmail` whose decoded text matches `pattern` (a RegExp), and returns that text. For emails a journey must see sent
+ * that carry no link: the advisor's "new booking request", the client's "confirmed".
+ */
+export async function waitForMessage(toEmail, pattern, { timeoutMs = 15000 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  const needle = toEmail.toLowerCase();
+  while (Date.now() < deadline) {
+    for (const { path } of messageFiles()) {
+      const raw = readFileSync(path, "utf8");
+      if (!raw.toLowerCase().includes(needle)) continue;
+      const text = `${raw}\n${bodyOf(path)}`;
+      if (pattern.test(text)) return text;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new MailUnavailable(`No email to ${toEmail} matching ${pattern} appeared in ${MAIL_DIR} within ${timeoutMs}ms.`);
+}
+
 /** Empties nothing and deletes nothing: reads the current message count, for assertions about sends. */
 export function messageCount() {
   return mailReadable() ? messageFiles().length : 0;

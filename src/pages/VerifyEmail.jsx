@@ -63,12 +63,24 @@ export default function VerifyEmail() {
                 ? "Thanks — your free trial has started."
                 : "Thanks — your email is confirmed. A free trial was already used with this address, so contact us to continue."}
           </p>
-          <Link
-            to={user ? "/dashboard" : "/login"}
-            className="w-full rounded-lg bg-navy px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-navy-light"
-          >
-            {user ? "Go to the app" : "Log in"}
-          </Link>
+          {user ? (
+            // A full page load, not a router link: it re-reads the account. The in-app copy can still say "not confirmed", because this page is
+            // usually opened fresh from the email, while the session is still being restored, so the refresh above may never have run. Through a
+            // router link that stale copy showed the "Confirm your email" gate again, right after the address was confirmed (found by TEST-06).
+            <a
+              href="/dashboard"
+              className="w-full rounded-lg bg-navy px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-navy-light"
+            >
+              Go to the app
+            </a>
+          ) : (
+            <Link
+              to="/login"
+              className="w-full rounded-lg bg-navy px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-navy-light"
+            >
+              Log in
+            </Link>
+          )}
         </div>
       </AuthCard>
     );

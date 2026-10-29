@@ -41,6 +41,19 @@ export async function register(page, { name, email, password = PASSWORD }) {
   await page.getByRole("button", { name: "Create Account" }).click();
 }
 
+/**
+ * Registers, confirms the address from the email the backend sent, and waits for the application. For the journeys that are about what an
+ * account does next, not about signing up (which `account-lifecycle.spec.js` covers step by step). Needs a readable mail directory.
+ */
+export async function registerConfirmed(page, { name, email, waitForLink }) {
+  await register(page, { name, email });
+  await expectEmailGate(page);
+  await page.goto(await waitForLink(email, "/verify-email"));
+  await expect(page.getByText(/email confirmed/i)).toBeVisible();
+  await page.getByRole("link", { name: "Go to the app" }).click();
+  await expectSignedIn(page);
+}
+
 export async function signIn(page, { identifier, password = PASSWORD }) {
   await page.goto("/login");
   await page.getByLabel("Email or username").fill(identifier);
@@ -71,15 +84,14 @@ export async function expectEmailGate(page) {
 }
 
 /**
- * Signs out through the avatar menu.
+ * Signs out through the account menu.
  *
- * The avatar is found by the account's own name: the button carries `title={user.name}`, which is
- * its accessible name. Its visible text is only the first initial, and the menu is rendered through
- * a portal outside the `<nav>` landmark, so neither the text nor the navigation is a reliable way in.
- * (FE-05, SCRUM-48, adds accessible menu primitives; when that lands this can get a real label.)
+ * The menu button is named "Account menu for <name>" and its entries are real menu items since FE-05 (SCRUM-48) gave the menu accessible
+ * primitives, so both are found by role and name. (Before FE-05 this clicked the avatar by its `title` and looked for a *button* named
+ * "Log out"; once the entries became `menuitem`s that lookup found nothing and every journey that signs out timed out.)
  */
 export async function signOut(page, name) {
-  await page.getByTitle(name, { exact: true }).click();
-  await page.getByRole("button", { name: /log ?out/i }).click();
+  await page.getByRole("button", { name: `Account menu for ${name}` }).click();
+  await page.getByRole("menuitem", { name: /log ?out/i }).click();
   await expectSignedOut(page);
 }
