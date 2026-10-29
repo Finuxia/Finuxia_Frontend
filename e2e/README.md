@@ -147,5 +147,5 @@ work would encode our assumptions about Stripe rather than Stripe's behaviour â€
 mistake TEST-04 was raised to fix, where a hand-written fixture contained a field the provider does
 not send and the test passed anyway.
 
-Still outstanding from the story: running in CI against a deployed environment and gating promotion.
-That needs OPS-12 (SCRUM-112) to exist first.
+Still outstanding: the payment and import journeys are TEST-14 (SCRUM-144); running against a staging
+environment and gating promotion on it is OPS-22 (SCRUM-145).
