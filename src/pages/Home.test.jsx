@@ -71,7 +71,7 @@ describe("the public home page", () => {
 });
 
 describe("the same description is in the HTML, for anything that does not run scripts", () => {
-  const html = readFileSync("index.html", "utf8") // the tests run from the repository root;
+  const html = readFileSync("index.html", "utf8"); // the tests run from the repository root;
   const squash = (s) => s.replace(/\s+/g, " ").trim();
 
   it("the page's purpose sentence is in the noscript block word for word", () => {
@@ -80,7 +80,9 @@ describe("the same description is in the HTML, for anything that does not run sc
   });
 
   it("there is a meta description and a title that say what it is, and the noscript links to privacy and terms", () => {
-    expect(html).toMatch(/<meta\s+name="description"\s+content="Finuxia is a client-relationship management \(CRM\) web application for financial advisors/);
+    expect(html).toMatch(
+      /<meta\s+name="description"\s+content="Finuxia is a client-relationship management \(CRM\) web application for financial advisors/
+    );
     expect(html).toMatch(/<title>[^<]*financial advisors[^<]*<\/title>/);
     expect(html).toContain('<a href="/privacy">Privacy Policy</a>');
     expect(html).toContain('<a href="/terms">Terms of Service</a>');

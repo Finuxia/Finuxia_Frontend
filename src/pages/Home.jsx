@@ -1,7 +1,7 @@
 import { CalendarClock, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
-import Footer from "../components/Footer";
-import Logo from "../components/Logo";
+import Footer from "../components/layout/Footer";
+import Logo from "../components/layout/Logo";
 import { useAuth } from "../context/AuthContext";
 
 // What the product is, in the plain words a visitor, a search engine and a reviewer (Google's OAuth branding check reads this page) need.
@@ -10,10 +10,26 @@ export const PURPOSE =
   "Finuxia is a client-relationship management (CRM) web application for financial advisors. An advisor uses it to keep client records and notes, move each client through their advisory pipeline, schedule meetings and follow-ups, store client documents, and prepare sales packages.";
 
 const POINTS = [
-  { icon: Users, title: "Clients and pipeline", body: "Every client, pipeline stage and follow-up in one place, so nothing falls through the cracks between meetings." },
-  { icon: CalendarClock, title: "Meetings and follow-ups", body: "Booking links clients can use to pick a time, and reminders and follow-ups that keep the next step visible." },
-  { icon: Sparkles, title: "Help with the busywork", body: "AI-assisted follow-up message drafts, presentation preparation and sales-package preparation, so the advisor spends less time on paperwork." },
-  { icon: ShieldCheck, title: "Your data stays yours", body: "Client information belongs to the advisor who entered it. We do not sell it and do not use it for advertising." },
+  {
+    icon: Users,
+    title: "Clients and pipeline",
+    body: "Every client, pipeline stage and follow-up in one place, so nothing falls through the cracks between meetings.",
+  },
+  {
+    icon: CalendarClock,
+    title: "Meetings and follow-ups",
+    body: "Booking links clients can use to pick a time, and reminders and follow-ups that keep the next step visible.",
+  },
+  {
+    icon: Sparkles,
+    title: "Help with the busywork",
+    body: "AI-assisted follow-up message drafts, presentation preparation and sales-package preparation, so the advisor spends less time on paperwork.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Your data stays yours",
+    body: "Client information belongs to the advisor who entered it. We do not sell it and do not use it for advertising.",
+  },
 ];
 
 /**
@@ -44,7 +60,9 @@ export default function Home() {
       </header>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-14">
-        <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-navy sm:text-4xl">The client-relationship app for financial advisors</h1>
+        <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-navy sm:text-4xl">
+          The client-relationship app for financial advisors
+        </h1>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">{PURPOSE}</p>
 
         <ul className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -62,9 +80,9 @@ export default function Home() {
             Connected services (optional)
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            An advisor can choose to connect Google Calendar, Google Drive or Zoom. Finuxia uses a connection only for the feature it powers: creating
-            the advisor's calendar events, keeping a folder of client files, and creating meeting links. The connection can be removed at any time
-            from the advisor's profile, which stops our access. Read how we handle data in our{" "}
+            An advisor can choose to connect Google Calendar, Google Drive or Zoom. Finuxia uses a connection only for the feature it
+            powers: creating the advisor's calendar events, keeping a folder of client files, and creating meeting links. The connection can
+            be removed at any time from the advisor's profile, which stops our access. Read how we handle data in our{" "}
             <Link to="/privacy" className="font-semibold text-navy underline">
               Privacy Policy
             </Link>{" "}
