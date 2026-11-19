@@ -55,22 +55,18 @@ export default function NotificationsDropdown() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const markAllSeen = () => {
+  const markSeen = (ids) => {
     setSeen((prev) => {
       const next = new Set(prev);
-      notifications.forEach((n) => next.add(n.id));
+      ids.forEach((id) => next.add(id));
       saveSeen(next);
       return next;
     });
   };
+  const markAllSeen = () => markSeen(notifications.map((n) => n.id));
 
-  const toggleOpen = () => {
-    setOpen((o) => {
-      // Opening the panel clears the badge (marks everything as seen).
-      if (!o) markAllSeen();
-      return !o;
-    });
-  };
+  // Opening the panel no longer marks anything as read: the badge stays until the person reads a notification or chooses "Mark all as read".
+  const toggleOpen = () => setOpen((o) => !o);
 
   return (
     <div className="relative" ref={ref}>
@@ -89,24 +85,40 @@ export default function NotificationsDropdown() {
 
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-80 animate-fade-in rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-          <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">Notifications</p>
+          <div className="flex items-center justify-between px-2 py-1.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Notifications</p>
+            <button
+              type="button"
+              onClick={markAllSeen}
+              disabled={unseenCount === 0}
+              className="text-xs font-medium text-av-blue transition hover:underline disabled:cursor-default disabled:text-slate-300 disabled:no-underline"
+            >
+              Mark all as read
+            </button>
+          </div>
           {notifications.length === 0 ? (
             <p className="px-2 py-4 text-center text-sm text-slate-400">You're all caught up.</p>
           ) : (
             <div className="flex max-h-80 flex-col gap-0.5 overflow-y-auto">
-              {notifications.map((n) => (
-                <button
-                  key={n.id}
-                  onClick={() => {
-                    setOpen(false);
-                    navigate(n.href);
-                  }}
-                  className="flex items-start gap-2.5 rounded-lg px-2 py-2 text-left text-sm text-slate-600 transition hover:bg-slate-50"
-                >
-                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.dot}`} />
-                  {n.text}
-                </button>
-              ))}
+              {notifications.map((n) => {
+                const read = seen.has(n.id);
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => {
+                      markSeen([n.id]);
+                      setOpen(false);
+                      navigate(n.href);
+                    }}
+                    className={`flex items-start gap-2.5 rounded-lg px-2 py-2 text-left text-sm transition hover:bg-slate-50 ${
+                      read ? "text-slate-400" : "font-medium text-slate-700"
+                    }`}
+                  >
+                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.dot} ${read ? "opacity-30" : ""}`} />
+                    {n.text}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
