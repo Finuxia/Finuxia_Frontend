@@ -39,7 +39,7 @@ describe("navigation dropdowns", () => {
       within(menu)
         .getAllByRole("menuitem")
         .map((i) => i.textContent)
-    ).toEqual(["All Clients", "Groups", "Follow-ups", "Import"]);
+    ).toEqual(["All Clients", "Groups", "Follow-ups", "Testimonials", "Import"]);
   });
 
   it("opens with the first item focused, and the arrow keys move through the items, wrapping", async () => {

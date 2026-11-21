@@ -232,10 +232,10 @@ async function request(path, options = {}) {
 
 // Multipart (file upload) POST — no Content-Type header, so the browser sets
 // the correct multipart boundary itself.
-async function requestMultipart(path, formData) {
+async function requestMultipart(path, formData, { auth = true } = {}) {
   let res;
   try {
-    res = await authedFetch(path, { method: "POST", body: formData });
+    res = await authedFetch(path, { method: "POST", body: formData }, { auth });
   } catch {
     throw new ApiError("Can't reach the server. Is the backend running?", { status: 0 });
   }
@@ -708,11 +708,33 @@ export const api = {
       { auth: false }
     ),
   requestBooking: (slug, payload) => request(`/api/booking/public/${encodeURIComponent(slug)}/request`, { method: "POST", body: payload }),
+
+  // Testimonials: the advisor's links for asking clients what they think, and what comes back.
+  getTestimonialLinks: () => request("/api/testimonials/links"),
+  /** `clientRef` makes it that client's own link; leave it out for a general one anyone it is sent to can use. */
+  createTestimonialLink: (payload) => request("/api/testimonials/links", { method: "POST", body: payload }),
+  updateTestimonialLink: (id, patch) => request(`/api/testimonials/links/${id}`, { method: "PATCH", body: patch }),
+  deleteTestimonialLink: (id) => request(`/api/testimonials/links/${id}`, { method: "DELETE" }),
+  /** Everything people sent, newest first, read a page at a time. */
+  getTestimonials: () => api.getAllPages("/api/testimonials"),
+  updateTestimonial: (id, patch) => request(`/api/testimonials/${id}`, { method: "PATCH", body: patch }),
+  deleteTestimonial: (id) => request(`/api/testimonials/${id}`, { method: "DELETE" }),
+  markAllTestimonialsRead: () => request("/api/testimonials/mark-all-read", { method: "POST" }),
+  /** The person's photo as a blob URL (it is only served to the advisor it belongs to, so an <img src> cannot load it). */
+  getTestimonialPhotoUrl: (id) => fetchBlobUrl(`/api/testimonials/${id}/photo`),
+  // The public page (no sign-in, no cookies).
+  getPublicTestimonialInfo: (slug) => request(`/api/testimonials/public/${encodeURIComponent(slug)}`, { auth: false }),
+  submitTestimonial: (slug, form) => requestMultipart(`/api/testimonials/public/${encodeURIComponent(slug)}/submit`, form, { auth: false }),
 };
 
 // The full shareable link for an advisor's booking page.
 export function bookingPublicUrl(slug) {
   return `${window.location.origin}/book/${encodeURIComponent(slug)}`;
+}
+
+// The full shareable link for one of an advisor's testimonial pages.
+export function testimonialPublicUrl(slug) {
+  return `${window.location.origin}/testimonial/${encodeURIComponent(slug)}`;
 }
 
 export { BASE_URL };

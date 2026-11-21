@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 const Profile = lazy(() => import("./pages/Profile"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const MyDay = lazy(() => import("./pages/MyDay"));
+const Testimonials = lazy(() => import("./pages/Testimonials"));
 const Meetings = lazy(() => import("./pages/Meetings"));
 const About = lazy(() => import("./pages/About"));
 const Clients = lazy(() => import("./pages/Clients"));
@@ -81,6 +82,7 @@ export default function AuthenticatedApp() {
           <Route path="/clients" element={<Clients />} />
           <Route path="/clients/:id" element={<ClientDetail />} />
           <Route path="/groups" element={<Groups />} />
+          <Route path="/testimonials" element={<Testimonials />} />
           <Route
             path="/follow-ups"
             element={

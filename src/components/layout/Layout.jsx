@@ -25,6 +25,7 @@ import {
   Info,
   Package,
   CreditCard,
+  MessageSquareQuote,
 } from "lucide-react";
 import Logo from "./Logo";
 import { useAuth } from "../../context/AuthContext";
@@ -58,6 +59,7 @@ const NAV_MENUS = [
       { to: "/clients", label: "All Clients", icon: Users },
       { to: "/groups", label: "Groups", icon: UsersRound },
       { to: "/follow-ups", label: "Follow-ups", icon: Clock },
+      { to: "/testimonials", label: "Testimonials", icon: MessageSquareQuote },
       { to: "/import", label: "Import", icon: Upload },
     ],
   },

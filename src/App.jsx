@@ -6,6 +6,7 @@ import PageSpinner from "./components/ui/PageSpinner";
 // opening a booking link on a phone downloads the shell and that one page, nothing else.
 const Login = lazy(() => import("./pages/Login"));
 const BookingPublic = lazy(() => import("./pages/BookingPublic"));
+const TestimonialPublic = lazy(() => import("./pages/TestimonialPublic"));
 const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/book/:slug" element={<BookingPublic />} />
+        <Route path="/testimonial/:slug" element={<TestimonialPublic />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
