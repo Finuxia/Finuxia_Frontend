@@ -207,6 +207,21 @@ export default function MyDay() {
         isToday={isToday}
         reminders={reminders}
         onEdit={(r) => setReminderModal(r)}
+        onCompleteAll={async (list) => {
+          if (!window.confirm(`Mark ${list.length} reminders as done?`)) return;
+          // One at a time, not in parallel: completing an occurrence of a repeating reminder tops its series up from the furthest date it has, and two
+          // completions of one series running together would both add the same next date.
+          let failed = 0;
+          for (const r of list) {
+            try {
+              await api.setReminderStatus(r.id, "completed");
+            } catch {
+              failed += 1;
+            }
+          }
+          await loadReminders();
+          addToast(failed ? `${list.length - failed} done; ${failed} could not be updated.` : `${list.length} reminders marked done.`);
+        }}
         onToggleStatus={async (r, status) => {
           try {
             await api.setReminderStatus(r.id, status);

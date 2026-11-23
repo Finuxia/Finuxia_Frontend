@@ -20,7 +20,7 @@ import { formatDate } from "../../lib/followUp";
  * same as a non-repeating reminder; the backend already put one row on
  * every date this series is due.
  */
-export default function RemindersSection({ date, isToday, reminders, onToggleStatus, onEdit }) {
+export default function RemindersSection({ date, isToday, reminders, onToggleStatus, onEdit, onCompleteAll }) {
   const { clients } = useClients();
   const [showCompleted, setShowCompleted] = useState(false);
 
@@ -55,14 +55,21 @@ export default function RemindersSection({ date, isToday, reminders, onToggleSta
         </div>
         <h2 className="text-sm font-semibold text-navy">Reminders</h2>
         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">{count}</span>
-        {visible.hasCompleted && (
-          <button
-            onClick={() => setShowCompleted((s) => !s)}
-            className="ml-auto text-xs font-medium text-slate-400 transition hover:text-navy"
-          >
-            {showCompleted ? "Hide completed" : "Show completed"}
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-4">
+          {onCompleteAll && count > 1 && (
+            <button
+              onClick={() => onCompleteAll(visible.pending)}
+              className="text-xs font-semibold text-av-blue transition hover:underline"
+            >
+              Complete all ({count})
+            </button>
+          )}
+          {visible.hasCompleted && (
+            <button onClick={() => setShowCompleted((s) => !s)} className="text-xs font-medium text-slate-400 transition hover:text-navy">
+              {showCompleted ? "Hide completed" : "Show completed"}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2.5">
