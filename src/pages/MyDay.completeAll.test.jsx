@@ -6,6 +6,7 @@ import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import MyDay from "./MyDay";
 
 const today = new Date().toISOString().slice(0, 10);
+const tomorrow = new Date(Date.now() + 24 * 3600 * 1000).toISOString().slice(0, 10);
 const reminder = (id, over = {}) => ({
   id,
   title: `Task ${id}`,
@@ -25,11 +26,18 @@ beforeEach(() => {
 });
 afterEach(() => confirm.mockRestore());
 
-/** Serves reminders from a list that completing one updates, and records the order the completions arrive in. */
+/** Serves reminders from a list that completing updates, and records what was called. */
 function serve(initial) {
-  const state = { list: initial, completed: [] };
+  const state = { list: initial, completed: [], dueCalls: [] };
   server.use(
     http.get(`${API}/api/reminders`, () => HttpResponse.json({ results: state.list, nextCursor: null })),
+    http.post(`${API}/api/reminders/complete-due`, async ({ request }) => {
+      const { date } = await request.json();
+      state.dueCalls.push(date);
+      const due = state.list.filter((r) => r.status === "pending" && r.dueDate <= date);
+      state.list = state.list.map((r) => (due.includes(r) ? { ...r, status: "completed" } : r));
+      return HttpResponse.json({ completed: due.length });
+    }),
     http.post(`${API}/api/reminders/:id/status`, async ({ params, request }) => {
       const { status } = await request.json();
       state.completed.push(Number(params.id));
@@ -41,13 +49,20 @@ function serve(initial) {
 }
 
 describe("My Day: complete every reminder at once", () => {
-  it("completes every pending reminder after asking, one after another, and says how many", async () => {
-    const state = serve([reminder(1), reminder(2), reminder(3, { dueDate: today }), reminder(4, { status: "completed" })]);
+  it("asks once, then has the server complete everything due today or earlier in one request", async () => {
+    const state = serve([
+      reminder(1),
+      reminder(2),
+      reminder(3, { dueDate: today }),
+      reminder(4, { status: "completed" }),
+      reminder(5, { dueDate: tomorrow }),
+    ]);
     renderWithProviders(<MyDay />);
     await userEvent.click(await screen.findByRole("button", { name: "Complete all (3)" }));
     expect(confirm).toHaveBeenCalledWith("Mark 3 reminders as done?");
     expect(await screen.findByText("3 reminders marked done.")).toBeInTheDocument();
-    expect(state.completed).toEqual([1, 2, 3]);
+    expect(state.dueCalls).toEqual([today]);
+    expect(state.completed).toEqual([]); // not one request per reminder
     await waitFor(() => expect(screen.queryByRole("button", { name: /complete all/i })).not.toBeInTheDocument());
   });
 
@@ -56,7 +71,7 @@ describe("My Day: complete every reminder at once", () => {
     confirm.mockReturnValueOnce(false);
     renderWithProviders(<MyDay />);
     await userEvent.click(await screen.findByRole("button", { name: "Complete all (2)" }));
-    expect(state.completed).toEqual([]);
+    expect(state.dueCalls).toEqual([]);
     expect(screen.getByRole("button", { name: "Complete all (2)" })).toBeInTheDocument();
   });
 
@@ -67,12 +82,24 @@ describe("My Day: complete every reminder at once", () => {
     expect(screen.queryByRole("button", { name: /complete all/i })).not.toBeInTheDocument();
   });
 
-  it("carries on past one that fails, and says so", async () => {
-    const state = serve([reminder(1), reminder(2), reminder(3)]);
+  it("says so, and changes nothing, when the server refuses", async () => {
+    serve([reminder(1), reminder(2)]);
+    server.use(http.post(`${API}/api/reminders/complete-due`, () => HttpResponse.json({ error: "Not today's date." }, { status: 400 })));
+    renderWithProviders(<MyDay />);
+    await userEvent.click(await screen.findByRole("button", { name: "Complete all (2)" }));
+    expect(await screen.findByText("Not today's date.")).toBeInTheDocument();
+    expect(screen.queryByText(/marked done/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Complete all (2)" })).toBeInTheDocument();
+  });
+
+  it("on another day, completes that day's reminders one at a time and carries on past one that fails", async () => {
+    const state = serve([reminder(1, { dueDate: tomorrow }), reminder(2, { dueDate: tomorrow }), reminder(3, { dueDate: tomorrow })]);
     server.use(http.post(`${API}/api/reminders/2/status`, () => HttpResponse.json({ error: "broken" }, { status: 500 })));
     renderWithProviders(<MyDay />);
+    await userEvent.click(await screen.findByRole("button", { name: "Next day" }));
     await userEvent.click(await screen.findByRole("button", { name: "Complete all (3)" }));
     expect(await screen.findByText("2 done; 1 could not be updated.")).toBeInTheDocument();
     expect(state.completed).toEqual([1, 3]);
+    expect(state.dueCalls).toEqual([]); // the whole-list endpoint is for today only
   });
 });

@@ -209,17 +209,29 @@ export default function MyDay() {
         onEdit={(r) => setReminderModal(r)}
         onCompleteAll={async (list) => {
           if (!window.confirm(`Mark ${list.length} reminders as done?`)) return;
-          // One at a time, not in parallel: completing an occurrence of a repeating reminder tops its series up from the furthest date it has, and two
-          // completions of one series running together would both add the same next date.
           let failed = 0;
-          for (const r of list) {
+          if (isToday) {
+            // Today's list holds everything overdue as well, and a repeating reminder that has fallen behind cannot be finished one occurrence at a
+            // time (each completion adds the next occurrence, which is still in the past). The server does it as a whole.
             try {
-              await api.setReminderStatus(r.id, "completed");
-            } catch {
-              failed += 1;
+              await api.completeDueReminders(selectedDate);
+            } catch (err) {
+              failed = list.length;
+              addToast(err.message || "Could not complete the reminders.");
+            }
+          } else {
+            // Another day's list is only that day's reminders. One at a time, not in parallel: completing an occurrence of a repeating reminder tops
+            // its series up from the furthest date it has, and two completions of one series running together would both add the same next date.
+            for (const r of list) {
+              try {
+                await api.setReminderStatus(r.id, "completed");
+              } catch {
+                failed += 1;
+              }
             }
           }
           await loadReminders();
+          if (isToday && failed) return;
           addToast(failed ? `${list.length - failed} done; ${failed} could not be updated.` : `${list.length} reminders marked done.`);
         }}
         onToggleStatus={async (r, status) => {

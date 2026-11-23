@@ -506,6 +506,8 @@ export const api = {
   updateReminder: (id, patch) => request(`/api/reminders/${id}`, { method: "PATCH", body: patch }),
   deleteReminder: (id) => request(`/api/reminders/${id}`, { method: "DELETE" }),
   deleteReminderSeries: (seriesId) => request(`/api/reminders/series/${encodeURIComponent(seriesId)}`, { method: "DELETE" }),
+  /** Completes every pending reminder due on or before `date` (the person's today) in one go, and tops repeating ones up from after it. */
+  completeDueReminders: (date) => request("/api/reminders/complete-due", { method: "POST", body: { date } }),
   setReminderStatus: (id, status) => request(`/api/reminders/${id}/status`, { method: "POST", body: { status } }),
 
   // Automated follow-ups — a per-client rule ("keep emailing them every N
