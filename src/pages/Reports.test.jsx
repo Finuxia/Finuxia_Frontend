@@ -37,11 +37,21 @@ const open = async () => {
 };
 
 describe("Reports: what was taken out", () => {
-  it("no longer has Clients Active, Meetings by Type or CPs per Client", async () => {
+  it("no longer has Clients Active or CPs per Client, and the Meetings card no longer says 'by type'", async () => {
     await open();
-    for (const gone of [/clients active/i, /meetings by type/i, /cps run per client/i, /per client/i]) {
+    for (const gone of [/clients active/i, /by type/i, /cps run per client/i, /per client/i]) {
       expect(screen.queryByText(gone)).not.toBeInTheDocument();
     }
+  });
+
+  it("keeps the Meetings card, with every type in the order a client moves through them and the counts for the range", async () => {
+    await open();
+    const card = (await screen.findByRole("heading", { name: "Meetings" })).closest("section");
+    await waitFor(() => expect(within(card).getByText("3")).toBeInTheDocument()); // this month's CPs
+    const labels = [...card.querySelectorAll("span.truncate")].map((n) => n.textContent);
+    expect(labels).toEqual(["CP", "FC1", "FC2", "FC3", "Strategy", "Closing", "Policy Delivery", "Other"]);
+    const counts = [...card.querySelectorAll("span.text-right")].map((n) => n.textContent);
+    expect(counts).toEqual(["3", "0", "1", "0", "0", "0", "0", "0"]);
   });
 
   it("writes the headings with a capital on every word", async () => {

@@ -27,6 +27,7 @@ import {
   monthShortLabel,
   currentMonthKey,
   monthKeysBetween,
+  MEETING_TYPES,
 } from "../lib/chartPipeline";
 import MeetingGrowth from "../components/reports/MeetingGrowth";
 import { toCsv, downloadCsv } from "../lib/csv";
@@ -137,6 +138,12 @@ export default function Reports() {
   }, [startDate, endDate]);
   const meetingsByType = useMemo(() => runPipeline(events, [countBy(classifyEventType)]), [events]);
 
+  // Every meeting type in the order a client moves through them (CP, FC1, FC2…), those with no meetings in the range showing 0.
+  const meetingsInOrder = useMemo(
+    () => MEETING_TYPES.map((type) => ({ label: type, value: meetingsByType.find((t) => t.key === type)?.count || 0 })),
+    [meetingsByType]
+  );
+
   const monthOverMonth = useMemo(() => {
     const map = new Map();
     events.forEach((e) => {
@@ -159,6 +166,9 @@ export default function Reports() {
     rows.push(["CP Meetings", cpMeetings]);
     rows.push(["Business Meeting -> Closing Rate", `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})`]);
     rows.push([]);
+    rows.push(["Meetings", "Count"]);
+    meetingsInOrder.forEach((t) => rows.push([t.label, t.value]));
+    rows.push([]);
     rows.push(["Meetings Month Over Month", "Count"]);
     monthOverMonth.forEach((m) => rows.push([monthShortLabel(m.key), m.count]));
     rows.push([]);
@@ -180,6 +190,11 @@ export default function Reports() {
           { label: "Business Meeting -> Closing", value: `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})` },
         ],
         sections: [
+          {
+            heading: "Meetings",
+            rows: meetingsInOrder,
+            emptyText: "No meetings in this range.",
+          },
           {
             heading: "Meetings Month Over Month",
             rows: monthOverMonth.map((m) => ({ label: monthShortLabel(m.key), value: m.count })),
@@ -357,12 +372,10 @@ export default function Reports() {
       {error && <p className="text-sm text-av-red">{error.message}</p>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* How each kind of meeting grows from month to month */}
-        <div className="lg:col-span-2">
-          <ReportCard title="Meeting Growth Over Month">
-            <MeetingGrowth events={allEvents} monthKeys={growthMonths} connected={status === "connected"} />
-          </ReportCard>
-        </div>
+        {/* Every kind of meeting, in the order a client moves through them */}
+        <ReportCard title="Meetings">
+          {status !== "connected" ? <Empty text="Connect Google Calendar to see your meetings." /> : <BarList rows={meetingsInOrder} />}
+        </ReportCard>
 
         {/* Stage breakdown (local clients) */}
         <ReportCard title="Pipeline Stage Breakdown">
@@ -371,6 +384,13 @@ export default function Reports() {
             emptyText="No client activity in this range."
           />
         </ReportCard>
+
+        {/* How each kind of meeting grows from month to month */}
+        <div className="lg:col-span-2">
+          <ReportCard title="Meeting Growth Over Month">
+            <MeetingGrowth events={allEvents} monthKeys={growthMonths} connected={status === "connected"} />
+          </ReportCard>
+        </div>
       </div>
     </div>
   );
