@@ -122,6 +122,39 @@ const TYPE_PATTERNS = [
   { type: "Policy Delivery", re: /\bpolicy\b/i },
 ];
 
+/** Every meeting type the classifier can give, in the order a client moves through them (CP, FC1, FC2…), "Other" last. */
+export const MEETING_TYPES = [...TYPE_PATTERNS.map((p) => p.type), "Other"];
+
+/** "2026-08" … "2026-11": every month key from `startKey` to `endKey`, both included (empty when the end is before the start). */
+export function monthKeysBetween(startKey, endKey) {
+  if (!startKey || !endKey || startKey > endKey) return [];
+  const [y0, m0] = startKey.split("-").map(Number);
+  const out = [];
+  for (let y = y0, m = m0; `${y}-${String(m).padStart(2, "0")}` <= endKey; m === 12 ? ((m = 1), (y += 1)) : (m += 1)) {
+    out.push(`${y}-${String(m).padStart(2, "0")}`);
+  }
+  return out;
+}
+
+/** Events → { "2026-10": { CP: 4, FC1: 2 }, … } (months and types that have no meetings are simply absent). */
+export function countsByMonthAndType(events) {
+  const out = {};
+  events.forEach((e) => {
+    const month = monthKeyOf(eventDate(e));
+    if (!month) return;
+    const type = classifyEventType(e);
+    out[month] = out[month] || {};
+    out[month][type] = (out[month][type] || 0) + 1;
+  });
+  return out;
+}
+
+/** How much `current` grew on `previous`, as { change, percent }. `percent` is null when there is nothing to compare with (previous was 0). */
+export function growth(previous, current) {
+  const change = current - previous;
+  return { change, percent: previous === 0 ? null : Math.round((change / previous) * 100) };
+}
+
 export function classifyEventType(event) {
   const summary = event?.summary || "";
   const hit = TYPE_PATTERNS.find((p) => p.re.test(summary));

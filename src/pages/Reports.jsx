@@ -5,7 +5,6 @@ import {
   Link2,
   RefreshCcw,
   AlertTriangle,
-  Users,
   CalendarCheck,
   Presentation,
   Download,
@@ -27,9 +26,9 @@ import {
   monthKeyOf,
   monthShortLabel,
   currentMonthKey,
-  monthRange,
+  monthKeysBetween,
 } from "../lib/chartPipeline";
-import { matchClientForEvent, guessClientNameFromEvent } from "../services/meetingClients";
+import MeetingGrowth from "../components/reports/MeetingGrowth";
 import { toCsv, downloadCsv } from "../lib/csv";
 import { PIPELINE_STAGES, STAGE_INDEX } from "../lib/pipeline";
 import { openPrintableReport } from "../lib/pdfReport";
@@ -39,8 +38,9 @@ function firstOfMonth(offset = 0) {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth() + offset, 1);
 }
+// The calendar date as the person sees it. (toISOString is in UTC, which for anyone ahead of UTC turned local midnight into the day before.)
 function toInput(d) {
-  return d.toISOString().slice(0, 10);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 const PRESETS = [
@@ -58,17 +58,20 @@ export default function Reports() {
 
   // Initialize range from a ?month= link, else the current month.
   const initialMonth = searchParams.get("month") || currentMonthKey();
-  const initialRange = monthRange(initialMonth);
+  const [initialYear, initialMonthNumber] = initialMonth.split("-").map(Number);
   const [preset, setPreset] = useState("this");
-  const [startDate, setStartDate] = useState(initialRange.startISO.slice(0, 10));
-  const [endDate, setEndDate] = useState(initialRange.endISO.slice(0, 10));
+  const [startDate, setStartDate] = useState(`${initialMonth}-01`);
+  // The last day of that month (day 0 of the next one), not the first day of the next month.
+  const [endDate, setEndDate] = useState(toInput(new Date(initialYear, initialMonthNumber, 0)));
 
-  const [events, setEvents] = useState([]);
+  const [allEvents, setAllEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const startISO = new Date(`${startDate}T00:00:00`).toISOString();
   const endISO = new Date(`${endDate}T23:59:59`).toISOString();
+  const rangeStart = new Date(`${startDate}T00:00:00`);
+  const growthStartISO = new Date(rangeStart.getFullYear(), rangeStart.getMonth() - 1, 1).toISOString();
 
   const applyPreset = (p) => {
     setPreset(p.key);
@@ -82,8 +85,9 @@ export default function Reports() {
     setLoading(true);
     setError(null);
     try {
-      const items = await fetchEventsInRange(startISO, endISO);
-      setEvents(items);
+      // From the month BEFORE the range: the growth chart compares each month with the one before it, so "This month" needs last month too.
+      const items = await fetchEventsInRange(growthStartISO, endISO);
+      setAllEvents(items);
     } catch (err) {
       setError(err);
     } finally {
@@ -117,23 +121,21 @@ export default function Reports() {
   const closingRate = businessMeetingClients.length ? Math.round((closedClients.length / businessMeetingClients.length) * 100) : 0;
 
   /* --------- calendar-based metrics (need a live connection) ----------- */
-  const meetingsByType = useMemo(() => runPipeline(events, [countBy(classifyEventType)]), [events]);
-
-  const cpsPerClient = useMemo(() => {
-    const cps = events.filter((e) => classifyEventType(e) === "CP");
-    const counts = new Map();
-    cps.forEach((e) => {
-      const client = matchClientForEvent(e, clients);
-      const name = client
-        ? `${client.first} ${client.last}`
-        : (() => {
-            const g = guessClientNameFromEvent(e);
-            return g ? `${g.first} ${g.last}`.trim() : "Unknown";
-          })();
-      counts.set(name, (counts.get(name) || 0) + 1);
+  // Everything on the page except the growth chart is about the chosen range; the chart also wants the month before it.
+  const events = useMemo(() => {
+    const from = new Date(startISO).getTime();
+    const to = new Date(endISO).getTime();
+    return allEvents.filter((e) => {
+      const t = eventDate(e).getTime();
+      return t >= from && t <= to;
     });
-    return [...counts.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
-  }, [events, clients]);
+  }, [allEvents, startISO, endISO]);
+  const growthMonths = useMemo(() => {
+    const [year, month] = startDate.split("-").map(Number);
+    const before = new Date(year, month - 2, 1);
+    return monthKeysBetween(monthKeyOf(before), endDate.slice(0, 7));
+  }, [startDate, endDate]);
+  const meetingsByType = useMemo(() => runPipeline(events, [countBy(classifyEventType)]), [events]);
 
   const monthOverMonth = useMemo(() => {
     const map = new Map();
@@ -153,22 +155,15 @@ export default function Reports() {
     rows.push(["Finuxia Report", `${startDate} to ${endDate}`]);
     rows.push([]);
     rows.push(["Summary"]);
-    rows.push(["Meetings held", totalMeetings]);
-    rows.push(["CP meetings", cpMeetings]);
-    rows.push(["Clients active", rangeClients.length]);
-    rows.push(["Business meeting -> Closing rate", `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})`]);
+    rows.push(["Meetings Held", totalMeetings]);
+    rows.push(["CP Meetings", cpMeetings]);
+    rows.push(["Business Meeting -> Closing Rate", `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})`]);
     rows.push([]);
-    rows.push(["Meetings by type", "Count"]);
-    meetingsByType.forEach((t) => rows.push([t.key, t.count]));
-    rows.push([]);
-    rows.push(["Meetings month over month", "Count"]);
+    rows.push(["Meetings Month Over Month", "Count"]);
     monthOverMonth.forEach((m) => rows.push([monthShortLabel(m.key), m.count]));
     rows.push([]);
-    rows.push(["Pipeline stage breakdown", "Clients"]);
+    rows.push(["Pipeline Stage Breakdown", "Clients"]);
     stageBreakdown.forEach((s) => rows.push([s.stage.label, s.count]));
-    rows.push([]);
-    rows.push(["CPs run per client", "Count"]);
-    cpsPerClient.forEach((c) => rows.push([c.name, c.count]));
 
     downloadCsv(`advisorpilot-report-${startDate}_to_${endDate}.csv`, toCsv(rows));
     addToast("Report exported");
@@ -180,31 +175,20 @@ export default function Reports() {
         title: "Finuxia Report",
         rangeLabel: `${startDate} to ${endDate}`,
         stats: [
-          { label: "Meetings held", value: totalMeetings },
-          { label: "CP meetings", value: cpMeetings },
-          { label: "Clients active", value: rangeClients.length },
-          { label: "Business meeting -> Closing", value: `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})` },
+          { label: "Meetings Held", value: totalMeetings },
+          { label: "CP Meetings", value: cpMeetings },
+          { label: "Business Meeting -> Closing", value: `${closingRate}% (${closedClients.length}/${businessMeetingClients.length})` },
         ],
         sections: [
           {
-            heading: "Meetings by type",
-            rows: meetingsByType.map((t) => ({ label: t.key, value: t.count })),
-            emptyText: "No meetings in this range.",
-          },
-          {
-            heading: "Meetings month over month",
+            heading: "Meetings Month Over Month",
             rows: monthOverMonth.map((m) => ({ label: monthShortLabel(m.key), value: m.count })),
             emptyText: "No meetings in this range.",
           },
           {
-            heading: "Pipeline stage breakdown",
+            heading: "Pipeline Stage Breakdown",
             rows: stageBreakdown.map((s) => ({ label: s.stage.label, value: s.count })),
             emptyText: "No client activity in this range.",
-          },
-          {
-            heading: "CPs run per client",
-            rows: cpsPerClient.map((c) => ({ label: c.name, value: c.count })),
-            emptyText: "No CP meetings in this range.",
           },
         ],
       });
@@ -328,12 +312,11 @@ export default function Reports() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile
           icon={CalendarCheck}
-          label="Meetings held"
+          label="Meetings Held"
           value={totalMeetings}
           hint={status !== "connected" ? "Connect Google" : undefined}
         />
-        <StatTile icon={Presentation} label="CP meetings" value={cpMeetings} hint={status !== "connected" ? "Connect Google" : undefined} />
-        <StatTile icon={Users} label="Clients active" value={rangeClients.length} />
+        <StatTile icon={Presentation} label="CP Meetings" value={cpMeetings} hint={status !== "connected" ? "Connect Google" : undefined} />
         <StatTile
           icon={CalendarRange}
           label="Types"
@@ -342,7 +325,7 @@ export default function Reports() {
         />
         <StatTile
           icon={CheckCircle2}
-          label="Business meeting → Closing"
+          label="Business Meeting → Closing"
           value={`${closingRate}%`}
           hint={`${closedClients.length}/${businessMeetingClients.length} clients`}
         />
@@ -374,52 +357,19 @@ export default function Reports() {
       {error && <p className="text-sm text-av-red">{error.message}</p>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Meetings by type */}
-        <ReportCard title="Meetings by type">
-          {status !== "connected" ? (
-            <Empty text="Connect Google Calendar to see meeting types." />
-          ) : meetingsByType.length === 0 ? (
-            <Empty text="No meetings in this range." />
-          ) : (
-            <BarList rows={meetingsByType.map((t) => ({ label: t.key, value: t.count }))} />
-          )}
-        </ReportCard>
-
-        {/* Month over month */}
-        <ReportCard title="Meetings month over month">
-          {status !== "connected" ? (
-            <Empty text="Connect Google Calendar to see monthly trends." />
-          ) : monthOverMonth.length === 0 ? (
-            <Empty text="No meetings in this range." />
-          ) : (
-            <BarList rows={monthOverMonth.map((m) => ({ label: monthShortLabel(m.key), value: m.count }))} />
-          )}
-        </ReportCard>
+        {/* How each kind of meeting grows from month to month */}
+        <div className="lg:col-span-2">
+          <ReportCard title="Meeting Growth Over Month">
+            <MeetingGrowth events={allEvents} monthKeys={growthMonths} connected={status === "connected"} />
+          </ReportCard>
+        </div>
 
         {/* Stage breakdown (local clients) */}
-        <ReportCard title="Pipeline stage breakdown">
+        <ReportCard title="Pipeline Stage Breakdown">
           <BarList
             rows={stageBreakdown.map((s) => ({ label: s.stage.short, value: s.count }))}
             emptyText="No client activity in this range."
           />
-        </ReportCard>
-
-        {/* CPs per client */}
-        <ReportCard title="CPs run per client">
-          {status !== "connected" ? (
-            <Empty text="Connect Google Calendar to count CPs." />
-          ) : cpsPerClient.length === 0 ? (
-            <Empty text="No CP meetings in this range." />
-          ) : (
-            <ul className="flex flex-col divide-y divide-slate-100">
-              {cpsPerClient.map((row) => (
-                <li key={row.name} className="flex items-center justify-between py-2 text-sm">
-                  <span className="text-navy">{row.name}</span>
-                  <span className="rounded-full bg-navy/5 px-2.5 py-0.5 text-xs font-semibold text-navy">{row.count}</span>
-                </li>
-              ))}
-            </ul>
-          )}
         </ReportCard>
       </div>
     </div>
