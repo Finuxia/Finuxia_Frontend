@@ -5,8 +5,11 @@ import { server } from "../test/server";
 import { renderWithProviders, screen, userEvent, waitFor } from "../test/utils";
 import MyDay from "./MyDay";
 
-const today = new Date().toISOString().slice(0, 10);
-const tomorrow = new Date(Date.now() + 24 * 3600 * 1000).toISOString().slice(0, 10);
+// The calendar day as the app sees it (local time; the suite runs in America/Edmonton), not the UTC day: for seven hours of every UTC day they differ.
+const localDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const now = new Date();
+const today = localDay(now);
+const tomorrow = localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
 const reminder = (id, over = {}) => ({
   id,
   title: `Task ${id}`,

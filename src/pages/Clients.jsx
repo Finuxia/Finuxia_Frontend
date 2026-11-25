@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import LoadMore from "../components/ui/LoadMore";
@@ -39,7 +39,7 @@ function useDebounced(value, delay) {
 export default function Clients() {
   // The complete list is held by the clients context (it is what edits are synced against); it gives the total here. WHAT IS SHOWN is asked of the server,
   // which filters and pages it, so the filters work across every page and not only across what happens to be loaded.
-  const { clients } = useClients();
+  const { clients, loading: contextLoading, loadingMore: contextLoadingMore } = useClients();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
@@ -60,6 +60,22 @@ export default function Clients() {
     stage: stageFilter === "all" ? "" : stageFilter,
     priority: priorityFilter === "all" ? "" : priorityFilter,
   });
+
+  // A client added (from the Add Client button), edited or deleted lands in the clients context first, not in the list on screen, which is the server's
+  // answer to the filters. Without this the new client was saved but only appeared after a page reload. Once the context has finished its own load,
+  // any later change to its clients (ids or versions) asks the server for the list again.
+  const signature = useMemo(() => clients.map((c) => `${c.id}:${c.version ?? ""}`).join("|"), [clients]);
+  const seen = useRef(null);
+  useEffect(() => {
+    if (contextLoading || contextLoadingMore) return;
+    if (seen.current === null) {
+      seen.current = signature;
+      return;
+    }
+    if (seen.current === signature) return;
+    seen.current = signature;
+    reload();
+  }, [signature, contextLoading, contextLoadingMore, reload]);
 
   return (
     <div className="flex flex-col gap-6">
